@@ -2,13 +2,16 @@
 	摄像机
 		now
 		future
+			实现GameObject出入摄像机画面事件
 			绕中心旋转
 			多个输出目标（同时向多个Graphics对象输出图像）
 	绘图
 		now
+			画面外物体不渲染
 			稳定性和容错
 			调试信息输出绘制
 		future
+			在现有的颜色渲染基础上升级为支持贴图渲染
 			分辨率调整
 			z-index
 			图层分离
@@ -40,4 +43,15 @@
 			touch事件坐标到场景坐标的映射
 			给除了矩形以外的碰撞模型添加hitTest
 			给GameObject添加touch事件
+		future
+			
 GUI
+	控件
+		now
+			为TextBlock添加交互事件的支持
+			Joystick
+		futrue
+			Block层次结构
+			基于Block层次的相对定位布局
+			分层逐级渲染
+			前景/背景贴图支持
