@@ -206,7 +206,7 @@ window.SardineFish=(function(sar){try{    if(!sar)        sar={};    sar.We
         {
             this.onRender();
         }
-        graphics.font = this.font;        var h = parseInt(this.font.fontSize) * 1.15;        var w = graphics.measureText(this.content).width;        var x = 0, y = 0;        var wx = 0, wy = 0;        var mW = this.parent.width;        var mH = this.parent.height;                if (this.widthAuto)        {            if (this.horAlign == HorAlign.Stretch)
+        graphics.font = this.font;        var h = parseInt(this.font.fontSize) * 1.15;//textHeight        var w = graphics.measureText(this.content).width;//textWidth        var x = 0, y = 0;//buttonX,buttonY        var wx = 0, wy = 0;//textX,textY        var mW = this.parent.width;//maxWidth        var mH = this.parent.height;//MaxHeight                if (this.widthAuto)        {            if (this.horAlign == HorAlign.Stretch)
             {
                 this.width = mW - this.margin.left - this.margin.right;
                 this.width = this.width < 0 ? 0 : this.width;
