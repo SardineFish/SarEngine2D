@@ -40,6 +40,7 @@
     <Content Include="Test\standUp.png" />
     <Content Include="Test\walk.png" />
     <Content Include="Test\walkLeft.png" />
+    <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Test\" />
