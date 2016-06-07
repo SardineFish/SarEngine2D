@@ -2,9 +2,25 @@
 ***    TODO    ***
 ******************
 
+游戏
+	基本
+		now
+			游戏的暂停和恢复
+			离开页面的暂停和恢复
+			贴图资源加载进度条
+		future
+			游戏初始化建立在非canvas对象上【图层分离require】
+	场景
+		now
+			单场景多画面输出
+			场景预设
+		future
+
 图形渲染
 	摄像机
 		now
+			整体亮度/对比度等
+			摄像机震动和摇晃
 		future
 			实现GameObject出入摄像机画面事件
 			绕中心旋转
@@ -20,6 +36,16 @@
 			z-index
 			图层分离
 			多canvas输出
+	图形对象
+		now
+			修复ImagineAnimation突发的fps变更导致时间轴的混乱
+			完善ImagineAnimation帧更新事件
+			实现ImagineAnimation暂停和继续
+			添加Imagine类
+			添加Path类
+		future
+			骨骼动画！
+			Path动画！
 
 物理模拟
 	碰撞模型
@@ -39,6 +65,15 @@
 			高速粒子 与 (单向通过的墙/地面)/矩形/地面/圆/直线/点 碰撞算法
 		future
 			多边形 与 多边形 碰撞算法
+			实现刚体碰撞角动量改变
+			精度提升
+	物理模拟算法
+		now
+			全局阻力
+			表面滑动摩擦力
+		future
+			流体阻力
+			角动量
 
 交互
 	交互事件
