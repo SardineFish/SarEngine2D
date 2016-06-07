@@ -26,7 +26,9 @@ window.SardineFish=(function(sar){try{    if(!sar)        sar={};    sar.We
     {
         if (!callback)            throw new Error("A callback function is require.");        var p = this.head;        for (var p = this.head; p; p = p.next)
         {
-            callback(p.object, p);
+            var br = callback(p.object, p);
+            if (br)
+                return;
         }
     }    int = parseInt;    //-------Color    function Color(r, g, b, a)
     {
@@ -43,51 +45,129 @@ window.SardineFish=(function(sar){try{    if(!sar)        sar={};    sar.We
     }    function Thickness(top,bottom,left,right)    {        if(isNaN(top))        {            top=bottom=left=right=0;        }        else if(isNaN(bottom))        {            bottom=left=right=top;        }        this.top=top;        this.bottom=bottom;        this.left=left;        this.right=right;    }    Thickness.prototype.copy = function ()
     {
         return new Thickness(this.top, this.bom, this.left, this.right);
-    }    window.Thickness = Thickness;    var VerAlign={};    VerAlign.Top=1;    VerAlign.Bottom=2;    VerAlign.Center=0;    VerAlign.Stretch = 3;    window.VerAlign = VerAlign;        var HorAlign={};    HorAlign.Left=1;    HorAlign.Right=2;    HorAlign.Center=0;    HorAlign.Stretch = 3;    window.HorAlign = HorAlign;    function GUI()    {        this.scene = null;        this.children=new LinkList();        this.width = 0;        this.height = 0;        this.x = 0;        this.y = 0;        this.color = new Color(0, 0, 0, 1.00);        this.bgColor = new Color(0, 0, 0, 0);                this.onRender = null;    }    GUI.prototype.copy=function()    {        var gui = new GUI;        gui.controls = this.controls;        gui.ctrlList = this.ctrlList;        gui.width = this.width;        gui.height = this.height;        gui.textCalcu = this.textCalcu;    }    GUI.prototype.addControl=function(obj)    {        this.children.add(obj);        obj.parent = this;    }    GUI.prototype.render=function(graphics)    {        this.width = graphics.canvas.width;        this.height = graphics.canvas.height;        var gui = this;        if (this.onRender)
+    }    window.Thickness = Thickness;    var VerAlign={};    VerAlign.Top=1;    VerAlign.Bottom=2;    VerAlign.Center=0;    VerAlign.Stretch = 3;    window.VerAlign = VerAlign;        var HorAlign={};    HorAlign.Left=1;    HorAlign.Right=2;    HorAlign.Center=0;    HorAlign.Stretch = 3;    window.HorAlign = HorAlign;    function GUI()    {        this.scene = null;        this.children=new LinkList();        this.width = 0;        this.height = 0;        this.x = 0;        this.y = 0;        this.color = new Color(0, 0, 0, 1.00);        this.bgColor = new Color(0, 0, 0, 0);                this.onRender = null;        this.onMouseDown = null;        this.onMouseUp = null;        this.onMouseMove = null;        this.onClick = null;        this.onDoubleClick = null;        this.onTouchStart = null;        this.onTouchEnd = null;        this.onTouchMove = null;    }    GUI.prototype.copy=function()    {        var gui = new GUI;        gui.controls = this.controls;        gui.ctrlList = this.ctrlList;        gui.width = this.width;        gui.height = this.height;        gui.textCalcu = this.textCalcu;        this.onRender = this.onRender;        this.onMouseDown = this.onMouseDown;        this.onMouseUp = this.onMouseUp;        this.onMouseMove = this.onMouseMove;        this.onClick = this.onClick;        this.onDoubleClick = this.onDoubleClick;        this.onTouchStart = this.onTouchStart;        this.onTouchEnd = this.onTouchEnd;        this.onTouchMove = this.onTouchMove;    }    GUI.prototype.addControl=function(obj)    {        this.children.add(obj);        obj.parent = this;    }    GUI.prototype.render=function(graphics)    {        this.width = graphics.canvas.width;        this.height = graphics.canvas.height;        var gui = this;        if (this.onRender)
         {
             this.onRender();
-        }        this.controls.foreach(function(obj,node)        {            if(obj.render)                obj.render(graphics);        });    }    GUI.prototype.mouseDownCallback = function (e)
+        }        this.children.foreach(function(obj,node)        {            if(obj.render)                obj.render(graphics);        });    }    GUI.prototype.mouseMoveCallback = function (e)
     {
         this.children.foreach(function (child, node)
         {
-            if (child.mouseDownCallback)
-                child.mouseDownCallback(e);
+            if (child.mouseMoveCallback && child.isPointIn && child.isPointIn(e.x, e.y))
+            {
+                child.mouseMoveCallback(e);
+                if (e.handled)
+                    return true;
+            }
         });
+        if (e.handled)
+            return;
+        if (this.onMouseMove)
+            this.onMouseMove(e);
+    }    GUI.prototype.mouseDownCallback = function (e)
+    {
+        this.children.foreach(function (child, node)
+        {
+            if (child.mouseDownCallback && child.isPointIn && child.isPointIn(e.x, e.y))
+            {
+                child.mouseDownCallback(e);
+                if (e.handled)
+                    return true;
+            }
+        });
+        if (e.handled)
+            return;
+        if (this.onMouseDown)
+            this.onMouseDown(e);
     }    GUI.prototype.mouseUpCallback = function (e)
     {
         this.children.foreach(function (child, node)
         {
             if (child.mouseUpCallback)
+            {
                 child.mouseUpCallback(e);
+                if (e.handled)
+                    return true;
+            }
         });
+        if (e.handled)
+            return;
+        if (this.onMouseUp)
+            this.onMouseUp(e);
     }    GUI.prototype.clickCallback = function (e)
     {
         this.children.foreach(function (child, node)
         {
-            if (child.clickCallback)
+            if (child.clickCallback && child.isPointIn && child.isPointIn(e.x, e.y))
+            {
                 child.clickCallback(e);
+                if (e.handled)
+                    return true;
+            }
         });
+        if (e.handled)
+            return;
+        if (this.onClick)
+            this.onClick(e);
+    }    GUI.prototype.doubleClickCallback = function (e)
+    {
+        this.children.foreach(function (child, node)
+        {
+            if (child.doubleClickCallback && child.isPointIn && child.isPointIn(e.x, e.y))
+            {
+                child.doubleClickCallback(e);
+                if (e.handled)
+                    return true;
+            }
+        });
+        if (e.handled)
+            return;
+        if (this.onDoubleClick)
+            this.onDoubleClick(e);
     }    GUI.prototype.touchStartCallback = function (e)
     {
         this.children.foreach(function (child, node)
         {
             if (child.touchStartCallback)
+            {
                 child.touchStartCallback(e);
+                if (e.handled)
+                    return true;
+            }
         });
+        if (e.handled)
+            return;
+        if (this.onTouchStart)
+            this.onTouchStart(e);
     }    GUI.prototype.touchEndCallback = function (e)
     {
         this.children.foreach(function (child, node)
         {
             if (child.touchEndCallback)
+            {
                 child.touchEndCallback(e);
+                if (e.handled)
+                    return true;
+            }
         });
+        if (e.handled)
+            return;
+        if (this.onTouchEnd)
+            this.onTouchEnd(e);
     }    GUI.prototype.touchMoveCallback = function (e)
     {
         this.children.foreach(function (child, node)
         {
             if (child.touchMoveCallback)
+            {
                 child.touchMoveCallback(e);
+                if (e.handled)
+                    return true;
+            }
         });
+        if (e.handled)
+            return;
+        if (this.onTouchMove)
+            this.onTouchMove(e);
     }    engine.GUI=GUI;    window.GUI = GUI;    function Block(width, height)
     {
         this.children = new LinkList();
@@ -121,7 +201,7 @@ window.SardineFish=(function(sar){try{    if(!sar)        sar={};    sar.We
             if (child.render)
                 child.render(graphics);
         });
-    }    function Button(content)    {        if (!content)            content = "button";        this.parent = null;        this.content = content;        this.width = 0;        this.widthAuto = true;        this.height = 0;        this.heightAuto = true;        this.x = 0;        this.y = 0;        this.margin=new Thickness(0);        this.padding=new Thickness(0);        this.horAlign=HorAlign.Left;        this.verAlign = VerAlign.Top;        this.color = new Color(0,0,0,1.00);        this.bgColor = new Color(0, 0, 0, 0);        this._renderColor = this.color;        this._renderBgColor = this.bgColor;        this.border = 1;        this.radius = 5;        this.font=new Font();                this.collider = null;        this.onRender = null;        this.onClick=null;        this.onMouseDown=null;        this.onMouseUp=null;        this.onMouseMove=null;        this.onTouchStart=null;        this.onTouchEnd=null;        this.onTouchMove = null;    }    Button.prototype.copy=function()    {        var button = new Button(this.content);        button.parent = this.parent;        button.width = this.width;        button.width = this.width;        button.widthAuto = this.widthAuto;        button.height = this.height;        button.heightAuto = this.heightAuto;        button.x = this.x;        button.y = this.y;                button.margin = this.margin.copy();        button.padding = this.padding.copy();        button.horAlign = this.horAlign;        button.verAlign = this.verAlign;        button.color = this.color.copy();        button.bgColor = this.bgColor.copy();        if (this.border instanceof Thickness)            button.border = this.border.copy();        else            button.border = this.border;        button.radius = this.radius;        button.font = this.font;        if (this.collider && this.collider.copy)            button.collider = this.collider.copy();        else            button.collider = this.collider;        button.onClick = this.onClick;        button.onMouseDown = this.onMouseDown;        button.onMouseUp = this.onMouseUp;        button.onMouseMove = this.onMouseMove;        button.onTouchStartthis.onTouchStart;        button.onTouchEnd = this.onTouchEnd;        button.onTouchMove = this.onTouchMove;        return button;    }    Button.prototype.render=function(graphics)    {
+    }    function Button(content)    {        if (!content)            content = "button";        this.parent = null;        this.content = content;        this.width = 0;        this.widthAuto = true;        this.height = 0;        this.heightAuto = true;        this.x = 0;        this.y = 0;        this.margin=new Thickness(0);        this.padding=new Thickness(0);        this.horAlign=HorAlign.Left;        this.verAlign = VerAlign.Top;        this.color = new Color(0,0,0,1.00);        this.bgColor = new Color(0, 0, 0, 0);        this.border = 1;        this.radius = 5;        this.font=new Font();                this.collider = null;        this.onRender = null;        this.onClick = null;        this.onDoubleClick = null;        this.onMouseMove = null;        this.onMouseDown=null;        this.onMouseUp=null;        this.onMouseMove=null;        this.onTouchStart=null;        this.onTouchEnd=null;        this.onTouchMove = null;        this.isPressed = false;    }    Button.prototype.copy=function()    {        var button = new Button(this.content);        button.parent = this.parent;        button.width = this.width;        button.width = this.width;        button.widthAuto = this.widthAuto;        button.height = this.height;        button.heightAuto = this.heightAuto;        button.x = this.x;        button.y = this.y;                button.margin = this.margin.copy();        button.padding = this.padding.copy();        button.horAlign = this.horAlign;        button.verAlign = this.verAlign;        button.color = this.color.copy();        button.bgColor = this.bgColor.copy();        if (this.border instanceof Thickness)            button.border = this.border.copy();        else            button.border = this.border;        button.radius = this.radius;        button.font = this.font;        if (this.collider && this.collider.copy)            button.collider = this.collider.copy();        else            button.collider = this.collider;        button.onClick = this.onClick;        button.onMouseDown = this.onMouseDown;        button.onMouseUp = this.onMouseUp;        button.onMouseMove = this.onMouseMove;        button.onTouchStartthis.onTouchStart;        button.onTouchEnd = this.onTouchEnd;        button.onTouchMove = this.onTouchMove;        return button;    }    Button.prototype.render=function(graphics)    {
         if (this.onRender)
         {
             this.onRender();
@@ -161,36 +241,56 @@ window.SardineFish=(function(sar){try{    if(!sar)        sar={};    sar.We
                 }
                 this.height = this.height < 0 ? 0 : this.height;
             }
-        }        h = this.height - this.padding.top - this.padding.bottom;        h = h < 0 ? 0 : h;        switch(this.verAlign)        {            case VerAlign.Top:                y=this.margin.top;                break;            case VerAlign.Bottom:                y=mH-this.margin.bottom-this.height;                break;            case VerAlign.Stretch:                y=this.margin.top;                break;            case VerAlign.Center:                y = (mH - this.height) / 2 + this.margin.top + this.margin.bottom;                break;        }        x += this.parent.x;        y += this.parent.y;        this.x = x;        this.y = y;        wx = x + w / 2 + this.padding.left;        wy = y + h / 2 + this.padding.right;        graphics.textAlign = TextAlign.Center;        graphics.fillStyle=this._renderBgColor.toString();        graphics.fillRoundRect(x, -y, this.width, this.height, this.radius);        graphics.strokeStyle = this._renderColor.toString();        graphics.strokeRoundRect(x, -y, this.width, this.height, this.radius);        graphics.fillStyle=this._renderColor.toString();        graphics.textAlign="center";        graphics.textBaseline = "middle";        graphics.fillText(this.content,wx,-wy);    }    Button.prototype.isPointIn = function (x, y)
+        }        h = this.height - this.padding.top - this.padding.bottom;        h = h < 0 ? 0 : h;        switch(this.verAlign)        {            case VerAlign.Top:                y=this.margin.top;                break;            case VerAlign.Bottom:                y=mH-this.margin.bottom-this.height;                break;            case VerAlign.Stretch:                y=this.margin.top;                break;            case VerAlign.Center:                y = (mH - this.height) / 2 + this.margin.top + this.margin.bottom;                break;        }        x += this.parent.x;        y += this.parent.y;        this.x = x;        this.y = y;        wx = x + w / 2 + this.padding.left;        wy = y + h / 2 + this.padding.right;        graphics.textAlign = TextAlign.Center;        graphics.textAlign = "center";        graphics.textBaseline = "middle";        if (this.isPressed)
+        {
+            graphics.fillStyle = this.color.toString();            graphics.fillRoundRect(x, -y, this.width, this.height, this.radius);            graphics.strokeStyle = this.color.toString();            graphics.strokeRoundRect(x, -y, this.width, this.height, this.radius);            graphics.globalCompositeOperation = Graphics.CompositeOperation.Xor;            graphics.fillStyle = this.color.toString();            graphics.fillText(this.content, wx, -wy);            graphics.globalCompositeOperation = Graphics.CompositeOperation.SourceOver;            graphics.fillStyle = this.bgColor.toString();            graphics.fillText(this.content, wx, -wy);
+        }        else
+        {            graphics.fillStyle = this.bgColor.toString();            graphics.fillRoundRect(x, -y, this.width, this.height, this.radius);            graphics.strokeStyle = this.color.toString();            graphics.strokeRoundRect(x, -y, this.width, this.height, this.radius);            graphics.fillStyle = this.color.toString();            graphics.fillText(this.content, wx, -wy);
+        }    }    Button.prototype.isPointIn = function (x, y)
     {
         if (this.x <= x && x <= this.x + this.width && this.y <= y && y <= this.y + this.height)
         {
             return true;
         }
         return false;
+    }    Button.prototype.mouseMoveCallback = function (e)
+    {
+        if (this.onMouseMove)
+            this.onMouseMove(e);
     }    Button.prototype.mouseDownCallback = function (e)
     {
-        this._renderColor = this.bgColor;
-        this._renderBgColor = this.color;
+        this.isPressed = true;
+        if (this.onMouseDown)
+            this.onMouseDown(e);
     }    Button.prototype.mouseUpCallback = function (e)
     {
-        var x = this.color;
-        this.color = this.bgColor;
-        this.bgColor = x;
+        this.isPressed = false;
+        if (this.onMouseUp)
+        {
+            this.onMouseUp(e);
+        }
     }    Button.prototype.clickCallback = function (e)
     {
-
+        if (this.onClick)
+            this.onClick(e);
+    }    Button.prototype.doubleClickCallback = function (e)
+    {
+        if (this.onClick)
+            this.onClick(e);
     }    Button.prototype.touchStartCallback = function (e)
     {
-        var x = this.color;
-        this.color = this.bgColor;
-        this.bgColor = x;
+        //this.isPressed = true;
+        if (this.onTouchStart)
+            this.onTouchStart(e);
     }    Button.prototype.touchEndCallback = function (e)
     {
-
+        //this.isPressed = false;
+        if (this.onTouchEnd)
+            this.onTouchEnd(e);
     }    Button.prototype.touchMoveCallback = function (e)
     {
-
+        if (this.onTouchMove)
+            this.onTouchMove();
     }    GUI.Button=Button;    function TextBlock(text)    {        if (!text)            text = "textBlock";        this.parent = null;        this.text = text;        this.width = 0;        this.widthAuto = true;        this.height = 0;        this.heightAuto = true;        this.x = 0;        this.y = 0;        this.margin = new Thickness(0);        this.padding = new Thickness(0);        this.horAlign = HorAlign.Left;        this.verAlign = VerAlign.Top;        this.color = new Color(0, 0, 0, 1.00);        this.borderColor = new Color(0, 0, 0, 1.00);        this.bgColor = new Color(0, 0, 0, 0);        this.border = new Thickness(0, 0, 0, 0);        this.font = new Font();        this.collider = null;        this.onRender = null;        this.onClick = null;        this.onMouseDown = null;        this.onMouseUp = null;        this.onMouseMove = null;        this.onTouchStart = null;        this.onTouchEnd = null;        this.onTouchMove = null;    }    TextBlock.prototype.copy = function ()
     {
 
