@@ -16,20 +16,32 @@
     <IncludeDebugInformation>false</IncludeDebugInformation>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="animationGame.html" />
-    <Content Include="animationTest.html" />
-    <Content Include="cameraTest.html" />
-    <Content Include="engineTest.html" />
-    <Content Include="GUITest.html" />
-    <Content Include="jquery.min.js" />
-    <Content Include="run.png" />
-    <Content Include="runingGame.html" />
-    <Content Include="runningGame.css" />
+    <Content Include="Test\animationGame.html" />
+    <Content Include="Test\animationTest.html" />
+    <Content Include="Test\cameraTest.html" />
+    <Content Include="Test\crouch.png" />
+    <Content Include="Test\crouchLeft.png" />
+    <Content Include="Test\engineTest.html" />
+    <Content Include="Test\GUITest.html" />
+    <Content Include="Test\hitBrick.html" />
+    <Content Include="Test\jquery.min.js" />
+    <Content Include="Test\jump.png" />
+    <Content Include="Test\jumpLeft.png" />
+    <Content Include="Test\run - 副本.png" />
+    <Content Include="Test\run.png" />
+    <Content Include="Test\runingGame.html" />
+    <Content Include="Test\runningGame.css" />
     <Content Include="SardineFish.Web.Engine2D.GUI.js" />
     <Content Include="SardineFish.Web.Engine2D.js" />
     <Content Include="SardineFish.Web.js" />
     <Content Include="SardineFish.Web.UI.js" />
-    <Content Include="stand.png" />
-    <Content Include="walk.png" />
+    <Content Include="Test\stand.png" />
+    <Content Include="Test\standLeft.png" />
+    <Content Include="Test\standUp.png" />
+    <Content Include="Test\walk.png" />
+    <Content Include="Test\walkLeft.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Test\" />
   </ItemGroup>
 </Project>
