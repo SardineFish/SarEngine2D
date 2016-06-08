@@ -16,6 +16,16 @@
 			场景预设
 		future
 
+游戏组件
+	GameObject
+		now
+			位移动画·done
+		future
+			属性值动画
+			组件链接
+			多个碰撞模型对象
+			多个图形对象
+
 图形渲染
 	摄像机
 		now

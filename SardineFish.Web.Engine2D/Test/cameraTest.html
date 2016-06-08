@@ -61,7 +61,8 @@ Graphics.canvas = canvas;
 var lineList=new Array();
 var pList=[];
 var lastLine=false;
-var lastCol=false;
+var lastCol = false;
+var img = new SardineFish.Web.Engine2D.Image();
 var calcu=false;
 var O=false;
 var scene = new Scene();
@@ -124,13 +125,16 @@ function onClick (e)
     try
     {
         //camera.zoomTo(4);
-        camera.moveTo(camera.width / 2, camera.height / 2);
-        var rect = new Rectangle(100, 100);
-        rect.setCenter(e.x, e.y, Align.center);
+        img.setCenter(e.x, e.y, Align.center);
         var obj = new GameObject();
-        obj.graphic = rect;
+        obj.graphic = img;
         obj.gravity = true;
+        obj.setCenter(e.x, e.y);
         scene.addGameObject(obj);
+        scene.onClick = function (e)
+        {
+            obj.moveAnimateTo(e.x, e.y, 1, function () { /*alert("completed!");*/ });
+        }
     }
     catch (ex){
         alert("scene.onClick:" + ex.message);
@@ -142,6 +146,10 @@ function onClick (e)
 window.onload=function(e){
     try
     {
+        img.loadFromUrl("http://7xkxy8.com1.z0.glb.clouddn.com/img/logo/Logo_50.min.png", function ()
+        {
+            var x = 0;
+        });
         canvas.height = height;
         canvas.width = width;
     var ctx=document.getElementById("canvas").getContext("2d");
