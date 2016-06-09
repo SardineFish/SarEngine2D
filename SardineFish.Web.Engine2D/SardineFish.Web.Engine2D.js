@@ -48,7 +48,53 @@
         this.moveTo(x1, y1);
         this.lineTo(x2, y2);
         this.stroke();
-    }        //-------Color    function Color (r, g, b, a)    {        r = int(r);        g = int(g);        b = int(b);        if (isNaN(r) || r >= 256)            r = 255;        else if (r < 0)            r = 0;        if (isNaN(g) || g >= 256)            g = 255;        else if (g < 0)            g = 0;        if (isNaN(b) || b >= 256)            b = 255;        else if (b < 0)            b = 0;        if (isNaN(a) || a > 1.0)            a = 1.0;        else if (a < 0)            a = 0;        this.red = r;        this.green = g;        this.blue = b;        this.alpha = a;    }    Color.random = function ()    {        return new Color(Math.random() * 255, Math.random() * 255, Math.random() * 255, 1.0);    }    Color.prototype.copy=function()    {        return new Color(this.red,this.green,this.blue,this.alpha);    }    Color.prototype.toString = function ()    {        return "rgba(" + this.red.toString() + "," + this.green.toString() + "," + this.blue.toString() + "," + this.alpha.toString() + ")";    }    //Graphics.Color=Color;    window.Color=Color;    engine.Graphics=Graphics;    window.Graphics=Graphics;    //-------Image    /*function Image()    {        this.width=0;        this.height=0;        this.center=new Point(0,0);    }    Image.create=function (width,height,color)    {    }    Image.fromUrl=function (url)    {    }    Image.prototype.copy=function()    {    }    Image.prototype.drawToCanvas=function(canvas,x,y,r,dt)    {    }    engine.Image=Image;    window.Image=Image;*/    //-------FontStyle    function Font(fontFamily, fontSize)    {        fontFamily = fontFamily ? fontFamily : "sans-serif";        fontSize = fontSize || fontSize == 0 ? fontSize : "10px";        this.fontFamily = fontFamily;        this.fontSize = fontSize;        this.fontStyle = FontStyle.Normal;        this.fontVariant = FontVariant.Normal;        this.fontWeight = FontWeight.Normal;        this.caption = "";        this.icon = "";        this.menu = "";        this.messageBox = "";        this.smallCaption = "";        this.statusBar = "";    }    Font.prototype.copy = function ()    {        var f = new Font(this.fontFamily, this.fontSize);        f.fontStyle = this.fontStyle;        f.fontVariant = this.fontVariant;        f.fontWeight = this.fontWeight;        f.caption = this.caption;        f.icon = this.icon;        f.menu = this.menu;        f.messageBox = this.messageBox;        f.smallCaption = this.smallCaption;        f.statusBar = this.statusBar;        return f;    }    Font.prototype.toString = function ()    {        return this.fontStyle + " " + this.fontVariant + " " + this.fontWeight + " " + this.fontSize + " " + this.fontFamily;    }    window.Font = Font;    function FontStyle(){}    FontStyle.Normal="normal";    FontStyle.Italic="italic";    FontStyle.Oblique = "oblique";    window.FontStyle = FontStyle;    function FontVariant(){}    FontVariant.Normal="normal";    FontVariant.SmallCaps = "small-caps";    window.FontVariant = FontVariant;    function FontWeight(){}    FontWeight.Normal="normal";    FontWeight.Bold="bold";    FontWeight.Bolder="bolder";    FontWeight.Lighter = "lighter";    window.FontWeight = FontWeight;    function TextAlign() { }    TextAlign.Start = "start";    TextAlign.End = "end";    TextAlign.Center = "center";    TextAlign.Left = "left";    TextAlign.Right = "right";    window.TextAlign = TextAlign;    function TextBaseline() { }    TextBaseline.Alphabetic = "alphabetic";    TextBaseline.Top = "top";    TextBaseline.Hanging = "hanging";    TextBaseline.Middle = "middle";    TextBaseline.Ideographic = "ideographic";    TextBaseline.Bottom = "bottom";    window.TextBaseline = TextBaseline;    //-------Text    function Text(text)    {        this.text=text;        this.fontFamily="sans-serif";        this.fontSize=10;        this.fontStyle=FontStyle.Normal;        this.fontWeight=FontWeight.Normal;        this.fontVariant=FontVariant.Normal;        this.fillStyle=new Color(0,0,0,1);        this.strokeStyle=new Color(255,255,255,0);    }    Text.prototype.copy=function()    {        var text=new Text(this.text);        text.fontFamily=this.fontFamily;        text.fontSize=this.fontSize;    }    Text.prototype.drawToCanvas=function(canvas,x,y,r,dt)    {        var ctx=canvas.getContext("2d");        ctx.font = this.fontStyle + " "                  + this.fontVariant + " "                 + this.fontWeight + " "                 + this.fontSize + "px "                 + this.fontFamily;        ctx.fillStyle=this.fillStyle;        ctx.strokeStyle=this.strokeStyle;        ctx.fillText(this.text,x,y);        ctx.strokeText(this.text,x,y);    }    engine.Text=Text;    window.Text = Text;    engine.Image = function (img)
+    }        sar.Color = (function (color)
+    {
+        Object.defineProperty(window, "Color", {
+            get: function ()
+            {
+                return color;
+            },
+            set: function (value)
+            {
+                if (!color)
+                    color = value;
+                if (!value || !value.version || value.version < color.version)
+                    return;
+                color = value;
+            }
+        });
+        if (color && color.version && color.version > 1.0)            return;        //-------Color        function Color(r, g, b, a)
+        {
+            r = int(r);            g = int(g);            b = int(b);            if (isNaN(r) || r >= 256)                r = 255;            else if (r < 0)                r = 0;            if (isNaN(g) || g >= 256)                g = 255;            else if (g < 0)                g = 0;            if (isNaN(b) || b >= 256)                b = 255;            else if (b < 0)                b = 0;            if (isNaN(a) || a > 1.0)                a = 1.0;            else if (a < 0)                a = 0;            this.red = r;            this.green = g;            this.blue = b;            this.alpha = a;
+        }        Color.version = 1.0;        Color.random = function ()
+        {
+            return new Color(Math.random() * 255, Math.random() * 255, Math.random() * 255, 1.0);
+        }        Color.prototype.copy = function ()
+        {
+            return new Color(this.red, this.green, this.blue, this.alpha);
+        }        Color.prototype.toString = function ()
+        {
+            return "rgba(" + this.red.toString() + "," + this.green.toString() + "," + this.blue.toString() + "," + this.alpha.toString() + ")";
+        }
+        window.Color = Color;
+        return Color;
+    })(sar.Color);    engine.Graphics=Graphics;    window.Graphics=Graphics;    //-------Image    /*function Image()    {        this.width=0;        this.height=0;        this.center=new Point(0,0);    }    Image.create=function (width,height,color)    {    }    Image.fromUrl=function (url)    {    }    Image.prototype.copy=function()    {    }    Image.prototype.drawToCanvas=function(canvas,x,y,r,dt)    {    }    engine.Image=Image;    window.Image=Image;*/    //-------FontStyle    function Font(fontFamily, fontSize)    {        fontFamily = fontFamily ? fontFamily : "sans-serif";        fontSize = fontSize || fontSize == 0 ? fontSize : "10px";        this.fontFamily = fontFamily;        this.fontSize = fontSize;        this.fontStyle = FontStyle.Normal;        this.fontVariant = FontVariant.Normal;        this.fontWeight = FontWeight.Normal;        this.caption = "";        this.icon = "";        this.menu = "";        this.messageBox = "";        this.smallCaption = "";        this.statusBar = "";    }    Font.prototype.copy = function ()    {        var f = new Font(this.fontFamily, this.fontSize);        f.fontStyle = this.fontStyle;        f.fontVariant = this.fontVariant;        f.fontWeight = this.fontWeight;        f.caption = this.caption;        f.icon = this.icon;        f.menu = this.menu;        f.messageBox = this.messageBox;        f.smallCaption = this.smallCaption;        f.statusBar = this.statusBar;        return f;    }    Font.prototype.toString = function ()    {        return this.fontStyle + " " + this.fontVariant + " " + this.fontWeight + " " + this.fontSize + " " + this.fontFamily;    }    window.Font = Font;    function FontStyle(){}    FontStyle.Normal="normal";    FontStyle.Italic="italic";    FontStyle.Oblique = "oblique";    window.FontStyle = FontStyle;    function FontVariant(){}    FontVariant.Normal="normal";    FontVariant.SmallCaps = "small-caps";    window.FontVariant = FontVariant;    function FontWeight(){}    FontWeight.Normal="normal";    FontWeight.Bold="bold";    FontWeight.Bolder="bolder";    FontWeight.Lighter = "lighter";    window.FontWeight = FontWeight;    function TextAlign() { }    TextAlign.Start = "start";    TextAlign.End = "end";    TextAlign.Center = "center";    TextAlign.Left = "left";    TextAlign.Right = "right";    window.TextAlign = TextAlign;    function TextBaseline() { }    TextBaseline.Alphabetic = "alphabetic";    TextBaseline.Top = "top";    TextBaseline.Hanging = "hanging";    TextBaseline.Middle = "middle";    TextBaseline.Ideographic = "ideographic";    TextBaseline.Bottom = "bottom";    window.TextBaseline = TextBaseline;    //-------Text    function Text(text)    {        this.text = text;        this.font = new Font("sans-serif", 16);        this.position = new Point(0, 0);        this.center = new Point(0, 0);        this.fillStyle=new Color(0,0,0,1);        this.strokeStyle = new Color(255, 255, 255, 0);        this.onRender = null;    }    Text.prototype.copy=function()    {        var text=new Text(this.text);        text.font = this.font.copy();        text.position = this.position.copy();        text.center = this.center.copy();        text.onRender = this.onRender;        if (this.fillStyle && this.fillStyle.copy)            text.fillStyle = this.fillStyle.copy();        else            text.fillStyle = this.fillStyle;        if (this.strokeStyle && this.strokeStyle.copy)            text.strokeStyle = this.strokeStyle.copy();        else            text.strokeStyle = this.strokeStyle;        return text;    }    Text.prototype.setCenter = function (x, y, align)
+    {        this.position = new Point(x, y);        if (!align)            throw new Error("未指定对齐方式");        this.center = align(this.width, this.height);        this.center.x = x - this.center.x;        this.center.y = y + this.center.y;
+    }    Text.prototype.moveTo = function (x, y)
+    {        var rx = this.position.x;        var ry = this.position.y;        this.position.x = x;        this.position.y = y;        this.center.x = this.center.x - rx + x;        this.center.y = this.center.y - ry + y;
+    }    Text.prototype.drawToCanvas=function(canvas,x,y,r,dt)    {        var ctx=canvas.getContext("2d");        ctx.font = this.fontStyle + " "                  + this.fontVariant + " "                 + this.fontWeight + " "                 + this.fontSize + "px "                 + this.fontFamily;        ctx.fillStyle=this.fillStyle;        ctx.strokeStyle=this.strokeStyle;        ctx.fillText(this.text,x,y);        ctx.strokeText(this.text,x,y);    }    Text.prototype.render = function (graphics, x, y, r, dt)
+    {
+        if (!graphics || !graphics.ctx)
+            return;
+        if (this.onRender)
+            this.onRender();
+
+        graphics.textAlign = TextAlign.Left;
+        graphics.textBaseline = TextBaseline.Top;
+        graphics.font = this.font;
+        graphics.fillText(this.text, this.center.x, this.center.y);
+    }    engine.Text=Text;    window.Text = Text;    engine.Image = function (img)
     {
         if (!img)
             img = new window.Image();
@@ -113,6 +159,10 @@
                 callback();
         }
         this.img.src = url;
+        if (this.img.complete)
+        {
+            return;
+        }
     }    engine.Image.prototype.render = function (graphics, x, y, r, dt)
     {
         if (!graphics)

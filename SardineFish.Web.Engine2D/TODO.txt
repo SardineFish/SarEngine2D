@@ -48,10 +48,10 @@
 			多canvas输出
 	图形对象
 		now
-			修复ImagineAnimation突发的fps变更导致时间轴的混乱
-			完善ImagineAnimation帧更新事件
-			实现ImagineAnimation暂停和继续
-			添加Imagine类
+			修复ImageAnimation突发的fps变更导致时间轴的混乱
+			完善ImageAnimation帧更新事件
+			实现ImageAnimation暂停和继续
+		    添加Image类·done
 			添加Path类
 		future
 			骨骼动画！

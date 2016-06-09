@@ -30,19 +30,24 @@ window.SardineFish=(function(sar){try{    if(!sar)        sar={};    sar.We
             if (br)
                 return;
         }
-    }    int = parseInt;    //-------Color    function Color(r, g, b, a)
+    }    int = parseInt;    //-------Color    sar.Color = (function (color)
     {
-        r = int(r);        g = int(g);        b = int(b);        if (isNaN(r) || r >= 256)            r = 255;        else if (r < 0)            r = 0;        if (isNaN(g) || g >= 256)            g = 255;        else if (g < 0)            g = 0;        if (isNaN(b) || b >= 256)            b = 255;        else if (b < 0)            b = 0;        if (isNaN(a) || a > 1.0)            a = 1.0;        else if (a < 0)            a = 0;        this.red = r;        this.green = g;        this.blue = b;        this.alpha = a;
-    }    Color.random = function ()
-    {
-        return new Color(Math.random() * 255, Math.random() * 255, Math.random() * 255, 1.0);
-    }    Color.prototype.copy = function ()
-    {
-        return new Color(this.red, this.green, this.blue, this.alpha);
-    }    Color.prototype.toString = function ()
-    {
-        return "rgba(" + this.red.toString() + "," + this.green.toString() + "," + this.blue.toString() + "," + this.alpha.toString() + ")";
-    }    function Thickness(top,bottom,left,right)    {        if(isNaN(top))        {            top=bottom=left=right=0;        }        else if(isNaN(bottom))        {            bottom=left=right=top;        }        this.top=top;        this.bottom=bottom;        this.left=left;        this.right=right;    }    Thickness.prototype.copy = function ()
+        if (color && color.version && color.version > 1.0)            return;        //-------Color        function Color(r, g, b, a)
+        {
+            r = int(r);            g = int(g);            b = int(b);            if (isNaN(r) || r >= 256)                r = 255;            else if (r < 0)                r = 0;            if (isNaN(g) || g >= 256)                g = 255;            else if (g < 0)                g = 0;            if (isNaN(b) || b >= 256)                b = 255;            else if (b < 0)                b = 0;            if (isNaN(a) || a > 1.0)                a = 1.0;            else if (a < 0)                a = 0;            this.red = r;            this.green = g;            this.blue = b;            this.alpha = a;
+        }        Color.version = 1.0;        Color.random = function ()
+        {
+            return new Color(Math.random() * 255, Math.random() * 255, Math.random() * 255, 1.0);
+        }        Color.prototype.copy = function ()
+        {
+            return new Color(this.red, this.green, this.blue, this.alpha);
+        }        Color.prototype.toString = function ()
+        {
+            return "rgba(" + this.red.toString() + "," + this.green.toString() + "," + this.blue.toString() + "," + this.alpha.toString() + ")";
+        }
+        window.Color = Color;
+        return Color;
+    })(sar.Color);    function Thickness(top,bottom,left,right)    {        if(isNaN(top))        {            top=bottom=left=right=0;        }        else if(isNaN(bottom))        {            bottom=left=right=top;        }        this.top=top;        this.bottom=bottom;        this.left=left;        this.right=right;    }    Thickness.prototype.copy = function ()
     {
         return new Thickness(this.top, this.bom, this.left, this.right);
     }    window.Thickness = Thickness;    var VerAlign={};    VerAlign.Top=1;    VerAlign.Bottom=2;    VerAlign.Center=0;    VerAlign.Stretch = 3;    window.VerAlign = VerAlign;        var HorAlign={};    HorAlign.Left=1;    HorAlign.Right=2;    HorAlign.Center=0;    HorAlign.Stretch = 3;    window.HorAlign = HorAlign;    function GUI()    {        this.scene = null;        this.children=new LinkList();        this.width = 0;        this.height = 0;        this.x = 0;        this.y = 0;        this.color = new Color(0, 0, 0, 1.00);        this.bgColor = new Color(0, 0, 0, 0);                this.onRender = null;        this.onMouseDown = null;        this.onMouseUp = null;        this.onMouseMove = null;        this.onClick = null;        this.onDoubleClick = null;        this.onTouchStart = null;        this.onTouchEnd = null;        this.onTouchMove = null;    }    GUI.prototype.copy=function()    {        var gui = new GUI;        gui.controls = this.controls;        gui.ctrlList = this.ctrlList;        gui.width = this.width;        gui.height = this.height;        gui.textCalcu = this.textCalcu;        this.onRender = this.onRender;        this.onMouseDown = this.onMouseDown;        this.onMouseUp = this.onMouseUp;        this.onMouseMove = this.onMouseMove;        this.onClick = this.onClick;        this.onDoubleClick = this.onDoubleClick;        this.onTouchStart = this.onTouchStart;        this.onTouchEnd = this.onTouchEnd;        this.onTouchMove = this.onTouchMove;    }    GUI.prototype.addControl=function(obj)    {        this.children.add(obj);        obj.parent = this;    }    GUI.prototype.render=function(graphics)    {        this.width = graphics.canvas.width;        this.height = graphics.canvas.height;        var gui = this;        if (this.onRender)
