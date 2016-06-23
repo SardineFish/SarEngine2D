@@ -19,7 +19,7 @@
 游戏组件
 	GameObject
 		now
-			位移动画·done
+			---位移动画---
 		future
 			属性值动画
 			组件链接
@@ -29,6 +29,8 @@
 图形渲染
 	摄像机
 		now
+			加入Output
+			以摄像机为基础的渲染架构
 			整体亮度/对比度等
 			摄像机震动和摇晃
 		future
@@ -51,7 +53,7 @@
 			修复ImageAnimation突发的fps变更导致时间轴的混乱
 			完善ImageAnimation帧更新事件
 			实现ImageAnimation暂停和继续
-		    添加Image类·done
+		    ---添加Image类---
 			添加Path类
 		future
 			骨骼动画！
@@ -76,6 +78,7 @@
 		future
 			多边形 与 多边形 碰撞算法
 			实现刚体碰撞角动量改变
+			真·刚体力学模拟
 			精度提升
 	物理模拟算法
 		now
@@ -88,8 +91,11 @@
 交互
 	交互事件
 		now
-			touch事件坐标到GUI坐标的映射
-			touch事件坐标到场景坐标的映射
+			
+			---touch事件坐标到GUI坐标的映射---
+			---touch事件坐标到场景坐标的映射---
+			---Devices类---
+			鼠标 键盘 触屏状态维护与查询
 			给除了矩形以外的碰撞模型添加hitTest
 			给GameObject添加touch事件
 		future
