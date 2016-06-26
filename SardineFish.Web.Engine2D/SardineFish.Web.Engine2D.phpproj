@@ -35,6 +35,10 @@
     <Content Include="Test\jquery.min.js" />
     <Content Include="Test\jump.png" />
     <Content Include="Test\jumpLeft.png" />
+    <Content Include="Test\Katana_Cut_1_R.png" />
+    <Content Include="Test\Katana_Cut_2_R.png" />
+    <Content Include="Test\Katana_Out_1.png" />
+    <Content Include="Test\Katana_Out_2.png" />
     <Content Include="Test\run - 副本.png" />
     <Content Include="Test\run.png" />
     <Content Include="Test\runingGame.html" />
