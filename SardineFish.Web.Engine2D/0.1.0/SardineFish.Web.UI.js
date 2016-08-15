@@ -44,7 +44,7 @@ window.SardineFish=(function(sar){    if(!jQuery)    {        throw new Error
             switch (str)
             {
                 case "transparent":
-                    return new Color(255, 255, 255, 0);
+                    return new color(255, 255, 255, 0);
                 case "aliceblue":
                     return new Color(240, 248, 255, 1.0);
                 case "antiquewhite":
@@ -447,9 +447,7 @@ window.SardineFish=(function(sar){    if(!jQuery)    {        throw new Error
         }
     }    function buttonMouseOut(e)
     {
-        var button = e.target;        var color = button.color.copy();
-        var bgColor = button.bgColor.copy();
-
+        var button = e.target;
         if (button.buttonStyle == ButtonSyle.ColorTransit)
         {
             $(button).css("color", button.color.toString());
@@ -474,8 +472,7 @@ window.SardineFish=(function(sar){    if(!jQuery)    {        throw new Error
         }
         else if (button.buttonStyle == ButtonStyle.ColorExchange)
         {
-            $(button).css("background-color", bgColor.toString());
-            $(button).css("color", color.toString());
+
         }
         else if (button.buttonStyle == ButtonStyle.TextIcon)
         {
@@ -523,12 +520,6 @@ window.SardineFish=(function(sar){    if(!jQuery)    {        throw new Error
             }
         }        else if (button.buttonStyle == ButtonStyle.ColorExchange)
         {
-            $(button).css("background-color", color.toString());
-            $(button).css("color", bgColor.toString());
-            if (bgColor.alpha <= 0)
-            {
-                $(button).css("color", "white");
-            }
 
         }
         else if (button.buttonStyle == ButtonStyle.TextIcon)
@@ -579,8 +570,7 @@ window.SardineFish=(function(sar){    if(!jQuery)    {        throw new Error
             }
         }        else if (button.buttonStyle == ButtonStyle.ColorExchange)
         {
-            $(button).css("background-color", bgColor.toString());
-            $(button).css("color", color.toString());
+
         }
         else if (button.buttonStyle == ButtonStyle.TextIcon)
         {
@@ -593,37 +583,7 @@ window.SardineFish=(function(sar){    if(!jQuery)    {        throw new Error
             color.blue += b;
             color.alpha += a;
             $(button).css("color", color.toString());
-        }    }    function valueAnimate(from,to,time,fps,callback,complete)    {
-        if (isNaN(from))
-            from = 0;
-        if (isNaN(to))
-            to = 0;
-        if (isNaN(time))
-            time = 0;
-        if (isNaN(fps))
-            fps = 60;
-        var dt = 1000 / fps;
-        var t = 0;
-        var v = from;
-        function handle()
-        {
-            t += dt;
-            v = from + ((to - from) * t / time);
-            v = v > to ? to : v;
-            if (callback)
-            {
-                callback(v);
-            }
-            if (t > time)
-            {
-                if (complete)
-                    complete();
-                return;
-            }
-            setTimeout(handle, Math.floor(dt));
-        }
-        setTimeout(handle, Math.floor(dt));
-    }    UI.valueAnimate = valueAnimate;    function TextBox(dom)
+        }    }    function TextBox(dom)
     {
         var textbox = this;
 
