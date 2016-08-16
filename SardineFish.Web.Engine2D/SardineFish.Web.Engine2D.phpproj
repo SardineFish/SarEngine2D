@@ -29,6 +29,8 @@
     <Content Include="0.1.0\SardineFish.Web.js" />
     <Content Include="0.1.0\SardineFish.Web.UI.js" />
     <Content Include="color.js" />
+    <Content Include="publish\0.1.0\SardineFish.Web.Engine2D.js" />
+    <Content Include="publish\0.2.0\SardineFish.Web.Engine2D.js" />
     <Content Include="SardineFish.Web.Engine2D.Colliders.js" />
     <Content Include="Test\animationGame.html" />
     <Content Include="Test\animationTest.html" />
@@ -63,6 +65,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="0.1.0\" />
+    <Folder Include="publish\" />
+    <Folder Include="publish\0.2.0\" />
+    <Folder Include="publish\0.1.0\" />
     <Folder Include="Test\" />
   </ItemGroup>
 </Project>
