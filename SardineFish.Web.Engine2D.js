@@ -107,16 +107,37 @@ window.SardineFish = (function (sar)
         }        Force.prototype.toAcceleration = function (m)
         {
             return new Vector(this.x / m, this.y / m);
-        }        engine.Force = Force;        window.Force = Force;        //-------Mouse        function Mouse() { }        Mouse.Buttons = {};        Mouse.Buttons.Left = 0;        Mouse.Buttons.Middle = 1;        Mouse.Buttons.Right = 2;        Mouse.ButtonState = {};        Mouse.ButtonState.None = 0;        Mouse.ButtonState.Pressed = 1;        Mouse.ButtonState.Released = 2;        Mouse.ButtonState.Click = 3;        Mouse.ButtonState.DoubleClick = 4;        function MouseEventArgs()
+        }        engine.Force = Force;        window.Force = Force;        //-------Mouse        function Mouse()
         {
-            this.x = 0;            this.y = 0;            this.button = null;            this.buttonState = Mouse.ButtonState.None;            this.handled = false;
-        }        Mouse.MouseEventArgs = MouseEventArgs;        engine.Mouse = Mouse;        window.Mouse = Mouse;        function Touch() { }        Touch.Types = {};        Touch.Types.None = 0;        Touch.Types.Start = 1;        Touch.Types.Move = 2;        Touch.Types.End = 3;        function TouchEventArgs()
+            this.x = 0;
+            this.y = 0;
+            this.dx = 0;
+            this.dy = 0;
+            this.left = Mouse.ButtonState.None;
+            this.right = Mouse.ButtonState.None;
+            this.wheel = Mouse.ButtonState.None;
+        }        Mouse.Buttons = {};        Mouse.Buttons.Left = 0;        Mouse.Buttons.Wheel = 1;        Mouse.Buttons.Right = 2;        Mouse.ButtonState = {};        Mouse.ButtonState.None = 0;        Mouse.ButtonState.Pressed = 1;        Mouse.ButtonState.Released = 2;        Mouse.ButtonState.Click = 3;        Mouse.ButtonState.DoubleClick = 4;        Mouse.ButtonState.Rolled = 8;        function MouseEventArgs()
         {
-            this.x = 0;            this.y = 0;            this.type = Touch.Types.None;            this.touches = null;            this.id = 0;            this.handled = false;
+            this.x = 0;            this.y = 0;            this.dx = 0;            this.dy = 0;            this.button = null;            this.buttonState = Mouse.ButtonState.None;            this.handled = false;
+        }        Mouse.MouseEventArgs = MouseEventArgs;        engine.Mouse = Mouse;        window.Mouse = Mouse;        function Touch(id)
+        {
+            this.x = 0;
+            this.y = 0;
+            this.dx = 0;
+            this.dy = 0;
+            this.type = Touch.Types.None;
+            this.id = 0;
+        }        Touch.Types = {};        Touch.Types.None = 0;        Touch.Types.Start = 1;        Touch.Types.Move = 2;        Touch.Types.End = 3;        function TouchEventArgs()
+        {
+            this.x = 0;            this.y = 0;            this.dx = 0;            this.dy = 0;            this.type = Touch.Types.None;            this.touches = null;            this.id = 0;            this.handled = false;
         }        TouchEventArgs.prototype.copy = function ()
         {
             var args = new TouchEventArgs();            args.x = this.x;            args.y = this.y;            args.type = this.type;            args.touches = this.touches;            args.id = this.id;            args.handled = this.handled;            return args;
-        }        Touch.TouchEventArgs = TouchEventArgs;        engine.Touch = Touch;        window.Touch = Touch;        //-------Keyboard        function Keyboard() { }        Keyboard.Keys = (function (keys)
+        }        Touch.TouchEventArgs = TouchEventArgs;        engine.Touch = Touch;        window.Touch = Touch;        //-------Keyboard        function Keyboard()
+        {
+            this.keys = [];
+            this.keys[8] = Keyboard.KeyState.None;            this.keys[9] = Keyboard.KeyState.None;            this.keys[12] = Keyboard.KeyState.None;            this.keys[13] = Keyboard.KeyState.None;            this.keys[16] = Keyboard.KeyState.None;            this.keys[17] = Keyboard.KeyState.None;            this.keys[18] = Keyboard.KeyState.None;            this.keys[19] = Keyboard.KeyState.None;            this.keys[20] = Keyboard.KeyState.None;            this.keys[27] = Keyboard.KeyState.None;            this.keys[32] = Keyboard.KeyState.None;            this.keys[33] = Keyboard.KeyState.None;            this.keys[34] = Keyboard.KeyState.None;            this.keys[35] = Keyboard.KeyState.None;            this.keys[36] = Keyboard.KeyState.None;            this.keys[37] = Keyboard.KeyState.None;            this.keys[38] = Keyboard.KeyState.None;            this.keys[39] = Keyboard.KeyState.None;            this.keys[40] = Keyboard.KeyState.None;            this.keys[41] = Keyboard.KeyState.None;            this.keys[42] = Keyboard.KeyState.None;            this.keys[43] = Keyboard.KeyState.None;            this.keys[45] = Keyboard.KeyState.None;            this.keys[46] = Keyboard.KeyState.None;            this.keys[47] = Keyboard.KeyState.None;            this.keys[48] = Keyboard.KeyState.None;            this.keys[49] = Keyboard.KeyState.None;            this.keys[50] = Keyboard.KeyState.None;            this.keys[51] = Keyboard.KeyState.None;            this.keys[52] = Keyboard.KeyState.None;            this.keys[53] = Keyboard.KeyState.None;            this.keys[54] = Keyboard.KeyState.None;            this.keys[55] = Keyboard.KeyState.None;            this.keys[56] = Keyboard.KeyState.None;            this.keys[57] = Keyboard.KeyState.None;            this.keys[65] = Keyboard.KeyState.None;            this.keys[66] = Keyboard.KeyState.None;            this.keys[67] = Keyboard.KeyState.None;            this.keys[68] = Keyboard.KeyState.None;            this.keys[69] = Keyboard.KeyState.None;            this.keys[70] = Keyboard.KeyState.None;            this.keys[71] = Keyboard.KeyState.None;            this.keys[72] = Keyboard.KeyState.None;            this.keys[73] = Keyboard.KeyState.None;            this.keys[74] = Keyboard.KeyState.None;            this.keys[75] = Keyboard.KeyState.None;            this.keys[76] = Keyboard.KeyState.None;            this.keys[77] = Keyboard.KeyState.None;            this.keys[78] = Keyboard.KeyState.None;            this.keys[79] = Keyboard.KeyState.None;            this.keys[80] = Keyboard.KeyState.None;            this.keys[81] = Keyboard.KeyState.None;            this.keys[82] = Keyboard.KeyState.None;            this.keys[83] = Keyboard.KeyState.None;            this.keys[84] = Keyboard.KeyState.None;            this.keys[85] = Keyboard.KeyState.None;            this.keys[86] = Keyboard.KeyState.None;            this.keys[87] = Keyboard.KeyState.None;            this.keys[88] = Keyboard.KeyState.None;            this.keys[89] = Keyboard.KeyState.None;            this.keys[90] = Keyboard.KeyState.None;            this.keys[96] = Keyboard.KeyState.None;            this.keys[97] = Keyboard.KeyState.None;            this.keys[98] = Keyboard.KeyState.None;            this.keys[99] = Keyboard.KeyState.None;            this.keys[100] = Keyboard.KeyState.None;            this.keys[101] = Keyboard.KeyState.None;            this.keys[102] = Keyboard.KeyState.None;            this.keys[103] = Keyboard.KeyState.None;            this.keys[104] = Keyboard.KeyState.None;            this.keys[105] = Keyboard.KeyState.None;            this.keys[106] = Keyboard.KeyState.None;            this.keys[107] = Keyboard.KeyState.None;            this.keys[108] = Keyboard.KeyState.None;            this.keys[109] = Keyboard.KeyState.None;            this.keys[110] = Keyboard.KeyState.None;            this.keys[111] = Keyboard.KeyState.None;            this.keys[112] = Keyboard.KeyState.None;            this.keys[113] = Keyboard.KeyState.None;            this.keys[114] = Keyboard.KeyState.None;            this.keys[115] = Keyboard.KeyState.None;            this.keys[116] = Keyboard.KeyState.None;            this.keys[117] = Keyboard.KeyState.None;            this.keys[118] = Keyboard.KeyState.None;            this.keys[119] = Keyboard.KeyState.None;            this.keys[120] = Keyboard.KeyState.None;            this.keys[121] = Keyboard.KeyState.None;            this.keys[122] = Keyboard.KeyState.None;            this.keys[123] = Keyboard.KeyState.None;            this.keys[124] = Keyboard.KeyState.None;            this.keys[125] = Keyboard.KeyState.None;            this.keys[126] = Keyboard.KeyState.None;            this.keys[127] = Keyboard.KeyState.None;            this.keys[128] = Keyboard.KeyState.None;            this.keys[129] = Keyboard.KeyState.None;            this.keys[130] = Keyboard.KeyState.None;            this.keys[131] = Keyboard.KeyState.None;            this.keys[132] = Keyboard.KeyState.None;            this.keys[133] = Keyboard.KeyState.None;            this.keys[134] = Keyboard.KeyState.None;            this.keys[135] = Keyboard.KeyState.None;            this.keys[136] = Keyboard.KeyState.None;            this.keys[137] = Keyboard.KeyState.None;
+        }        Keyboard.Keys = (function (keys)
         {
             keys = {};            keys.BackSpace = 8;            keys.Tab = 9;            keys.Clear = 12;            keys.Enter = 13;            keys.Shift = 16;            keys.Control = 17;            keys.Alt = 18;            keys.Pause = 19;            keys.CapsLock = 20;            keys.Escape = 27;            keys.Space = 32;            keys.Prior = 33;            keys.Next = 34;            keys.End = 35;            keys.Home = 36;            keys.Left = 37;            keys.Up = 38;            keys.Right = 39;            keys.Down = 40;            keys.Select = 41;            keys.Print = 42;            keys.Execute = 43;            keys.Insert = 45;            keys.Delete = 46;            keys.Help = 47;            keys.Num0 = 48;            keys.Num1 = 49;            keys.Num2 = 50;            keys.Num3 = 51;            keys.Num4 = 52;            keys.Num5 = 53;            keys.Num6 = 54;            keys.Num7 = 55;            keys.Num8 = 56;            keys.Num9 = 57;            keys.A = 65;            keys.B = 66;            keys.C = 67;            keys.D = 68;            keys.E = 69;            keys.F = 70;            keys.G = 71;            keys.H = 72;            keys.I = 73;            keys.J = 74;            keys.K = 75;            keys.L = 76;            keys.M = 77;            keys.N = 78;            keys.O = 79;            keys.P = 80;            keys.Q = 81;            keys.R = 82;            keys.S = 83;            keys.T = 84;            keys.U = 85;            keys.V = 86;            keys.W = 87;            keys.X = 88;            keys.Y = 89;            keys.Z = 90;            keys.KP0 = 96;            keys.KP1 = 97;            keys.KP2 = 98;            keys.KP3 = 99;            keys.KP4 = 100;            keys.KP5 = 101;            keys.KP6 = 102;            keys.KP7 = 103;            keys.KP8 = 104;            keys.KP9 = 105;            keys.KPMultiply = 106;            keys.KPAdd = 107;            keys.KPSeparator = 108;            keys.KPSubtract = 109;            keys.KPDecimal = 110;            keys.KPDivide = 111;            keys.F1 = 112;            keys.F2 = 113;            keys.F3 = 114;            keys.F4 = 115;            keys.F5 = 116;            keys.F6 = 117;            keys.F7 = 118;            keys.F8 = 119;            keys.F9 = 120;            keys.F10 = 121;            keys.F11 = 122;            keys.F12 = 123;            keys.F13 = 124;            keys.F14 = 125;            keys.F15 = 126;            keys.F16 = 127;            keys.F17 = 128;            keys.F18 = 129;            keys.F19 = 130;            keys.F20 = 131;            keys.F21 = 132;            keys.F22 = 133;            keys.F23 = 134;            keys.F24 = 135;            keys.NumLock = 136;            keys.ScrollLock = 137;            keys.toString = function (keyCode)
             {
@@ -128,7 +149,41 @@ window.SardineFish = (function (sar)
         })(Keyboard.Keys);        Keyboard.KeyState = {};        Keyboard.KeyState.None = 0;        Keyboard.KeyState.Down = 1;        Keyboard.KeyState.Up = 2;        Keyboard.KeyState.Pressed = 3;        function KeyEventArgs()
         {
             this.key = 0;            this.keyName = "Unknown";            this.keyState = Keyboard.KeyState.None;            this.ctrl = false;            this.alt = false;            this.shift = false;            this.handled = false;
-        }        Keyboard.KeyEventArgs = KeyEventArgs;        engine.Keyboard = Keyboard;        window.Keyboard = Keyboard;        function int(x)
+        }        Keyboard.KeyEventArgs = KeyEventArgs;        engine.Keyboard = Keyboard;        window.Keyboard = Keyboard;        function Device()
+        {
+            this.mouse = new Mouse;
+            this.keyboard = new Keyboard;
+            this.touches = [];            this.touches.add = function (touch)
+            {
+                this[this.length] = touch;
+            }            this.touches.id = function (id)
+            {
+                for (var i = 0; i < this.length; i++)
+                {
+                    if (this[i].id == id)
+                        return this[i];
+                }
+                throw new Error("Id not available.");
+            }            this.touches.removeId = function (id)
+            {
+                for (var i = 0; i < this.length; i++)
+                {
+                    if (this[i].id == id)
+                    {
+                        for (var j = i + 1; j < this.length; j++)
+                        {
+                            this[j - 1] = this[j];
+                        }
+                    }
+                }
+            }            this.touches.remove = function (index)
+            {
+                for (var j = index + 1; j < this.length; j++)
+                {
+                    this[j - 1] = this[j];
+                }
+            }
+        }        function int(x)
         {
             return parseInt(x);
         }        function keyCodeToKey(keyCode)
@@ -162,7 +217,7 @@ window.SardineFish = (function (sar)
             this.started = false;
         }        engine.Game = Game;        window.Game = Game;        //-------Scene        function Scene()
         {
-            this.game = null;            this.objectList = new LinkList();            this._objList = new Array();            this._objList.n = 0;            this.physics = new Scene.Physics();            this.camera = null;            this.GUI = null;            this.doubleClickDelay = 200;            this.eventSource = null;            this.onMouseMove = null;            this.onMouseOver = null;            this.onMouseOut = null;            this.onMouseDown = null;            this.onMouseUp = null;            this.onClick = null;            this.onDoubleClick = null;            this.onKeyDown = null;            this.onKeyUp = null;            this.onKeyPress = null;            this.onTouchStart = null;            this.onTouchMove = null;            this.onTouchEnd = null;            this._objList.add = function (node)
+            this.game = null;            this.objectList = new LinkList();            this._objList = new Array();            this._objList.n = 0;            this.physics = new Scene.Physics();            this.camera = null;            this.GUI = null;            this.device = new Device();            this.doubleClickDelay = 200;            this.eventSource = null;            this.onMouseMove = null;            this.onMouseOver = null;            this.onMouseOut = null;            this.onMouseDown = null;            this.onMouseUp = null;            this.onClick = null;            this.onDoubleClick = null;            this.onKeyDown = null;            this.onKeyUp = null;            this.onKeyPress = null;            this.onTouchStart = null;            this.onTouchMove = null;            this.onTouchEnd = null;            this._objList.add = function (node)
             {
                 this[this.n] = node;                return this.n++;
             }
@@ -216,8 +271,12 @@ window.SardineFish = (function (sar)
         }        Scene.prototype.initEvents = function ()
         {
             var scene = this;            var pressedKeyList = [];            var touchArray = [];            var touchArrayGUI = [];            var touchList = new LinkList();            var touchListGUI = new LinkList();            var clickTime = 0;            this.eventSource.addEventListener("mousemove", function (e)
-            {
-                var args = new MouseEventArgs();                args.button = e.button;                args.buttonState = Mouse.ButtonState.None;                args.handled = false;                args.x = e.pageX;                args.y = e.pageY;                if (scene.GUI)                    scene.GUI.mouseMoveCallback(e);                if (args.handled)                    return;                /*args.x = (e.pageX / scene.camera.zoom) + (scene.camera.center.x - scene.camera.width / 2);                args.y = (scene.camera.height - e.pageY / scene.camera.zoom) + (scene.camera.center.y - scene.camera.height / 2);*/                args.x = scene.camera.map(e.pageX, e.pageY).x;                args.y = scene.camera.map(e.pageX, e.pageY).y;                if (scene.onMouseMove)                    scene.onMouseMove(args);
+            {                var mapTo = scene.camera.map(e.pageX, e.pageY);                scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;                scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+                scene.device.mouse.x = mapTo.x;
+                scene.device.mouse.y = mapTo.y;
+
+
+                var args = new MouseEventArgs();                args.button = e.button;                args.buttonState = Mouse.ButtonState.None;                args.handled = false;                args.x = e.pageX;                args.y = e.pageY;                if (scene.GUI)                    scene.GUI.mouseMoveCallback(e);                if (args.handled)                    return;                /*args.x = (e.pageX / scene.camera.zoom) + (scene.camera.center.x - scene.camera.width / 2);                args.y = (scene.camera.height - e.pageY / scene.camera.zoom) + (scene.camera.center.y - scene.camera.height / 2);*/                args.x = mapTo.x;                args.y = mapTo.y;                if (scene.onMouseMove)                    scene.onMouseMove(args);
             });            this.eventSource.addEventListener("mouseover", function (e)
             {
                 var args = new MouseEventArgs();                args.x = scene.camera.map(e.pageX, e.pageY).x;                args.y = scene.camera.map(e.pageX, e.pageY).y;                args.button = e.button;                args.buttonState = Mouse.ButtonState.None;                args.handled = false;                if (scene.onMouseOver)                    scene.onMouseOver(args);
@@ -226,7 +285,23 @@ window.SardineFish = (function (sar)
                 var args = new MouseEventArgs();                args.x = scene.camera.map(e.pageX, e.pageY).x;                args.y = scene.camera.map(e.pageX, e.pageY).y;                args.button = e.button;                args.buttonState = Mouse.ButtonState.None;                args.handled = false;                if (scene.onMouseOut)                    scene.onMouseOut(args);
             });            this.eventSource.addEventListener("mousedown", function (e)
             {
-                var args = new MouseEventArgs();                args.button = e.button;                args.buttonState = Mouse.ButtonState.Pressed;                args.handled = false;                args.x = e.pageX;                args.y = e.pageY;                if (scene.GUI)                    scene.GUI.mouseDownCallback(args);                if (args.handled)                    return;                args.x = scene.camera.map(e.pageX, e.pageY).x;                args.y = scene.camera.map(e.pageX, e.pageY).y;                scene.objectList.foreach(function (obj, node)
+                var mapTo = scene.camera.map(e.pageX, e.pageY);                scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;                scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+                scene.device.mouse.x = mapTo.x;
+                scene.device.mouse.y = mapTo.y;
+                if (e.button == Mouse.Buttons.Left)
+                {
+                    scene.device.mouse.left = Mouse.ButtonState.Pressed;
+                }
+                else if (e.button == Mouse.Buttons.Wheel)
+                {
+                    scene.device.mouse.wheel = Mouse.ButtonState.Pressed;
+                }
+                else if (e.button == Mouse.Buttons.Right)
+                {
+                    scene.device.mouse.right = Mouse.ButtonState.Pressed;
+                }
+
+                var args = new MouseEventArgs();                args.button = e.button;                args.buttonState = Mouse.ButtonState.Pressed;                args.handled = false;                args.x = e.pageX;                args.y = e.pageY;                if (scene.GUI)                    scene.GUI.mouseDownCallback(args);                if (args.handled)                    return;                args.x = mapTo.x;                args.y = mapTo.y;                scene.objectList.foreach(function (obj, node)
                 {
                     if (obj.hitTest && obj.onMouseDown && obj.collider)
                     {
@@ -238,7 +313,23 @@ window.SardineFish = (function (sar)
                 });                if (args.handled)                    return;                if (scene.onMouseDown)                    scene.onMouseDown(args);
             });            this.eventSource.addEventListener("mouseup", function (e)
             {
-                var args = new MouseEventArgs();                args.button = e.button;                args.buttonState = Mouse.ButtonState.Released;                args.handled = false;                args.x = e.pageX;                args.y = e.pageY;                if (scene.GUI)                    scene.GUI.mouseUpCallback(args);                if (args.handled)                    return;                args.x = scene.camera.map(e.pageX, e.pageY).x;                args.y = scene.camera.map(e.pageX, e.pageY).y;                scene.objectList.foreach(function (obj, node)
+                var mapTo = scene.camera.map(e.pageX, e.pageY);                scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;                scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+                scene.device.mouse.x = mapTo.x;
+                scene.device.mouse.y = mapTo.y;
+                if (e.button == Mouse.Buttons.Left)
+                {
+                    scene.device.mouse.left = Mouse.ButtonState.Released;
+                }
+                else if (e.button == Mouse.Buttons.Wheel)
+                {
+                    scene.device.mouse.wheel = Mouse.ButtonState.Released;
+                }
+                else if (e.button == Mouse.Buttons.Right)
+                {
+                    scene.device.mouse.right = Mouse.ButtonState.Released;
+                }
+
+                var args = new MouseEventArgs();                args.button = e.button;                args.buttonState = Mouse.ButtonState.Released;                args.handled = false;                args.x = e.pageX;                args.y = e.pageY;                if (scene.GUI)                    scene.GUI.mouseUpCallback(args);                if (args.handled)                    return;                args.x = mapTo.x;                args.y = mapTo.y;                scene.objectList.foreach(function (obj, node)
                 {
                     if (obj.hitTest && obj.onMouseUp && obj.collider)
                     {
@@ -277,12 +368,16 @@ window.SardineFish = (function (sar)
                 }
             });            window.addEventListener("keydown", function (e)
             {
+                scene.device.keyboard.keys[e.keyCode] = Keyboard.KeyState.Down;
+
                 if (!pressedKeyList[e.keyCode])
                 {
                     pressedKeyList[e.keyCode] = true;                    var args = new KeyEventArgs();                    args.key = e.keyCode;                    args.keyName = Keyboard.Keys.toString(args.key);                    args.keyState = Keyboard.KeyState.Down;                    args.ctrl = e.ctrlKey;                    args.alt = e.altKey;                    args.shift = e.shiftKey;                    args.handled = false;                    e.key = keyCodeToKey(e.keyCode);                    if (scene.onKeyDown)                        scene.onKeyDown(args);
                 }
             });            window.addEventListener("keyup", function (e)
             {
+                scene.device.keyboard.keys[e.keyCode] = Keyboard.KeyState.Up;
+
                 if (pressedKeyList[e.key.toUpperCase()])
                 {
                     pressedKeyList[e.key.toUpperCase()] = false;                    var args = new KeyEventArgs();                    args.key = e.keyCode;                    args.keyName = Keyboard.Keys.toString(args.key);                    args.keyState = Keyboard.KeyState.Up;                    args.ctrl = e.ctrlKey;                    args.alt = e.altKey;                    args.shift = e.shiftKey;                    args.handled = false;                    if (scene.onKeyUp)                        scene.onKeyUp(args);
@@ -294,13 +389,24 @@ window.SardineFish = (function (sar)
             {
                 for (var i = 0; i < e.changedTouches.length ; i++)
                 {
+                    var t = new Touch(e.changedTouches[i].identifier);
+                    t.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                    t.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                    t.type = Touch.Types.Start;
+                    scene.device.touches.add(t);
+
                     var argsGUI = new Touch.TouchEventArgs();                    argsGUI.type = Touch.Types.Start;                    argsGUI.id = e.changedTouches[i].identifier;                    argsGUI.x = e.changedTouches[i].pageX;                    argsGUI.y = e.changedTouches[i].pageY;                    touchListGUI.add(argsGUI);                    touchArrayGUI[argsGUI.id] = argsGUI;                    argsGUI.touches = touchListGUI.toArray();                    var args = argsGUI.copy();                    args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;                    args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;                    touchList.add(args);                    touchArray[args.id] = args;                    args.touches = touchList.toArray();                    if (scene.GUI)                        scene.GUI.touchStartCallback(argsGUI);                    if (argsGUI.handled)                        continue;                    if (scene.onTouchStart)                        scene.onTouchStart(args);
                 }
             });            this.eventSource.addEventListener("touchmove", function (e)
             {
                 for (var i = 0; i < e.changedTouches.length ; i++)
                 {
-                    var id = e.changedTouches[i].identifier;                    if (!touchArray[id] || !touchArrayGUI[id])                        continue;                    var argsGUI = touchArrayGUI[id];                    argsGUI.type = Touch.Types.Move;                    argsGUI.touches = touchListGUI.toArray();                    argsGUI.x = e.changedTouches[i].pageX;                    argsGUI.y = e.changedTouches[i].pageY;                    var args = touchArray[id];                    args.type = Touch.Types.Move;                    args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;                    args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;                    args.touches = touchList.toArray();                    if (scene.GUI)                        scene.GUI.touchMoveCallback(argsGUI);                    if (argsGUI.handled)                        continue;                    if (scene.onTouchMove)                        scene.onTouchMove(args);
+                    var mapTo = scene.camera.map(e.pageX, e.pageY);
+                    var id = e.changedTouches[i].identifier;
+                    var t = scene.device.touches.id(id);                    t.dx = mapTo.x - scene.device.mouse.x;                    t.dy = mapTo.y - scene.device.mouse.y;
+                    t.x = mapTo.x;
+                    t.y = mapTo.y;
+                    t.type = Touch.Types.Move;                    if (!touchArray[id] || !touchArrayGUI[id])                        continue;                    var argsGUI = touchArrayGUI[id];                    argsGUI.type = Touch.Types.Move;                    argsGUI.touches = touchListGUI.toArray();                    argsGUI.x = e.changedTouches[i].pageX;                    argsGUI.y = e.changedTouches[i].pageY;                    var args = touchArray[id];                    args.type = Touch.Types.Move;                    args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;                    args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;                    args.touches = touchList.toArray();                    if (scene.GUI)                        scene.GUI.touchMoveCallback(argsGUI);                    if (argsGUI.handled)                        continue;                    if (scene.onTouchMove)                        scene.onTouchMove(args);
                 }
             });            this.eventSource.addEventListener("touchend", function (e)
             {
@@ -308,7 +414,8 @@ window.SardineFish = (function (sar)
                 {
                     for (var i = 0; i < e.changedTouches.length ; i++)
                     {
-                        var id = e.changedTouches[i].identifier;                        if (!touchArray[id] || !touchArrayGUI[id])                            continue;                        var argsGUI = touchArrayGUI[id];                        touchArrayGUI[id] = null;                        touchListGUI.remove(argsGUI);                        argsGUI.type = Touch.Types.End;                        argsGUI.id = e.changedTouches[i].identifier;                        argsGUI.touches = touchListGUI.toArray();                        argsGUI.x = e.changedTouches[i].pageX;                        argsGUI.y = e.changedTouches[i].pageY;                        var args = touchArray[id];                        args.type = Touch.Types.End;                        args.touches = touchList.toArray();                        args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;                        args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;                        if (scene.GUI)                            scene.GUI.touchEndCallback(argsGUI);                        if (args.handled)                            continue;                        if (scene.onTouchEnd)                            scene.onTouchEnd(args);
+                        var id = e.changedTouches[i].identifier;
+                        scene.device.touches.removeId(id);                        if (!touchArray[id] || !touchArrayGUI[id])                            continue;                        var argsGUI = touchArrayGUI[id];                        touchArrayGUI[id] = null;                        touchListGUI.remove(argsGUI);                        argsGUI.type = Touch.Types.End;                        argsGUI.id = e.changedTouches[i].identifier;                        argsGUI.touches = touchListGUI.toArray();                        argsGUI.x = e.changedTouches[i].pageX;                        argsGUI.y = e.changedTouches[i].pageY;                        var args = touchArray[id];                        args.type = Touch.Types.End;                        args.touches = touchList.toArray();                        args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;                        args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;                        if (scene.GUI)                            scene.GUI.touchEndCallback(argsGUI);                        if (args.handled)                            continue;                        if (scene.onTouchEnd)                            scene.onTouchEnd(args);
                     }
                 }                catch (ex)
                 {
@@ -778,7 +885,7 @@ window.SardineFish = (function (sar)
         }        GUI.TextBlock = TextBlock;        function Joystick()
         {
             this.margin = new Thickness(0);            this.padding = new Thickness(0);            this.horAlign = HorAlign.Left;            this.verAlign = VerAlign.Top;            this.width = 0;            this.height = 0;            this.content = "";            this.color = new Color(0, 0, 0, 1.00);            this.bgColor = new Color(0, 0, 0, 0);            this.border = 1;            this.font = new Font();            this.onClick = null;
-        }        GUI.Joystick = Joystick;        //-----------------        //-------Image        /*function Image()        {            this.width=0;            this.height=0;            this.center=new Point(0,0);        }        Image.create=function (width,height,color)        {        }        Image.fromUrl=function (url)        {        }        Image.prototype.copy=function()        {        }        Image.prototype.drawToCanvas=function(canvas,x,y,r,dt)        {        }        engine.Image=Image;        window.Image=Image;*/        //-------FontStyle        function Font(fontFamily, fontSize)
+        }        GUI.Joystick = Joystick;        //-----------------        //-------FontStyle        function Font(fontFamily, fontSize)
         {
             fontFamily = fontFamily ? fontFamily : "sans-serif";            fontSize = fontSize || fontSize == 0 ? fontSize : "10px";            this.fontFamily = fontFamily;            this.fontSize = fontSize;            this.fontStyle = FontStyle.Normal;            this.fontVariant = FontVariant.Normal;            this.fontWeight = FontWeight.Normal;            this.caption = "";            this.icon = "";            this.menu = "";            this.messageBox = "";            this.smallCaption = "";            this.statusBar = "";
         }        Font.prototype.copy = function ()
@@ -851,7 +958,110 @@ window.SardineFish = (function (sar)
         }        engine.Image.prototype.render = function (graphics, x, y, r, dt)
         {
             if (!graphics)                return;            if (this.onRender)                this.onRender();            graphics.drawImage(this.img, this.o.x, this.o.y, this.width, this.height);
-        }        //-------ImageAnimation        function ImageAnimation()
+        }        //-------Path        function Path()        {
+            this.pList = (function ()
+            {
+                var list = [];
+                list.add = function (p)
+                {
+                    list[list.length] = p;
+                }
+                list.remove = function (index)
+                {
+                    for (var i = index + 1; i < list.length; i++)
+                    {
+                        list[i - 1] = list[i];
+                    }
+                    list.pop();
+                }
+                list.clear = function ()
+                {
+                    while (list.length)
+                    {
+                        list.pop();
+                    }
+                }
+                list.last = function ()
+                {
+                    return list[list.length - 1];
+                }
+                return list;
+            })();
+            this.position = new Point(0, 0);
+            this.center = this.position;
+            this.strokeStyle = new Color(0, 0, 0, 1);
+            this.fillStyle = new Color(255, 255, 255, 1);
+            this.strokeWidth = 1;
+        }        Path.Point = function (x, y)
+        {
+            this.x = x;
+            this.y = y;
+            this.cp1 = new Point(x, y);
+            this.cp2 = new Point(x, y);
+        }        Path.Point.prototype.copy = function ()
+        {
+            var p = new Point(this.x, this.y);
+            p.cp1 = this.cp1.copy();
+            p.cp2 = this.cp2.copy();
+            return p;
+        }        Path.Point.prototype.moveTo = function (x, y)
+        {
+            var dx = x - this.x;
+            var dy = y - this.y;
+            this.cp1.x += dx;
+            this.cp1.y += dy;
+            this.cp2.x += dx;
+            this.cp2.y += dy;
+            this.x = x;
+            this.y = y;
+        }        Path.prototype.copy = function ()
+        {
+            var path = new Path();
+            for (var i = 0; i < this.pList.length; i++)
+            {
+                path.pList[i] = this.pList[i].copy();
+            }
+            return path;
+        }        Path.prototype.setCenter = function (x, y)
+        {
+            if (!isNaN(x) && !isNaN(y))
+            {
+                this.position.x = x;
+                this.position.y = y;
+                this.center = this.position;
+            }
+        }        Path.prototype.moveTo = function (x, y)
+        {
+            var dx = x - this.position.x;
+            var dy = y - this.position.y;
+            for (var i = 0; i < this.pList.length; i++)
+            {
+                this.pList[i].moveTo(this.pList[i].x + dx, this.pList[i].y + dy);
+            }
+            this.position.x = x;
+            this.position.y = y;
+        }        Path.prototype.close = function ()
+        {
+            if (this.pList.length)
+                this.pList.add(this.pList[0]);
+        }        Path.prototype.render = function (graphics, x, y, r, dt)
+        {
+            graphics.beginPath();
+            for (var i = 0; i < this.pList.length - 1; i++)
+            {
+                var p1 = this.pList[i];
+                var p2 = this.pList[i + 1];
+                graphics.lineTo(p1.x, p1.y);
+                graphics.bezierCurveTo(p1.cp2.x, p1.cp2.y, p2.cp1.x, p2.cp1.y, p2.x, p2.y);
+            }
+            if (this.pList.last() == this.pList[0])
+                graphics.closePath();
+            graphics.fillStyle = this.fillStyle.toString();
+            graphics.strokeStyle = this.strokeStyle.toString();
+            graphics.lineWidth = this.strokeWidth;
+            graphics.fill();
+            graphics.stroke();
+        }        engine.Path = Path;        window.Path = Path;        //-----------        //-------ImageAnimation        function ImageAnimation()
         {
             this.center = new Point(0, 0);            this.position = this.center.copy();            this.fCount = 0;            this.fps = 0;            this.clipX = 0;            this.clipY = 0;            this.fWidth = 0;            this.fHeight = 0;            this.time = 0;            this.img = null;            this.frame = 0;            this.playing = true;            this.reverse = false;            this.width = 0;            this.heigh = 0;            this.onBegine = null;            this.onEnd = null;            this.onFrameUpdate = null;            this.loop = new ImageAnimation.Loop();
         }        //---ImagImageAnimation.Loop        ImageAnimation.Loop = function ()
@@ -1011,10 +1221,15 @@ window.SardineFish = (function (sar)
             var p1 = _p1, p2 = _p2;            if ((_p1 instanceof Vector2) && (_p2 instanceof Vector2))
             {
                 p1 = new Point(_p1.x, _p1.y, this);                p2 = new Point(_p2.x, _p2.y, this);
-            }            else if (!(p1 instanceof Point) || !(p2 instanceof Point))
+            }            /*else if (!(p1.x && !isNaN(p1.x) && p1.y && !isNaN(p1.y) &&
+                p2.x && !isNaN(p2.x) && p2.y && !isNaN(p2.y)))
             {
                 throw new Error("P1 or P2 is not a Point.");
-            }            this.p1 = p1;            this.p2 = p2;            this.center = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);            this.position = this.center;            this.strokeStyle = new Color(0, 0, 0, 1.00);
+            }            else if (!(p1 instanceof Point) || !(p2 instanceof Point))
+            {
+                
+                throw new Error("P1 or P2 is not a Point.");
+            }*/            this.p1 = p1;            this.p2 = p2;            this.center = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);            this.position = this.center;            this.strokeStyle = new Color(0, 0, 0, 1.00);
         }        Line.prototype.copy = function ()
         {
             var p1 = this.p1.copy();            var p2 = this.p2.copy();            var line = new Line(p1, p2);            line.setCenter(this.center.x, this.center.y);            return line;
@@ -1041,6 +1256,11 @@ window.SardineFish = (function (sar)
         }        Line.prototype.render = function (graphics, x, y, r, dt)
         {
             graphics.beginPath();            graphics.moveTo(this.p1.x, this.p1.y);            graphics.lineTo(this.p2.x, this.p2.y);            graphics.strokeStyle = this.strokeStyle;            graphics.stroke();
+        }        Line.prototype.toGameObject = function ()
+        {
+            var obj = new GameObject();
+            obj.graphic = this;
+            return obj;
         }        engine.Line = Line;        window.Line = Line;        //-------GameObject        function GameObject()
         {
             this.id = null;            this.name = "GameObject";            this.graphic = null;            this.collider = null;            this.layer = 0;            this.zIndex = 0;            this.mass = 1;            this.gravity = true;            this.onGround = false;            this.hitTest = false;            this.F = new Force(0, 0);            this.constantForce = new Force(0, 0);            this.v = new Vector2(0, 0);            this.a = new Vector2(0, 0);            this.position = new Point(0, 0);            this.center = this.position;            this.rotation = 0.0;            this.onRender = null;            this.onUpdate = null;            this.onStart = null;            this.onCollide = null;            this.onMouseDown = null;            this.onMouseUp = null;            this.onClick = null;            this.onDoubleClick = null;
