@@ -28,7 +28,27 @@
     <Content Include="0.1.0\SardineFish.Web.Engine2D.js" />
     <Content Include="0.1.0\SardineFish.Web.js" />
     <Content Include="0.1.0\SardineFish.Web.UI.js" />
+    <Content Include="arcTreeRelease\arcTree.html" />
+    <Content Include="arcTreeRelease\SardineFish.Web.Engine2D.Colliders.js" />
+    <Content Include="arcTreeRelease\SardineFish.Web.Engine2D.GUI.js" />
+    <Content Include="arcTreeRelease\SardineFish.Web.Engine2D.js" />
+    <Content Include="arcTreeRelease\SardineFish.Web.js" />
+    <Content Include="arcTreeRelease\SardineFish.Web.UI.js" />
+    <Content Include="arcTree\arcTree-Ang.html" />
+    <Content Include="arcTree\arcTree-Cap.html" />
+    <Content Include="arcTree\arcTree-Release.html" />
+    <Content Include="arcTree\arcTree-S-PI.html" />
+    <Content Include="arcTree\arcTree-Zoom.html" />
+    <Content Include="arcTree\arcTree-S.html" />
+    <Content Include="arcTree\arcTree.html" />
+    <Content Include="arcTree\jquery.min.js" />
     <Content Include="color.js" />
+    <Content Include="paint\index.html" />
+    <Content Include="paint\jquery.min.js" />
+    <Content Include="paint\segmdl2.woff" />
+    <Content Include="paint\styleClass.css" />
+    <Content Include="paint\styleId.css" />
+    <Content Include="paint\styleTag.css" />
     <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />
     <Content Include="release\0.2.0\SardineFish.Web.Engine2D.js" />
     <Content Include="SardineFish.Web.Engine2D.Colliders.js" />
@@ -65,6 +85,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="0.1.0\" />
+    <Folder Include="arcTreeRelease\" />
+    <Folder Include="arcTree\" />
+    <Folder Include="paint\" />
     <Folder Include="release\" />
     <Folder Include="release\0.2.0\" />
     <Folder Include="release\0.1.0\" />
