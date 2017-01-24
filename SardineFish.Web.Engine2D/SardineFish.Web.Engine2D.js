@@ -1,26 +1,16 @@
-﻿window.SardineFish=(function(sar){
-try{
-    if(!sar)
-        sar = function () { };
-    sar.Version = 0.20;
-    sar.Web=(function(web)
-    {
-        if(!web)
-            web=function(){};
-        return web;
-    })(sar.Web);
+﻿window.SarEngine=(function(engine){
+try
+{
+        engine = engine || function ()
+        {
+
+        }
+        engine.Version = 0.40;
     window.requestAnimationFrame = 
         window.requestAnimationFrame || 
         window.mozRequestAnimationFrame || 
         window.webkitRequestAnimationFrame || 
         window.msRequestAnimationFrame;
-    sar.Web.Engine2D=(function(engine)
-    {
-        if(!engine)
-            engine={};
-        return engine;
-    })(sar.Web.Engine2D);
-    engine=sar.Web.Engine2D;
     engine.debug=function(){}
     engine.onError=null;
     engine.debug.write=null;
@@ -681,6 +671,16 @@ try{
     }
 
     function keyCodeToKey(keyCode)
+    {
+
+    }
+
+    function CoordinateSys(pointToDefault, pointFromDefault, vectorToDefault, vectorFromDefault)
+    {
+        
+    }
+
+    function Layer()
     {
 
     }
@@ -1557,11 +1557,9 @@ whileRender=false;
     }
     Camera.prototype.rotateTo = function (angle)
     {
-        throw new Error("Coming soon...");
         this.rotate = angle;
         if (!this.graphics || !this.graphics.ctx)
             return;
-        //this.resetTransform();
     }
     Camera.prototype.resetTransform=function()
     {
@@ -1587,23 +1585,20 @@ whileRender=false;
             return;
         var sinA = Math.sin(this.rotate);
         var cosA = Math.cos(this.rotate);
-        this.width = this.graphics.canvas.width;
-        this.height = this.graphics.canvas.height;
-        var x0 = -this.position.x + this.width / 2;
-        var y0 = this.position.y + this.height / 2;
+        var rw = this.graphics.width;//real width
+        var rh = this.graphics.height;//real height
         this.width = this.graphics.canvas.width / this.zoom;
         this.height = this.graphics.canvas.height / this.zoom;
-        var x1 = this.center.x * cosA + this.center.y * sinA - this.center.x;
-        var y1 = -this.center.x * sinA + this.center.y * cosA - this.center.y;
-        var x2 = (1 - 1 / this.zoom) * this.center.x * this.zoom;
-        var y2 = (1 - 1 / this.zoom) * this.center.y * this.zoom;
-        this.graphics.setTransform(1, 0, 0, 1, x0, y0);
-        //this.graphics.setTransform(1, 0, 0, 1, 100, 100);
+        //move to center
+        this.graphics.setTransform(1, 0, 0, 1, rw / 2, rh / 2);
+        //apply rotation
         this.graphics.transform(cosA, sinA, -sinA, cosA, 0, 0);
-        this.graphics.transform(1, 0, 0, 1, x1, -y1);
-        this.graphics.transform(this.zoom, 0, 0, this.zoom, -x2, +y2);
-        //this.graphics.clearRect(this.center.x - this.width / 2, this.center.y - this.height / 2);
-        this.graphics.ky=-1;
+        //apply zoom
+        this.graphics.transform(this.zoom, 0, 0, this.zoom, 0, 0);
+        //move camera center
+        this.graphics.transform(1, 0, 0, 1, -this.position.x, this.position.y);
+
+        this.graphics.ky = -1;
     }
     Camera.prototype.map=function(x,y)
     {
@@ -1624,6 +1619,16 @@ whileRender=false;
     }
     function Joystick()
     {
+    }
+
+    function Output()
+    {
+
+    }
+
+    function Background()
+    {
+
     }
     
 

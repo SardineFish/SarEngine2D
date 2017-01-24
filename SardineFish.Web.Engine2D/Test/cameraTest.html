@@ -1,177 +1,1 @@
-﻿<!DOCTYPE HTML>
-<html>
-<head>
-    <title>Test</title>
-    <script src="jquery.min.js"></script>
-    <script src="../SardineFish.Web.js"></script>
-    <script src="../SardineFish.Web.Engine2D.js"></script>
-    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no,target-densitydpi=device-dpi" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="browsermode" content="application" />
-    <meta name="full-screen" content="true" />
-    <meta name="x5-fullscreen" content="true" />
-    <meta name="x5-page-mode" content="app" />
-    <meta name="360-fullscreen" content="true" />
-    <style>
-        html {
-            -ms-touch-action: none; /*Direct all pointer events to JavaScript code. */
-            /*overflow: hidden;*/
-        }
-
-        body {
-            margin: 0px;
-            padding: 0px;
-            background-color: rgb(240,240,240);
-        }
-
-        #debug {
-            display: block;
-            position: fixed;
-            top: -10px;
-            left: 0px;
-            z-index: 1000;
-            color: red;
-        }
-
-        #textCount {
-            display: none;
-        }
-    </style>
-</head>
-<body oncontextmenu="return false;">
-    <!--        <a href="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js" download="jquery.min.js" >jquery.min.js</a>
-            -->
-    <p id="debug">debug</p>
-    <p id="textCount">0</p>
-    <div>
-        <canvas id="canvas" width="480" height="500"></canvas>
-        <div style="height: 200px; background-color:black"></div>
-    </div>
-
-    <script>
-try
-{
-//call SardineFish;
-//alert(Engine2D.Web);
-var width=0,height=0;
-var lastP=false;
-//alert(LinkList);
-var canvas=document.getElementById("canvas");
-Graphics.canvas = canvas;
-var lineList=new Array();
-var pList=[];
-var lastLine=false;
-var lastCol = false;
-var img = new SardineFish.Web.Engine2D.Image();
-var calcu=false;
-var O=false;
-var scene = new Scene();
-var camera = new Camera(0, 0, 100, 100, 1);
-camera.graphics = new Graphics(canvas);
-scene.camera = camera;
-var game = new Game.createByCanvas(canvas);
-game.setScene(scene);
-scene.physics.g.y = -360;
-var lastPosition = null;
-scene.onMouseMove = function (e)
-{
-    return;
-    if (!lastPosition)
-        lastPosition = new Point(e.x, e.y);
-    else
-    {
-        camera.moveTo(camera.position.x + (e.x - lastPosition.x), camera.position.y + (e.y - lastPosition.y));
-        lastPosition = new Point(e.x, e.y);
-    }
-}
-scene.onDoubleClick = function (e)
-{
-    camera.moveTo(e.x, e.y);
-    camera.zoomTo(camera.zoom * 2);
-}
-scene.onClick = function (e)
-{
-    var l = new Line(new Point(-width, 0), new Point(width, 0));
-    l.strokeStyle = "blue";
-    var obj = new GameObject();
-    obj.gravity = false;
-    obj.graphic = l;
-    scene.addGameObject(obj);
-
-    l = new Line(new Point(0, -height), new Point(0, height));
-    l.strokeStyle = "red";
-    obj = new GameObject();
-    obj.gravity = false;
-    obj.graphic = l;
-    scene.addGameObject(obj);
-    scene.onClick = onClick;
-}
-scene.onMouseDown = function (e)
-{
-    if (e.button == Mouse.Buttons.Right)
-    {
-        camera.moveTo(e.x, e.y);
-    }
-}
-scene.onMouseUp = function (e)
-{
-    if (e.button == Mouse.Buttons.Right)
-    {
-        camera.zoomTo(camera.zoom / 2);
-    }
-}
-function onClick (e)
-{
-    try
-    {
-        //camera.zoomTo(4);
-        img.setCenter(e.x, e.y, Align.center);
-        var obj = new GameObject();
-        obj.graphic = img;
-        obj.gravity = true;
-        obj.setCenter(e.x, e.y);
-        scene.addGameObject(obj);
-        scene.onClick = function (e)
-        {
-            obj.moveAnimateTo(e.x, e.y, 1, function () { /*alert("completed!");*/ });
-        }
-    }
-    catch (ex){
-        alert("scene.onClick:" + ex.message);
-    }
-}function resize()
-{
-    width = screen.availWidth;    height = screen.availHeight;    //alert("("+width+","+height+")");    $("body").css("width", width.toString() + "px");    document.getElementById("canvas").width = width;    document.getElementById("canvas").height = height;
-}resize();
-window.onload=function(e){
-    try
-    {
-        img.loadFromUrl("http://7xkxy8.com1.z0.glb.clouddn.com/img/logo/Logo_50.min.png", function ()
-        {
-            var x = 0;
-        });
-        canvas.height = height;
-        canvas.width = width;
-    var ctx=document.getElementById("canvas").getContext("2d");
-    //alert(ctx);
-    ctx.fillRect(0,0,width,height);
-    SardineFish.Web.Engine2D.debug.write=function(text)
-    {
-//alert(text);
-        $("#debug").text(text);
-    }
-    SardineFish.Web.Engine2D.debug.clear=function()
-    {
-        $("#debug").text("");
-    }
-    game.start();
-}catch(ex){alert("onLoaded:"+ex.message);}
-}
-
-}catch(ex)
-{
-    alert("global:"+ex.message);
-}
-    </script>
-</body>
-</html>
+﻿<!DOCTYPE HTML><html><head>    <title>Test</title>    <script src="jquery.min.js"></script>    <script src="SardineFish.Web.js"></script>    <script src="../SarEngine2D.js"></script>    <script src="../SarEngine2D.Colliders.js"></script>    <script src="../SarEngine2D.GUI.js"></script>    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no,target-densitydpi=device-dpi" />    <meta name="apple-mobile-web-app-capable" content="yes" />    <meta name="browsermode" content="application" />    <meta name="full-screen" content="true" />    <meta name="x5-fullscreen" content="true" />    <meta name="x5-page-mode" content="app" />    <meta name="360-fullscreen" content="true" />    <style>        html {            -ms-touch-action: none; /*Direct all pointer events to JavaScript code. */            /*overflow: hidden;*/        }        body {            margin: 0px;            padding: 0px;            background-color: rgb(240,240,240);        }        #debug {            display: block;            position: fixed;            top: -10px;            left: 0px;            z-index: 1000;            color: red;        }        #textCount {            display: none;        }    </style></head><body oncontextmenu="return false;">    <!--        <a href="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js" download="jquery.min.js" >jquery.min.js</a>            -->    <p id="debug">debug</p>    <p id="textCount">0</p>    <div>        <canvas id="canvas" width="480" height="500"></canvas>        <div style="height: 200px; background-color:black"></div>    </div>    <script>try{var PI=Math.PI;var width=0;var height=0;var game = SarEngine.createByCanvas($("#canvas").get(0));var scene=game.scene;var camera=scene.camera;function init(){    width=window.innerWidth;    height =window.innerHeight;    canvas.height=height;    canvas.width=width;    game.start();    camera.moveTo(100,200);    camera.zoomTo(0.5);    var l = new Line(new Point(-width, 0), new Point(width, 0));    l.strokeStyle = "blue";    var obj = new GameObject();    obj.gravity = false;    obj.graphic = l;    scene.addGameObject(obj);    l = new Line(new Point(0, -height), new Point(0, height));    l.strokeStyle = "red";    obj = new GameObject();    obj.gravity = false;    obj.graphic = l;    scene.addGameObject(obj);        var c=new Circle(30);    c.moveTo(camera.position.x,camera.position.y);    c.fillStyle="white";    c.strokeStyle="#66CCFF";    obj=new GameObject();    obj.graphic=c;    scene.addGameObject(obj);        //scene.onClick = onClick;}init();game.onUpdate=function(dt){    $("#debug").text(dt);}scene.onMouseMove = function (e){    }scene.onDoubleClick = function (e){    camera.rotateTo(camera.rotate+PI/7);}scene.onClick=function (e){    try    {        //camera.zoomTo(4);        //camera.moveTo(e.x,e.y);        //camera.rotateTo(PI/4);        camera.rotateTo(camera.rotate+PI/7);        var rect = new Rectangle(100, 100);        //rect.setCenter(e.x, e.y, Align.center);        rect.moveTo(e.x,e.y);        var obj = new GameObject();        obj.graphic = rect;        obj.gravity = true;        scene.addGameObject(obj);    }    catch (ex){        alert("scene.onClick:" + ex.message);    }}function resize(){    width = screen.availWidth;    height = screen.availHeight;    //alert("("+width+","+height+")");    $("body").css("width", width.toString() + "px");    document.getElementById("canvas").width = width;    document.getElementById("canvas").height = height;}//resize();window.onload=function(e){    try    {        canvas.height = height;        canvas.width = width;    var ctx=document.getElementById("canvas").getContext("2d");    //alert(ctx);    ctx.fillRect(0,0,width,height);    //game.start();}catch(ex){alert("onLoaded:"+ex.message);}}}catch(ex){    alert("global:"+ex.message);}    </script></body></html>

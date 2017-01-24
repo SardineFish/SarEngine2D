@@ -32,6 +32,9 @@
     <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />
     <Content Include="release\0.2.0\SardineFish.Web.Engine2D.js" />
     <Content Include="SardineFish.Web.Engine2D.Colliders.js" />
+    <Content Include="SarEngine2D.Colliders.js" />
+    <Content Include="SarEngine2D.GUI.js" />
+    <Content Include="SarEngine2D.js" />
     <Content Include="Test\animationGame.html" />
     <Content Include="Test\animationTest.html" />
     <Content Include="Test\cameraTest.html" />
