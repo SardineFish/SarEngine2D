@@ -31,12 +31,21 @@
     <Content Include="color.js" />
     <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />
     <Content Include="release\0.2.0\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.0\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.Engine2D.Colliders.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.UI.js" />
+    <Content Include="release\0.3.2\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.2\SardineFish.Web.Engine2D.zip" />
+    <Content Include="release\0.4.0\SarEngine2D.js" />
     <Content Include="SardineFish.Web.Engine2D.Colliders.js" />
-    <Content Include="SarEngine2D.Colliders.js" />
+    <Content Include="SarEngine2D.Objects.js" />
     <Content Include="SarEngine2D.GUI.js" />
     <Content Include="SarEngine2D.js" />
     <Content Include="Test\animationGame.html" />
     <Content Include="Test\animationTest.html" />
+    <Content Include="Test\blank.html" />
     <Content Include="Test\cameraTest.html" />
     <Content Include="Test\colliderTest.html" />
     <Content Include="Test\crouch.png" />
@@ -71,6 +80,10 @@
     <Folder Include="release\" />
     <Folder Include="release\0.2.0\" />
     <Folder Include="release\0.1.0\" />
+    <Folder Include="release\0.3.0\" />
+    <Folder Include="release\0.3.1\" />
+    <Folder Include="release\0.3.2\" />
+    <Folder Include="release\0.4.0\" />
     <Folder Include="Test\" />
   </ItemGroup>
 </Project>

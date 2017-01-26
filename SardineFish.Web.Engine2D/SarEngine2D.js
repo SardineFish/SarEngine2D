@@ -34,7 +34,7 @@
         }
         );
     }
-    Engine.Version = 0.40;
+    Engine.Version = 0.50;
     Engine.createByCanvas = function (canvas)
     {
         var engine = new Engine();
@@ -221,11 +221,13 @@
     function Scene()
     {
         this.engine = null;
-        this.objectList = [];
-        this._objList = [];
+        this.objectList = ArrayList();
+        this._objList = ArrayList();
         this.physics = new Scene.Physics();
-        this.camera = null;
+        this.cameraList = ArrayList();
+        this.layers = new LayerCollection();
         this.GUI = null;
+        this.background = null;
         this.device = new Device();
         this.doubleClickDelay = 200;
         this.onUpdate = null;
@@ -246,25 +248,91 @@
         this.onTouchStart = null;
         this.onTouchMove = null;
         this.onTouchEnd = null;
-        this._objList.add = function (node)
-        {
-            this[this.length] = node;
-            return this.length - 1;
-        }
-        this.objectList.add = function (node)
-        {
-            this[this.length] = node;
-            return this.length - 1;
-        }
-        this.objectList.removeAt = function (index)
-        {
-            for (var i = index; i < this.length - 1; i++)
-            {
-                this[i] = this[i + 1];
-            }
-            this.length -= 1;
-        }
+
+        this.layers.scene = this;
+        this.layers.add(new Layer(), 0);
     }
+    function LayerCollection()
+    {
+        this.count = 0;
+        this.topDepth = NaN;
+        this.bottomDepth = NaN;
+        this.top = null;
+        this.bottom = null;
+        this.scene = null;
+        this.depthList = ArrayList();
+    }
+    LayerCollection.prototype.add = function (layer, depth)
+    {
+        if (!this.scene)
+        {
+            throw new Error("This LayerCollection must belong to a Scene before operaion.");
+        }
+        if (isNaN(depth) || this[depth])
+        {
+            throw new Error("Invalid depth.");
+        }
+        layer.scene = this.scene;
+        this[depth] = layer;
+        if (this.count == 0)
+        {
+            this.topDepth = depth;
+            this.top = layer;
+            this.bottomDepth = depth;
+            this.bottom = layer;
+            this.depthList[0] = depth;
+        }
+        else if (depth < this.depthList[0])
+        {
+            this.bottomDepth = depth;
+            this.bottom = layer;
+            this.depthList.insert(depth, 0);
+        }
+        else if (this.depthList[this.depthList.length - 1] < depth)
+        {
+            this.topDepth = depth;
+            this.top = layer;
+            this.depthList[this.depthList.length] = depth;
+        }
+        else
+        {
+            for (var i = 0; i < this.depthList.length; i++)
+            {
+                if (depth < this.depthList[i])
+                {
+                    this.depthList.insert(depth, i);
+                    break;
+                }
+            }
+        }
+        this.count++;
+    }
+    LayerCollection.prototype.removeAt = function (depth)
+    {
+        if(!this[depth])
+        {
+            throw new Error("There is not a Layer at " + depth);
+        }
+        var layer = this[depth];
+        this[depth] = null;
+        this.depthList.remove(depth);
+        if (this.depthList.length > 0)
+        {
+            this.topDepth = this.depthList[this.depthList.length - 1];
+            this.top = this[this.topDepth];
+            this.bottomDepth = this.depthList[0];
+            this.bottom = this[this.bottomDepth];
+        }
+        else
+        {
+            this.topDepth = NaN;
+            this.top = null;
+            this.bottomDepth = NaN;
+            this.bottomDepth = null;
+        }
+        return layer;
+    }
+    Scene.LayerCollection = LayerCollection;
     Scene.Physics = function ()
     {
         this.g = new Vector2(0, 0);
@@ -286,69 +354,56 @@
     Scene.prototype.reset = function ()
     {
         this.camera = null;
-        this.objectList = [];
-        this._objList = [];
+        this.objectList = ArrayList();
+        this._objList = ArrayList();
         if (this.physics)
             this.physics.reset();
-        this._objList.add = function (node)
-        {
-            this[this.length] = node;
-            return this.length - 1;
-        }
-        this.objectList.add = function (node)
-        {
-            this[this.length] = node;
-            return this.length - 1;
-        }
-        this.objectList.removeAt = function (index)
-        {
-            for (var i = index; i < this.length - 1; i++)
-            {
-                this[i] = this[i + 1];
-            }
-            this.length -= 1;
-        }
     }
     Scene.prototype.physicalSimulate = function (dt)
     {
         var scene = this;
-        for (var i = 0; i < this.objectList.length; i++)
+        for (var d = 0; d < this.layers.depthList.length; d++)
         {
-            var obj = this.objectList[i];
-            obj.a.x = (obj.F.x + obj.constantForce.x) / obj.mass;
-            obj.a.y = (obj.F.y + obj.constantForce.y) / obj.mass;
-            if (obj.gravity && (!obj.collider || !obj.collider.landed))
+            var objectList = this.layers[this.layers.depthList[d]].objectList;
+            for (var i = 0; i < objectList.length; i++)
             {
-                obj.a.x += scene.physics.g.x;
-                obj.a.y += scene.physics.g.y;
-            }
-            obj.moveTo(obj.position.x + obj.v.x * dt + 0.5 * obj.a.x * dt * dt, obj.position.y + obj.v.y * dt + 0.5 * obj.a.y * dt * dt);
-            obj.v.x += obj.a.x * dt;
-            obj.v.y += obj.a.y * dt;
-            if (obj.collider && obj.collider.angV)
-            {
-                var w = obj.collider.angV;
-                var ang = w * dt;
-                obj.rotate(obj.collider.center, ang);
-            }
-            obj.resetForce();
-            if (obj.collider)
-                obj.collider.landed = false;
-        }
-        for (var i = 0; i < this.objectList.length; i++)
-        {
-            if (obj.collider && obj.collider.rigidBody)
-            {
-                for (var j = i + 1; j < this.objectList.length; j++)
+                var obj = this.layers[this.layers.depthList[d]].objectList[i];
+                obj.a.x = (obj.F.x + obj.constantForce.x) / obj.mass;
+                obj.a.y = (obj.F.y + obj.constantForce.y) / obj.mass;
+                if (obj.gravity && (!obj.collider || !obj.collider.landed))
                 {
-                    var target = this.objectList[j];
-                    if (target.collider && target.collider.rigidBody)
-                    {
+                    obj.a.x += scene.physics.g.x;
+                    obj.a.y += scene.physics.g.y;
+                }
+                obj.moveTo(obj.position.x + obj.v.x * dt + 0.5 * obj.a.x * dt * dt, obj.position.y + obj.v.y * dt + 0.5 * obj.a.y * dt * dt);
+                obj.v.x += obj.a.x * dt;
+                obj.v.y += obj.a.y * dt;
+                if (obj.collider && obj.collider.angV)
+                {
+                    var w = obj.collider.angV;
+                    var ang = w * dt;
+                    obj.rotate(obj.collider.center, ang);
+                }
+                obj.resetForce();
+                if (obj.collider)
+                    obj.collider.landed = false;
+            }
 
-                        if (obj.collider.isCollideWith(target.collider))
+            for (var i = 0; i < objectList.length; i++)
+            {
+                if (obj.collider && obj.collider.rigidBody)
+                {
+                    for (var j = i + 1; j < objectList.length; j++)
+                    {
+                        var target = objectList[j];
+                        if (target.collider && target.collider.rigidBody)
                         {
 
-                            obj.collider.collide(obj, target, dt);
+                            if (obj.collider.isCollideWith(target.collider))
+                            {
+
+                                obj.collider.collide(obj, target, dt);
+                            }
                         }
                     }
                 }
@@ -364,6 +419,26 @@
         if (scene.onRender)
             scene.onRender(scene.camera.graphics, dt);
         //scene.camera.graphics.clearRect(scene.camera.center.x - scene.camera.width / 2, scene.camera.center.y + scene.camera.height / 2, scene.camera.width, scene.camera.height);
+
+        for (var i = 0; i < this.layers.depthList.length; i++)
+        {
+            var layer = this.layers[this.layers.depthList[i]];
+            if (layer.onRender)
+            {
+                args = { graphics: graphics, dt: dt, cancel: false };
+                layer.onRender(args);
+                if (args.cancel)
+                    continue;
+            }
+
+            layer.render(scene.camera.graphics, dt);
+
+            if (layer.onEndRender)
+            {
+                layer.onEndRender();
+            }
+        }
+        /*
         for (var i = 0; i < this.objectList.length; i++)
         {
             var obj = this.objectList[i];
@@ -372,11 +447,17 @@
                 obj.onRender(obj, dt);
             }
             obj.render(scene.camera.graphics, obj.position.x, obj.position.y, 0, dt);
+        }*/
+        if (scene.GUI)
+        {
+            scene.camera.resetTransform();
+            scene.GUI.render(scene.camera.graphics);
         }
-        if (!scene.GUI)
-            return;
-        scene.camera.resetTransform();
-        scene.GUI.render(scene.camera.graphics);
+        if (scene.background)
+        {
+            scene.camera.resetTransform();
+            scene.background.render(scene.camera.graphics);
+        }
         if (this.onEndRender)
             this.onEndRender();
     }
@@ -679,7 +760,6 @@
             if (scene.device.keyboard.keys[e.keyCode] != Keyboard.KeyState.Down)
             {
                 scene.device.keyboard.keys[e.keyCode] = Keyboard.KeyState.Down;
-                pressedKeyList[e.keyCode] = true;
                 var args = new KeyEventArgs();
                 args.key = e.keyCode;
                 args.keyName = Keyboard.Keys.toString(args.key);
@@ -688,7 +768,6 @@
                 args.alt = e.altKey;
                 args.shift = e.shiftKey;
                 args.handled = false;
-                e.key = keyCodeToKey(e.keyCode);
                 if (scene.onKeyDown)
                     scene.onKeyDown(args);
             }
@@ -700,7 +779,6 @@
             if (scene.device.keyboard.keys[e.keyCode] == Keyboard.KeyState.Down)
             {
                 scene.device.keyboard.keys[e.keyCode] = Keyboard.KeyState.Up;
-                pressedKeyList[e.key.toUpperCase()] = false;
                 var args = new KeyEventArgs();
                 args.key = e.keyCode;
                 args.keyName = Keyboard.Keys.toString(args.key);
@@ -830,16 +908,20 @@
         this.eventSource.addEventListener("touchmove", touchMoveCallback);
         this.eventSource.addEventListener("touchend", touchEndCallback);
     }
-    Scene.prototype.addGameObject = function (obj)
+    Scene.prototype.addGameObject = function (obj, layer)
     {
         if (obj.id >= 0)
         {
-            //alert(obj.id);
             throw new Error("Object existed.");
         }
         this.objectList.add(obj);
         obj.id = this._objList.add(obj);
-        //alert(obj.id);
+        if (!isNaN(layer))
+        {
+            if (!this.layers[layer])
+                throw new Error("Invalid layer.");
+            this.layers[layer].addGameObject(obj);
+        }
         return obj.id;
     }
     Scene.prototype.removeGameObject = function (id)
@@ -869,8 +951,905 @@
         this._objList[id] = null;
         node.object.id = -1;
     }
+    Scene.prototype.addLayer = function (layer, depth)
+    {
+        layer.scene = this;
+        this.layers.add(layer,depth);
+    }
+    Scene.prototype.removeLayer = function (depth)
+    {
+        return this.layers.removeAt(depth);
+    }
+    Scene.prototype.addCamera = function (camera)
+    {
+        if(camera.scene)
+        {
+            throw new Error("This camera is in another scene.");
+        }
+        camera.scene = this;
+        this.cameraList.add(camera);
+    }
+    Scene.prototype.removeCamera = function (camera)
+    {
+        var index = this.cameraList.indexOf(camera);
+        if (index < 0)
+        {
+            throw new Error("Not found.");
+        }
+        this.cameraList.removeAt(index);
+    }
     Engine.Scene = Scene;
     window.Scene = Scene;
+
+    /// <summary>Cordinate System</summary>
+    /// <param name="pTo" type="Function">A function(x,y) that map a point from default cordinate system to this cordinate system.</param>
+    /// <param name="pFrom" type="Function">A function(x,y) that map a point from this cordinate system to default cordinate system.</param>
+    /// <param name="vTo" type="Function">A function(x,y) that map a vector from default cordinate system to this cordinate system.</param>
+    /// <param name="vFrom" type="Function">A function(x,y) that map a vector from this cordinate system to default cordinate system.</param>
+    function Coordinate(pTo, pFrom, vTo, vFrom)
+    {
+        this.pTo = pTo;
+        this.pFrom = pFrom;
+        this.vTo = vTo;
+        this.vFrom = vFrom;
+        this.axis = null;
+    }
+    Coordinate.Axis = function ()
+    {
+        this.visible = false;
+        this.graphic = null;
+    }
+    Coordinate.Axis.createCartesian = function (coordinate ,xLen, yLen, xColor, yColor)
+    {
+        var axis = new Coordinate.Axis();
+        var lineX = new Line(new Point(-xLen, 0), new Point(xLen, 0));
+        lineX.strokeStyle = xColor;
+        lineX.strokeWidth = 1; var lineY = new Line(new Point(0, -yLen), new Point(0, yLen));
+        lineY.strokeStyle = yColor;
+        lineY.strokeWidth = 1;
+        axis.x = lineX;
+        axis.y = lineY;
+        axis.graphic = new Combination();
+        axis.graphic.addObject(lineX);
+        axis.graphic.addObject(lineY);
+        axis.graphic.setCoordinate(coordinate);
+        return axis;
+    }
+    Coordinate.Axis.prototype.render = function (graphics, dt)
+    {
+        if (this.graphic)
+            this.graphic.render(graphics, dt);
+    }
+    Coordinate.Default = (function ()
+    {
+        var coordinate = new Coordinate(
+            function (x, y)
+            {
+                return { x: x, y: y };
+            },
+            function (x, y)
+            {
+                return { x: x, y: y };
+            },
+            function (x, y)
+            {
+                return { x: x, y: y };
+            },
+            function (x, y)
+            {
+                return { x: x, y: y };
+            });
+        var axis = new Coordinate.Axis();
+        var axisVisible = false;
+        Object.defineProperty(axis, "visible", {
+            get: function ()
+            {
+                return axisVisible;
+            },
+            set: function (value)
+            {
+                if (!axisVisible)
+                {
+                    var lineX = new Line(new Point(-1024, 0), new Point(1024, 0));
+                    lineX.strokeStyle = new Color(255, 0, 0, 1);
+                    lineX.strokeWidth = 1;
+                    var lineY = new Line(new Point(0, -1024), new Point(0, 1024));
+                    lineY.strokeStyle = new Color(0, 255, 0, 1);
+                    lineY.strokeWidth = 1;
+                    axis.graphic = new Combination();
+                    axis.graphic.addObject(lineX);
+                    axis.graphic.addObject(lineY);
+                }
+                axisVisible = value;
+            }
+        })
+        coordinate.axis = axis;
+        return coordinate;
+    })();
+    Coordinate.createCartesian = function (x, y, unitX, unitY, rotation)
+    {
+        var originX = x;
+        var originY = y;
+        var xZoom = unitX;
+        var yZoom = unitY;
+        var rotation = rotation;
+        function pointTo(x, y)
+        {
+            if (rotation == 0)
+            {
+                return {
+                    x: (x - originX) / xZoom,
+                    y: (y - originY) / yZoom
+                };
+            }
+            else
+            {
+                var cos = Math.cos(-rotation);
+                var sin = Math.sin(-rotation);
+                var dx = x - originX;
+                var dy = x - originY;
+                return {
+                    x: (dx * cos - dy * sin) / xZoom,
+                    y: (dy * cos + dx * sin) / yZoom
+                };
+            }
+        }
+        function pointFrom(x, y)
+        {
+            if (rotation == 0)
+            {
+                return {
+                    x: x * xZoom + originX,
+                    y: y * yZoom + originY
+                };
+            }
+            else
+            {
+                var cos = Math.cos(rotation);
+                var sin = Math.sin(rotation);
+                var dx = x * xZoom;
+                var dy = y * yZoom;
+                return {
+                    x: dx * cos - dy * sin + originX,
+                    y: dy * cos + dx * sin + originY
+                };
+            }
+        }
+        function vectorTo(x, y)
+        {
+            if (rotation == 0)
+            {
+                return {
+                    x: x / xZoom,
+                    y: y / yZoom
+                };
+            }
+            else
+            {
+                var cos = Math.cos(-rotation);
+                var sin = Math.sin(-rotation);
+                return {
+                    x: (x * cos - y * sin) / xZoom,
+                    y: (y * cos + x * sin) / yZoom
+                };
+            }
+        }
+        function vectorFrom(x, y)
+        {
+            if (rotation == 0)
+            {
+                return {
+                    x: x * xZoom,
+                    y: y * yZoom
+                };
+            }
+            else
+            {
+                var cos = Math.cos(rotation);
+                var sin = Math.sin(rotation);
+                var dx = x * xZoom;
+                var dy = y * yZoom;
+                return {
+                    x: dx * cos - dy * sin,
+                    y: dy * cos + dx * sin
+                };
+            }
+        }
+
+        var coordinate = new Coordinate(pointTo, pointFrom, vectorTo, vectorFrom);
+        coordinate.originX = originX;
+        coordinate.originY = originY;
+        coordinate.unitX = unitX;
+        coordinate.unitY = unitY;
+        coordinate.rotation = rotation;
+        var axis = new Coordinate.Axis();
+        coordinate.axis = axis;
+        var lineX = new Line(new Point(-1024, 0), new Point(1024, 0));
+        lineX.strokeStyle = new Color(255, 0, 0, 1);
+        lineX.strokeWidth = 1; var lineY = new Line(new Point(0, -1024), new Point(0, 1024));
+        lineY.strokeStyle = new Color(0, 255, 0, 1);
+        lineY.strokeWidth = 1;
+        axis.graphic = new Combination();
+        axis.graphic.addObject(lineX);
+        axis.graphic.addObject(lineY);
+        axis.graphic.setCoordinate(coordinate);
+        return coordinate;
+    }
+    Coordinate.createPolar = function (x, y, unit, rotation)
+    {
+        var originX = x;
+        var originY = y;
+        var unit = unit;
+        var rotation = rotation;
+        function pointTo(x, y)
+        {
+            var l = Math.sqrt((x - originX) * (x - originX) + (y - originY) * (y - originY));
+            var ang = Math.acos((x - originX) / l) - rotation;
+            return {
+                x: l / unit,
+                y: ang
+            };
+        }
+        function pointFrom(l, ang)
+        {
+            return {
+                x: l * unit * Math.cos(ang + rotation) + originX,
+                y: l * unit * Math.sin(ang + rotation) + originY
+            };        }
+        function vectorTo(x, y)
+        {
+            var l = Math.sqrt(x * x + y * y);;
+            var ang = Math.acos(x / l) - rotation;
+            return {
+                x: l / unit,
+                y: ang
+            };
+        }
+        function vectorFrom(l, ang)
+        {
+            return {
+                x: l * unit * Math.cos(ang + rotation),
+                y: l * unit * Math.sin(ang + rotation)
+            };
+        }
+
+        var coordinate = new Coordinate(pointTo, pointFrom, vectorTo, vectorFrom);
+        coordinate.originX = originX;
+        coordinate.originY = originY;
+        coordinate.unit = unit;
+        coordinate.rotation = rotation;
+        var axis = new Coordinate.Axis();
+        coordinate.axis = axis;
+        return coordinate;
+    }
+    Coordinate.prototype.pointMapTo = function (coordinate, x, y)
+    {
+        if (coordinate == this)
+            return { x: x, y: y };
+        if (coordinate == Coordinate.Default)
+            return this.pFrom(x, y);
+        if (this == coordinate.Default)
+            return coordinate.pFrom(x, y);
+        var p = coordinate.pFrom(x, y);
+        return this.pTo(x, y);
+    }
+    Coordinate.prototype.vectorMapTo = function (coordinate, x, y)
+    {
+        if (coordinate == this)
+            return { x: x, y: y };
+        if (coordinate == Coordinate.Default)
+            return this.vFrom(x, y);
+        if (this == coordinate.Default)
+            return coordinate.vFrom(x, y);
+        var p = coordinate.vFrom(x, y);
+        return this.vTo(x, y);
+    }
+    Engine.Coordinate = Coordinate;
+    window.Coordinate = Coordinate;
+
+    //Layer
+    function Layer(coordinate)
+    {
+        if(!coordinate)
+        {
+            coordinate = Coordinate.Default;
+        }
+        this.coordinate = coordinate;
+        this.objectList = ArrayList();
+        this.followCamera = false;
+        this.scene = null;
+        this.onRender = null;
+        this.onEndRender = null;
+
+    }
+    Layer.prototype.addGameObject = function (obj, keepCoordinate, index)
+    {
+        if (!this.scene)
+            throw new Error("This layer must belong to a scene before add GameOject.");
+        if (!isNaN(index))
+        {
+            this.objectList.insert(obj, index);
+        }
+        else
+        {
+            this.objectList.add(obj);
+        }
+        if (!keepCoordinate)
+            obj.setCoordinate(this.coordinate);
+    }
+    Layer.prototype.removeGameObject = function (obj)
+    {
+        this.objectList.remove(obj);
+    }
+    Layer.prototype.render = function (graphics, dt)
+    {
+
+        for (var i = 0; i < this.objectList.length; i++)
+        {
+            if (this.objectList[i].onRender)
+            {
+                args = { graphics: graphics, x: this.objectList[i].position.x, y: this.objectList[i].position.y, r: this.objectList[i].rotation, dt: dt, cancel: false };
+                this.objectList[i].onRender(args);
+                if (args.cancel)
+                    continue;
+            }
+            this.objectList[i].render(graphics, this.objectList[i].position.x, this.objectList[i].position.y, this.objectList[i].rotation, dt);
+        }
+        if (this.coordinate.axis && this.coordinate.axis.visible)
+            this.coordinate.axis.render(graphics, dt);
+    }
+    Engine.Layer = Layer;
+    window.Layer = Layer;
+
+    //ArrayList
+    function ArrayList()
+    {
+        var list = [];
+        list.add = function (obj)
+        {
+            list[list.length] = obj;
+            return list.length - 1;
+        }
+        list.insert = function (obj, index)
+        {
+            if (isNaN(index) || index < 0)
+            {
+                throw new Error("Invalid index.");
+            }
+            for (var i = this.length-1; i >=index; i--)
+            {
+                this[i + 1] = this[i];
+            }
+            this[index] = obj;
+        }
+        list.removeAt = function (index)
+        {
+            if (isNaN(index) || index < 0 || index >= list.length)
+            {
+                throw new Error("Invalid index.");
+            }
+            for (var i = index; i < list.length - 1; i++)
+            {
+                list[i] = list[i + 1];
+            }
+            list.length -= 1;
+        }
+        list.remove = function (obj)
+        {
+            for (var i = 0; i < list.length; i++)
+            {
+                if (list[i] == obj)
+                {
+                    for (; i < list.length + 1; i++)
+                    {
+                        list[i] = list[i + 1];
+                    }
+                    list[i].length -= 1;
+                    return;
+                }
+            }
+            throw new Error("Object not found.");
+        }
+        list.clear = function ()
+        {
+            list.length = 0;
+        }
+        list.addRange = function (arr, startIndex, count)
+        {
+            if (!startIndex || isNaN(startIndex))
+                startIndex = 0;
+            if (!count || isNaN(count))
+                count = arr.length;
+            for (var i = startIndex; i < count; i++)
+            {
+                list[list.length] = arr[i];
+            }
+        }
+        return list;
+    }
+
+    //Matrix
+    function Matrix(m,n)
+    {
+        this.rows = 0;
+        this.columns = 0;
+        this._innerMatrix = [];
+        var matrix = this;
+        if (m instanceof Array)
+        {
+            this.rows = m.length;
+            for (var i = 0; i < arr.length; i++)
+            {
+                if (!(m[i] instanceof Array))
+                {
+                    throw new Error("Invalid Matrix.");
+                }
+                matrix._innerMatrix[i] = [];
+                //Get columns number
+                if (i == 0)
+                    this.columns = m[i].length;
+                else if (this.columns != m[i].length)
+                {
+                    throw new Error("Columns not same.");
+                }
+
+                for (var j = 0; j < this.columns ; j++)
+                {
+                    matrix._innerMatrix[i][j] = m[i][j];
+                }
+
+                (function (index)
+                {
+                    Object.defineProperty(matrix, index.toString(), {
+                        get: function ()
+                        {
+                            return matrix._innerMatrix[index];
+                        }
+                    });
+                })(i);
+            }
+        }
+        else if ((!isNaN(m)) && (!isNaN(n)))
+        {
+            this.rows = m;
+            this.columns = n;
+            for (var i = 0; i < m; i++)
+            {
+                matrix._innerMatrix[i] = [];
+                for (var j = 0; j < n; j++)
+                {
+                    matrix._innerMatrix[i][j] = 0;
+                }
+                (function (index)
+                {
+                    Object.defineProperty(matrix, index.toString(), {
+                        get: function ()
+                        {
+                            return matrix._innerMatrix[index];
+                        }
+                    });
+                })(i);
+            }
+        }
+    }
+    Matrix.plus = function (a, b)
+    {
+        if (!(a instanceof Matrix) || !(b instanceof Matrix))
+        {
+            throw new Error("Not Matrix.");
+        }
+        if (a.columns != b.columns || a.rows != b.rows)
+        {
+            throw new Error("Two Matrix must have same columns and rows.");
+        }
+        var matrix = new Matrix(a.rows, a.columns);
+        for (var i = 0; i < a.rows; i++)
+        {
+            for (var j = 0; j < a.columns ; j++)
+            {
+                matrix._innerMatrix[i][j] = a._innerMatrix[i][j] + b._innerMatrix[i][j];
+            }
+        }
+        return matrix;
+    }
+    Matrix.minus = function (a, b)
+    {
+        if (!(a instanceof Matrix) || !(b instanceof Matrix))
+        {
+            throw new Error("Not Matrix.");
+        }
+        if (a.columns != b.columns || a.rows != b.rows)
+        {
+            throw new Error("Two Matrix must have same columns and rows.");
+        }
+        var matrix = new Matrix(a.rows, a.columns);
+        for (var i = 0; i < a.rows; i++)
+        {
+            for (var j = 0; j < a.columns ; j++)
+            {
+                matrix._innerMatrix[i][j] = a._innerMatrix[i][j] - b._innerMatrix[i][j];
+            }
+        }
+        return matrix;
+    }
+    Matrix.multi = function (a, b)
+    {
+        if ((a instanceof Matrix) && (b))
+        {
+            var matrix = new Matrix(a.rows, a.columns);
+            for (var i = 0; i < a.rows; i++)
+            {
+                for (var j = 0; j < a.columns ; j++)
+                {
+                    matrix._innerMatrix[i][j] = a._innerMatrix[i][j] * b;
+                }
+            }
+            return matrix;
+        }
+        else if ((a instanceof Matrix) && (b instanceof Matrix))
+        {
+            if (a.columns != b.rows)
+            {
+                throw new Error("The number of columns of the left matrix must be the same as the number of rows of the right matrix.")
+            }
+            var matrix = new Matrix(a.rows, b.columns);
+            for (var i = 0; i < a.rows; i++)
+            {
+                for (var j = 0; j < b.columns; j++)
+                {
+                    for (var k = 0; k < a.columns; k++)
+                    {
+                        matrix._innerMatrix[i][j] += a._innerMatrix[i][k] * b._innerMatrix[k][j];
+                    }
+                }
+            }
+            return matrix;
+        }
+        throw new Error("Can only multiply Matrix with Matrix or Matrix with Number.");
+    }
+    Matrix.scale = function (a, b)
+    {
+        if (!((a instanceof Matrix) && !isNaN(b)))
+        {
+            throw new Error("The left must be Matrix and right mustv be Number.");
+        }
+        var matrix = new Matrix(a.rows, a.columns);
+        for (var i = 0; i < a.rows; i++)
+        {
+            for (var j = 0; j < a.columns ; j++)
+            {
+                matrix._innerMatrix[i][j] = a._innerMatrix[i][j] * b;
+            }
+        }
+        return matrix;
+    }
+    Matrix.transpose = function (matrix)
+    {
+        if (!(matrix instanceof Matrix))
+        {
+            
+        }
+        var newMatrix = new Matrix(matrix.columns, matrix.rows);
+        for (var i = 0; i < newMatrix.rows ; i++)
+        {
+            for (var j = 0; j < newMatrix.columns; j++)
+            {
+                newMatrix._innerMatrix[i][j] = matrix._innerMatrix[j][i];
+            }
+        }
+        return newMatrix;
+    }
+    Matrix.prototype.plus = function (matrix)
+    {
+        if (!(matrix instanceof Matrix))
+        {
+            throw new Error("Not Matrix.");
+        }
+        if (matrix.columns != this.columns || matrix.rows != this.rows)
+        {
+            throw new Error("The Matrix must has same columns and rows.");
+        }
+        for (var i = 0; i < this.rows; i++)
+        {
+            for (var j = 0; j < this.columns ; j++)
+            {
+                this._innerMatrix[i][j] += matrix._innerMatrix[i][j];
+            }
+        }
+    }
+    Matrix.prototype.minus = function (matrix)
+    {
+        if (!(matrix instanceof Matrix))
+        {
+            throw new Error("Not Matrix.");
+        }
+        if (matrix.columns != this.columns || matrix.rows != this.rows)
+        {
+            throw new Error("The Matrix must has same columns and rows.");
+        }
+        for (var i = 0; i < this.rows; i++)
+        {
+            for (var j = 0; j < this.columns ; j++)
+            {
+                this._innerMatrix[i][j] -= matrix._innerMatrix[i][j];
+            }
+        }
+    }
+    Matrix.prototype.multi = function (x)
+    {
+        if (isNaN(x))
+        {
+            throw new Error("x must be number. Or use Matrix.multi(a,b) to multiply two Matrix.");
+        }
+        for (var i = 0; i < this.rows; i++)
+        {
+            for (var j = 0; j < this.columns ; j++)
+            {
+                this._innerMatrix[i][j] *= x;
+            }
+        }
+    }
+    Matrix.prototype.scale = Matrix.prototype.multi;
+    Matrix.prototype.transpose = function ()
+    {
+        var innerMatrix = this._innerMatrix;
+        var rows = this.rows;
+        var columns = this.columns;
+        this._innerMatrix = [];
+        for (var i = 0; i < columns; i++)
+        {
+            this._innerMatrix[i] = [];
+            for (var j = 0; j < rows; j++)
+            {
+                this._innerMatrix[i][j] = innerMatrix[j][i];
+            }
+        }
+        this.columns = rows;
+        this.rows = columns;
+    }
+    Engine.Matrix = Matrix;
+    window.Matrix = Matrix;
+
+    //Output
+    function Output(node, w, h)
+    {
+        if (!(node instanceof Node))
+        {
+            throw new Error("Cannot create a output by this object.");
+        }
+
+        this.type = Output.OutputTypes.None;
+        this.getLayer = function (z) { };
+        this.setLayer = function (count) { };
+        this.camera = null;
+        var outputDom = null;
+        var graphics = null;
+        var width = 0;
+        var height = 0;
+        var renderWidth = 0;
+        var renderHeight = 0;
+        var seperateSize = false;
+        if (node.nodeName == "CANVAS")
+        {
+            outputDom = node;
+            this.type = Output.OutputTypes.None;
+            graphics = new Graphics(node);
+            this.getLayer = function (z)
+            {
+                return graphics;
+            }
+
+            if (!isNaN(w) && !isNaN(h))
+            {
+                width = w;
+                height = h;
+                renderWidth = w;
+                renderHeight = h;
+                applySize();
+                applyRenderSize();
+            }
+
+            Object.defineProperty(this, "width", {
+                get: function ()
+                {
+                    return width;
+                },
+                set: function (value)
+                {
+                    width = value;
+                    if (!seperateSize)
+                    {
+                        renderWidth = value;
+                        applyRenderSize();
+                    }
+                    applySize();
+                }
+            });
+            Object.defineProperty(this, "height", {
+                get: function ()
+                {
+                    return height;
+                },
+                set: function (value)
+                {
+                    height = value;
+                    if (!seperateSize)
+                    {
+                        renderHeight = value;
+                        applyRenderSize();
+                    }
+                    applySize();
+                }
+            });
+            Object.defineProperty(this, "renderWidth", {
+                get: function ()
+                {
+                    renderWidth = node.width;
+                    return node.width;
+                },
+                set: function (value)
+                {
+                    renderWidth = value;
+                    seperateSize = true;
+                    applyRenderSize();
+                }
+            });
+            Object.defineProperty(this, "renderHeight", {
+                get: function ()
+                {
+                    renderHeight = node.height;
+                    return node.height;
+                },
+                set: function (value)
+                {
+                    renderHeight = value;
+                    seperateSize = true;
+                    applyRenderSize();
+                }
+            });
+
+            function applySize()
+            {
+                node.style.width = width + "px";
+                node.style.height = height + "px";
+            }
+            function applyRenderSize()
+            {
+                node.width = renderWidth;
+                node.height = renderHeight;
+                
+            }
+        }
+        else
+        {
+            outputDom = node;
+            if (getComputedStyle(outputDom).position == "static")
+            {
+                outputDom.style.position = "relative";
+            }
+            this.type = Output.OutputTypes.MultiLayer;
+            graphics = ArrayList();
+            this.getLayer = function (z)
+            {
+                if (graphics.length <= 0)
+                    return null;
+                if (z >= graphics.length)
+                    z = graphics.length - 1;
+                if (z < 0)
+                    z = 0;
+                return graphics[z];
+            }
+            this.setLayer = function (count)
+            {
+                var d = count - graphics.length;
+                if (d < 0)
+                {
+                    for (; d < 0; d++)
+                    {
+                        var node = graphics[i].canvas;
+                        node.remove();
+                        graphics.removeAt(graphics.length - 1);
+                    }
+                }
+                else if (d > 0)
+                {
+                    for (; d > 0; d--)
+                    {
+                        var canvas = document.createElement("canvas");
+                        canvas.width = renderWidth;
+                        canvas.height = renderHeight;
+                        canvas.style.width = width + "px";
+                        canvas.style.height = height + "px";
+                        canvas.style.position = "absolute";
+                        canvas.style.left = "0px";
+                        canvas.style.top = "0px";
+                        outputDom.appendChild(canvas);
+                        var i = graphics.add(new Graphics(canvas));
+                        canvas.style.zIndex = i;
+                    }
+                }
+            }
+
+            Object.defineProperty(this, "width", {
+                get: function ()
+                {
+                    return width;
+                },
+                set: function (value)
+                {
+                    width = value;
+                    if (!seperateSize)
+                    {
+                        renderWidth = value;
+                        applyRenderSize();
+                    }
+                    applySize();
+                }
+            });
+            Object.defineProperty(this, "height", {
+                get: function ()
+                {
+                    return height;
+                },
+                set: function (value)
+                {
+                    height = value;
+                    if (!seperateSize)
+                    {
+                        renderHeight = value;
+                        applyRenderSize();
+                    }
+                    applySize();
+                }
+            });
+            Object.defineProperty(this, "renderWidth", {
+                get: function ()
+                {
+                    return renderWidth;
+                },
+                set: function (value)
+                {
+                    renderWidth = value;
+                    seperateSize = true;
+                    applyRenderSize();
+                }
+            });
+            Object.defineProperty(this, "renderHeight", {
+                get: function ()
+                {
+                    return renderHeight;
+                },
+                set: function (value)
+                {
+                    renderHeight = value;
+                    seperateSize = true;
+                    applyRenderSize();
+                }
+            });
+            function applySize()
+            {
+                for (var i = 0; i < graphics.length; i++)
+                {
+                    graphics[i].canvas.style.width = width + "px";
+                    graphics[i].canvas.style.height = height + "px";
+                }
+            }
+            function applyRenderSize()
+            {
+                for (var i = 0; i < graphics.length; i++)
+                {
+                    graphics[i].canvas.width = renderWidth;
+                    graphics[i].canvas.height = renderHeight;
+                }
+            }
+        }
+        this._sizeChangeCallback = null;
+        this._renderSizeChangeCallback = null;
+    }
+    Output.OutputTypes = { None: 0, Single: 1, MultiLayer: 2 };
+    Engine.Output = Output;
+    window.Output = Output;
+
 
     //Camera
     function Camera(x, y, w, h, z)
@@ -882,6 +1861,8 @@
         this.zoom = z;
         this.rotate = 0;
         this.graphics = null;
+        this.outputList = ArrayList();
+        this.scene = null;
     }
     Camera.prototype.copy = function ()
     {
@@ -931,11 +1912,11 @@
         if (!this.graphics || !this.graphics.ctx)
             return;
     }
-    Camera.prototype.resetTransform = function ()
+    Camera.prototype.resetTransform = function (graphics)
     {
         //alert(this.graphics);
-        this.graphics.ky = 1;
-        this.graphics.setTransform(1, 0, 0, 1, 0, 0);
+        graphics.ky = 1;
+        graphics.setTransform(1, 0, 0, 1, 0, 0);
     }
     Camera.prototype.clear = function (bgColor)
     {
@@ -949,30 +1930,75 @@
         this.graphics.ctx.fillRect(0, 0, this.graphics.canvas.width, this.graphics.canvas.height);
         this.applyTransform();
     }
-    Camera.prototype.applyTransform = function ()
+    Camera.prototype.applyTransform = function (graphics)
     {
-        if (!this.graphics || !this.graphics.ctx)
+        if (!graphics || !graphics.ctx)
             return;
         var sinA = Math.sin(this.rotate);
         var cosA = Math.cos(this.rotate);
-        var rw = this.graphics.width;//real width
-        var rh = this.graphics.height;//real height
-        this.width = this.graphics.canvas.width / this.zoom;
-        this.height = this.graphics.canvas.height / this.zoom;
+        var rw = graphics.width;//real width
+        var rh = graphics.height;//real height
+        this.width = graphics.canvas.width / this.zoom;
+        this.height = graphics.canvas.height / this.zoom;
         //move to center
-        this.graphics.setTransform(1, 0, 0, 1, rw / 2, rh / 2);
+        graphics.setTransform(1, 0, 0, 1, rw / 2, rh / 2);
         //apply rotation
-        this.graphics.transform(cosA, sinA, -sinA, cosA, 0, 0);
+        graphics.transform(cosA, sinA, -sinA, cosA, 0, 0);
         //apply zoom
-        this.graphics.transform(this.zoom, 0, 0, this.zoom, 0, 0);
+        graphics.transform(this.zoom, 0, 0, this.zoom, 0, 0);
         //move camera center
-        this.graphics.transform(1, 0, 0, 1, -this.position.x, this.position.y);
+        graphics.transform(1, 0, 0, 1, -this.position.x, this.position.y);
 
-        this.graphics.ky = -1;
+        graphics.ky = -1;
     }
     Camera.prototype.map = function (x, y)
     {
         return new Point((x / this.zoom) + (this.center.x - this.width / 2), (this.height - y / this.zoom) + (this.center.y - this.height / 2));
+    }
+    Camera.prototype.addOutput = function (output)
+    {
+        if (!(output instanceof Output))
+        {
+            throw new Error("Invalid Output.");
+        }
+        if (output.camera)
+        {
+            throw new Error("This output has linked to another camera.");
+        }
+        output.camera = this;
+        this.outputList.add(output);
+    }
+    Camera.prototype.removeOutput = function (output)
+    {
+        var index = this.outputList.indexOf(output);
+        if (index < 1)
+        {
+            throw new Error("Not found.");
+        }
+        this.outputList.removeAt(index);
+        output.camera = null;
+    }
+    Camera.prototype.render = function (dt)
+    {
+        if(!this.scene)
+        {
+            throw new Error("Camera not in scene.");
+        }
+        for (var i = 0; i < this.scene.layers.depthList.length; i++)
+        {
+            var layer = this.scene.layers[this.scene.layers.depthList[i]];
+            for (var j = 0; j < this.outputList.length; j++)
+            {
+                var graphics = this.outputList[i].getLayer(i);
+                this.resetTransform(graphics);
+                this.applyTransform(graphics);
+                layer.render(graphics, dt);
+            }
+        }
+    }
+    Camera.prototype.renderTo = function (output, dt)
+    {
+
     }
     Engine.Camera = Camera;
     window.Camera = Camera;
@@ -992,7 +2018,10 @@
         this.o = new Point(0, 0);
         this.zoom = 0;
         this.rotation = 0;
-        this.kx = 1, ky = 1, kw = 1, kh = 1;
+        this.kx = 1;
+        this.ky = 1;
+        this.kw = 1;
+        this.kh = 1;
         this.fillStyle = "#000000";
         this.strokeStyle = "#000000";
         this.shadowColor = "#000000";
@@ -2365,581 +3394,8 @@
         return parseInt(x);
     }
 
-    //Font
-    function Font(fontFamily, fontSize)
-    {
-        fontFamily = fontFamily ? fontFamily : "sans-serif";
-        fontSize = fontSize || fontSize == 0 ? fontSize : "10px";
-        this.fontFamily = fontFamily;
-        this.fontSize = fontSize;
-        this.fontStyle = FontStyle.Normal;
-        this.fontVariant = FontVariant.Normal;
-        this.fontWeight = FontWeight.Normal;
-        this.caption = "";
-        this.icon = "";
-        this.menu = "";
-        this.messageBox = "";
-        this.smallCaption = "";
-        this.statusBar = "";
-    }
-    Font.prototype.copy = function ()
-    {
-        var f = new Font(this.fontFamily, this.fontSize);
-        f.fontStyle = this.fontStyle;
-        f.fontVariant = this.fontVariant;
-        f.fontWeight = this.fontWeight;
-        f.caption = this.caption;
-        f.icon = this.icon;
-        f.menu = this.menu;
-        f.messageBox = this.messageBox;
-        f.smallCaption = this.smallCaption;
-        f.statusBar = this.statusBar;
-        return f;
-    }
-    Font.prototype.toString = function ()
-    {
-        return this.fontStyle + " " + this.fontVariant + " " + this.fontWeight + " " + this.fontSize + "px " + this.fontFamily;
-    }
-    window.Font = Font;
-    function FontStyle() { }
-    FontStyle.Normal = "normal";
-    FontStyle.Italic = "italic";
-    FontStyle.Oblique = "oblique";
-    window.FontStyle = FontStyle;
-    function FontVariant() { }
-    FontVariant.Normal = "normal";
-    FontVariant.SmallCaps = "small-caps";
-    window.FontVariant = FontVariant;
-    function FontWeight() { }
-    FontWeight.Normal = "normal";
-    FontWeight.Bold = "bold";
-    FontWeight.Bolder = "bolder";
-    FontWeight.Lighter = "lighter";
-    window.FontWeight = FontWeight;
-    function TextAlign() { }
-    TextAlign.Start = "start";
-    TextAlign.End = "end";
-    TextAlign.Center = "center";
-    TextAlign.Left = "left";
-    TextAlign.Right = "right";
-    window.TextAlign = TextAlign;
-    function TextBaseline() { }
-    TextBaseline.Alphabetic = "alphabetic";
-    TextBaseline.Top = "top";
-    TextBaseline.Hanging = "hanging";
-    TextBaseline.Middle = "middle";
-    TextBaseline.Ideographic = "ideographic";
-    TextBaseline.Bottom = "bottom";
-    window.TextBaseline = TextBaseline;
-
-    //Text
-    function Text(text)
-    {
-        this.text = text;
-        this.font = new Font("sans-serif", 16);
-        this.position = new Point(0, 0);
-        this.center = new Point(0, 0);
-        this.fillStyle = new Color(0, 0, 0, 1);
-        this.strokeStyle = new Color(255, 255, 255, 0);
-        this.onRender = null;
-    }
-    Text.prototype.copy = function ()
-    {
-        var text = new Text(this.text);
-        text.font = this.font.copy();
-        text.position = this.position.copy();
-        text.center = this.center.copy();
-        text.onRender = this.onRender;
-        if (this.fillStyle && this.fillStyle.copy)
-            text.fillStyle = this.fillStyle.copy();
-        else
-            text.fillStyle = this.fillStyle;
-        if (this.strokeStyle && this.strokeStyle.copy)
-            text.strokeStyle = this.strokeStyle.copy();
-        else
-            text.strokeStyle = this.strokeStyle;
-        return text;
-    }
-    Text.prototype.setCenter = function (x, y, align)
-    {
-        this.position = new Point(x, y);
-        if (!align)
-            throw new Error("未指定对齐方式");
-        this.center = align(this.width, this.height);
-        this.center.x = x - this.center.x;
-        this.center.y = y + this.center.y;
-    }
-    Text.prototype.moveTo = function (x, y)
-    {
-        var rx = this.position.x;
-        var ry = this.position.y;
-        this.position.x = x;
-        this.position.y = y;
-        this.center.x = this.center.x - rx + x;
-        this.center.y = this.center.y - ry + y;
-    }
-    Text.prototype.drawToCanvas = function (canvas, x, y, r, dt)
-    {
-        var ctx = canvas.getContext("2d");
-        ctx.font = this.fontStyle + " "
-                 + this.fontVariant + " "
-                 + this.fontWeight + " "
-                 + this.fontSize + "px "
-                 + this.fontFamily;
-        ctx.fillStyle = this.fillStyle;
-        ctx.strokeStyle = this.strokeStyle;
-        ctx.fillText(this.text, x, y);
-        ctx.strokeText(this.text, x, y);
-    }
-    Text.prototype.render = function (graphics, x, y, r, dt)
-    {
-        if (!graphics || !graphics.ctx)
-            return;
-        if (this.onRender)
-            this.onRender();
-
-        graphics.textAlign = TextAlign.Left;
-        graphics.textBaseline = TextBaseline.Top;
-        graphics.font = this.font;
-        graphics.fillStyle = this.fillStyle;
-        graphics.strokeStyle = this.strokeStyle;
-        graphics.fillText(this.text, this.center.x, this.center.y);
-        graphics.strokeText(this.text, this.center.x, this.center.y);
-    }
-    Engine.Text = Text;
-    window.Text = Text;
-
-    //Image
-    function Image(img)
-    {
-        if (!img)
-            img = new window.Image();
-        this.img = img;
-        this.position = new Point(0, 0);
-        this.o = new Point(0, 0);
-        this.onRender = null;
-
-        var obj = this;
-        Object.defineProperty(this, "width", {
-            get: function ()
-            {
-                return obj.img.width;
-            },
-            set: function (value)
-            {
-                obj.img.width = value;
-            }
-        });
-        Object.defineProperty(this, "height", {
-            get: function ()
-            {
-                return obj.img.height;
-            },
-            set: function (value)
-            {
-                obj.img.height = value;
-            }
-        });
-    }
-    Image.prototype.copy = function ()
-    {
-        var img = new engine.Image(img);
-        img.position = this.position.copy();
-        img.o = this.o.copy();
-        img.onRender = this.onRender;
-    }
-    Image.prototype.setCenter = function (x, y, align)
-    {
-        this.position = new Point(x, y);
-        if (!align)
-            throw new Error("未指定对齐方式");
-        this.o = align(this.width, this.height);
-        this.o.x = x - this.o.x;
-        this.o.y = y + this.o.y;
-    }
-    Image.prototype.moveTo = function (x, y)
-    {
-        var rx = this.position.x;
-        var ry = this.position.y;
-        this.position.x = x;
-        this.position.y = y;
-        this.o.x = this.o.x - rx + x;
-        this.o.y = this.o.y - ry + y;
-    }
-    Image.prototype.loadFromUrl = function (url, width, height, callback)
-    {
-        this.img = new window.Image();
-        var me = this;
-        this.img.onload = function (e)
-        {
-            me.width = me.img.naturalWidth;
-            me.height = me.img.naturalHeight;
-            if (!width)
-                return;
-            if (!height)
-            {
-                width();
-                return;
-            }
-            if (!callback)
-            {
-                me.img.width = width;
-                me.img.height = height;
-                return;
-            }
-            if (callback)
-                callback();
-        }
-        this.img.src = url;
-        if (this.img.complete)
-        {
-            return;
-        }
-    }
-    Image.prototype.render = function (graphics, x, y, r, dt)
-    {
-        if (!graphics)
-            return;
-        if (this.onRender)
-            this.onRender();
-        graphics.drawImage(this.img, this.o.x, this.o.y, this.width, this.height);
-    }
-    Engine.Image = Image;
-
-    //Path
-    function Path()
-    {
-        this.pList = (function ()
-        {
-            var list = [];
-            list.add = function (p)
-            {
-                list[list.length] = p;
-            }
-            list.remove = function (index)
-            {
-                for (var i = index + 1; i < list.length; i++)
-                {
-                    list[i - 1] = list[i];
-                }
-                list.pop();
-            }
-            list.clear = function ()
-            {
-                while (list.length)
-                {
-                    list.pop();
-                }
-            }
-            list.last = function ()
-            {
-                return list[list.length - 1];
-            }
-            return list;
-        })();
-        this.position = new Point(0, 0);
-        this.center = this.position;
-        this.strokeStyle = new Color(0, 0, 0, 1);
-        this.fillStyle = new Color(255, 255, 255, 1);
-        this.strokeWidth = 1;
-    }
-    Path.Point = function (x, y)
-    {
-        this.x = x;
-        this.y = y;
-        this.cp1 = new Point(x, y);
-        this.cp2 = new Point(x, y);
-    }
-    Path.Point.prototype.copy = function ()
-    {
-        var p = new Point(this.x, this.y);
-        p.cp1 = this.cp1.copy();
-        p.cp2 = this.cp2.copy();
-        return p;
-    }
-    Path.Point.prototype.moveTo = function (x, y)
-    {
-        var dx = x - this.x;
-        var dy = y - this.y;
-        this.cp1.x += dx;
-        this.cp1.y += dy;
-        this.cp2.x += dx;
-        this.cp2.y += dy;
-        this.x = x;
-        this.y = y;
-    }
-    Path.prototype.copy = function ()
-    {
-        var path = new Path();
-        for (var i = 0; i < this.pList.length; i++)
-        {
-            path.pList[i] = this.pList[i].copy();
-        }
-        return path;
-    }
-    Path.prototype.setCenter = function (x, y)
-    {
-        if (!isNaN(x) && !isNaN(y))
-        {
-            this.position.x = x;
-            this.position.y = y;
-            this.center = this.position;
-        }
-    }
-    Path.prototype.moveTo = function (x, y)
-    {
-        var dx = x - this.position.x;
-        var dy = y - this.position.y;
-        for (var i = 0; i < this.pList.length; i++)
-        {
-            this.pList[i].moveTo(this.pList[i].x + dx, this.pList[i].y + dy);
-        }
-        this.position.x = x;
-        this.position.y = y;
-    }
-    Path.prototype.close = function ()
-    {
-        if (this.pList.length)
-            this.pList.add(this.pList[0]);
-    }
-    Path.prototype.render = function (graphics, x, y, r, dt)
-    {
-        graphics.beginPath();
-        for (var i = 0; i < this.pList.length - 1; i++)
-        {
-            var p1 = this.pList[i];
-            var p2 = this.pList[i + 1];
-            graphics.lineTo(p1.x, p1.y);
-            graphics.bezierCurveTo(p1.cp2.x, p1.cp2.y, p2.cp1.x, p2.cp1.y, p2.x, p2.y);
-        }
-        if (this.pList.last() == this.pList[0])
-            graphics.closePath();
-        graphics.fillStyle = this.fillStyle.toString();
-        graphics.strokeStyle = this.strokeStyle.toString();
-        graphics.lineWidth = this.strokeWidth;
-        graphics.fill();
-        graphics.stroke();
-    }
-    Engine.Path = Path;
-    window.Path = Path;
-
-    //ImageAnimation
-    function ImageAnimation()
-    {
-        this.center = new Point(0, 0);
-        this.position = this.center.copy();
-        this.fCount = 0;
-        this.fps = 0;
-        this.clipX = 0;
-        this.clipY = 0;
-        this.fWidth = 0;
-        this.fHeight = 0;
-        this.time = 0;
-        this.img = null;
-        this.frame = 0;
-        this.playing = true;
-        this.reverse = false;
-        this.width = 0;
-        this.heigh = 0;
-        this.onBegine = null;
-        this.onEnd = null;
-        this.onFrameUpdate = null;
-        this.loop = new ImageAnimation.Loop();
-    }
-    //---ImagImageAnimation.Loop
-    ImageAnimation.Loop = function ()
-    {
-        this.from = 0;
-        this.to = 0;
-        this.length = 0;
-        this.loopTimes = -1;
-        this.lt = 0;
-        this.enable = true;
-        this.onEnd = null;
-        this.onStart = null;
-    }
-    ImageAnimation.Loop.prototype.copy = function ()
-    {
-        var loop = new ImageAnimation.Loop();
-        loop.from = this.from;
-        loop.to = this.to;
-        loop.length = this.length;
-        loop.loopTimes = this.loopTimes;
-        loop.lt = this.lt;
-        loop.enable = this.enable;
-        loop.onEnd = this.onEnd;
-        loop.onStart = this.onStart;
-        return loop;
-    }
-    ImageAnimation.Loop.prototype.begin = function ()
-    {
-        this.enable = true;
-        if (this.onStart)
-            this.onStart();
-    }
-    ImageAnimation.Loop.prototype.end = function ()
-    {
-        var t = this.enable;
-        this.enable = false;
-        if (t && this.onEnd)
-            this.onEnd();
-    }
-    ImageAnimation.loadFromUrl = function (url, clipX, clipY, fWidth, fHeight, width, height, fCount, fps, callback)
-    {
-        var ia = new ImageAnimation;
-        ia.img = new Image();
-        ia.img.onload = function (e)
-        {
-            ia.fps = fps;
-            ia.width = width;
-            ia.heigh = height;
-            ia.clipFrame(clipX, clipY, fWidth, fHeight, fCount);
-            if (callback)
-                callback();
-        }
-        ia.img.src = url;
-        return ia;
-    }
-    ImageAnimation.create = function (width, height, fCount, fps)
-    {
-    }
-    ImageAnimation.prototype.copy = function ()
-    {
-        var ia = new ImageAnimation;
-        ia.img = this.img;
-        ia.center = this.center.copy();
-        ia.position = this.position.copy();
-        ia.fCount = this.fCount;
-        ia.fps = this.fps;
-        ia.clipX = this.clipX;
-        ia.clipY = this.clipY;
-        ia.fWidth = this.fWidth;
-        ia.fHeight = this.fHeight;
-        ia.time = this.time;
-        ia.width = this.width;
-        ia.heigh = this.heigh;
-        ia.frame = this.frame;
-        ia.playing = this.playing;
-        ia.reverse = this.reverse;
-        ia.onBegine = this.onBegine;
-        ia.onEnd = this.onEnd;
-        ia.onFrameUpdate = this.onFrameUpdate;
-        ia.loop = this.loop.copy();
-        return ia;
-    }
-    ImageAnimation.prototype.setCenter = function (x, y, align)
-    {
-        this.position = new Point(x, y);
-        if (!align)
-            throw new Error("未指定对齐方式");
-        this.center = align(this.width, this.heigh);
-        this.center.x = x - this.center.x;
-        this.center.y = y + this.center.y;
-    }
-    ImageAnimation.prototype.moveTo = function (x, y)
-    {
-        var rx = this.position.x;
-        var ry = this.position.y;
-        this.position.x = x;
-        this.position.y = y;
-        this.center.x = this.center.x - rx + x;
-        this.center.y = this.center.y - ry + y;
-    }
-    ImageAnimation.prototype.clipFrame = function (clipX, clipY, fWidth, fHeight, fCount)
-    {
-        this.clipX = clipX;
-        this.clipY = clipY;
-        this.fWidth = fWidth;
-        this.fHeight = fHeight;
-        this.fCount = fCount;
-        this.loop.from = 0;
-        this.loop.to = fCount - 1;
-    }
-    ImageAnimation.prototype.begine = function ()
-    {
-        this.playing = true;
-        this.time = 0;
-        this.frame = 0;
-        this.loop.lt = 0;
-    }
-    ImageAnimation.prototype.end = function ()
-    {
-        var t = this.playing;
-        this.playing = false;
-        if (this.onEnd && t)
-        {
-            this.onEnd();
-        }
-    }
-    ImageAnimation.prototype.play = function ()
-    {
-        this.playing = true;
-        this.time = 0;
-    }
-    ImageAnimation.prototype.drawToCanvas = function (canvas, x, y, r, dt)
-    {
-
-    }
-    ImageAnimation.prototype.preload = function (graphics)
-    {
-        graphics.drawImage(this.img, 0, 0, this.fWidth, this.fHeight, 0, 0, this.width, this.heigh);
-        graphics.clearRect(0, 0, this.width, this.height);
-    }
-    ImageAnimation.prototype.render = function (graphics, x, y, r, dt)
-    {
-        if (this.time == 0 && this.onBegine)
-            this.onBegine();
-        this.time += dt;
-        var f = Math.floor(this.time / (1 / this.fps));
-        if (this.reverse)
-            f = this.fCount - f;
-        if (this.loop.enable)
-        {
-            if (f > this.loop.to)
-            {
-                this.loop.lt++;
-                if (this.loop.loopTimes > 0 && this.loop.lt >= this.loop.loopTimes)
-                {
-                    this.loop.enable = false;
-                    f = f % this.fCount;
-                }
-                else
-                {
-                    f -= this.loop.from;
-                    f %= (this.loop.to - this.loop.from);
-                    if (!f)
-                        f = 0;
-                    f = this.loop.from + f;
-                }
-            }
-        }
-        else if (this.playing)
-        {
-            if (f >= this.fCount && !this.reverse)
-            {
-                this.frame = f = this.fCount - 1;
-                this.end();
-            }
-            if (f <= 0 && this.reverse)
-            {
-                this.frame = f = 0;
-                this.end();
-            }
-            //f = f % this.fCount;
-        }
-        if (this.playing)
-        {
-            var F = f;
-            if (this.frame != f && this.onFrameUpdate)
-                F = this.onFrameUpdate(f);
-            if (!isNaN(F))
-                f = F;
-            this.frame = f;
-        }
-        graphics.drawImage(this.img, this.clipX + (this.fWidth * this.frame), this.clipY, this.fWidth, this.fHeight, this.center.x, this.center.y, this.width, this.heigh);
-    }
-    Engine.ImageAnimation = ImageAnimation;
-    window.ImageAnimation = ImageAnimation;
+    //-------------------------Objects
+    //--------------------------------
 
     return Engine;
 })(window.SarEngine);

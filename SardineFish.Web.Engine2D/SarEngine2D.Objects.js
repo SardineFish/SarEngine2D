@@ -1,8 +1,71 @@
-﻿(function (engine)
+﻿(function (Engine)
 {
-    if (!engine)
+    if (!Engine)
     {
         throw new Error("Engine not found.");
+    }
+
+    //ArrayList
+    function ArrayList()
+    {
+        var list = [];
+        list.add = function (obj)
+        {
+            list[list.length] = obj;
+            return list.length - 1;
+        }
+        list.insert = function (obj, index)
+        {
+            if (isNaN(index) || index < 0)
+            {
+                throw new Error("Invalid index.");
+            }
+            for (var i = this.length - 1; i >= index; i--)
+            {
+                this[i + 1] = this[i];
+            }
+            this[index] = obj;
+        }
+        list.removeAt = function (index)
+        {
+            if (isNaN(index) || index < 0 || index >= list.length)
+            {
+                throw new Error("Invalid index.");
+            }
+            for (var i = index; i < list.length - 1; i++)
+            {
+                list[i] = list[i + 1];
+            }
+            list.length -= 1;
+        }
+        list.remove = function (obj)
+        {
+            for (var i = 0; i < list.length; i++)
+            {
+                if (list[i] == obj)
+                {
+                    for (; i < list.length + 1; i++)
+                    {
+                        list[i] = list[i + 1];
+                    }
+                    list[i].length -= 1;
+                    return;
+                }
+            }
+            throw new Error("Object not found.");
+        }
+        list.addRange = function (arr, startIndex, count)
+        {
+            if (!startIndex || isNaN(startIndex))
+                startIndex = 0;
+            if (!count || isNaN(count))
+                count = arr.length;
+            for (var i = startIndex; i < count; i++)
+            {
+                list[list.length] = arr[i];
+            }
+        }
+        return list;
     }
 
     //-------Vector2
@@ -10,7 +73,7 @@
     {
         this.x = x;
         this.y = y;
-
+        this.coordinate = Coordinate.Default;
     }
     Vector2.fromPoint = function (p1, p2)
     {
@@ -18,11 +81,24 @@
     }
     Vector2.prototype.copy = function ()
     {
-        return new Vector2(this.x, this.y);
+        var v = new Vector2(this.x, this.y);
+        v.coordinate = this.coordinate;
+        return v;
     }
     Vector2.prototype.toString = function ()
     {
         return "(" + this.x + "," + this.y + ")";
+    }
+    Vector2.prototype.setCoordinate = function (coordinate)
+    {
+        this.coordinate = coordinate;
+    }
+    Vector2.prototype.changeCoordinate = function (coordinate)
+    {
+        var v = this.coordinate.vectorMapTo(coordinate);
+        this.x = v.x;
+        this.y = v.y;
+        this.coordinate = coordinate;
     }
     Vector2.prototype.getLength = function ()
     {
@@ -99,7 +175,7 @@
             return (new Vector2(u.x * v, u.y * v));
         }
     }
-    engine.Vector2 = Vector2;
+    Engine.Vector2 = Vector2;
     window.Vector2 = Vector2;
 
     //-------Point
@@ -109,6 +185,7 @@
             throw "x and y must be numbers.";
         this.x = x;
         this.y = y;
+        this.coordinate = Coordinate.Default;
     }
     Point.Distance = function (p1, p2)
     {
@@ -116,13 +193,26 @@
     }
     Point.prototype.copy = function ()
     {
-        return new Point(this.x, this.y);
+        var p = new Point(this.x, this.y);
+        p.coordinate = this.coordinate;
+        return p;
     }
     Point.prototype.toString = function ()
     {
         return "(" + this.x + "," + this.y + ")";
     }
-    Point.prototype.rotate = function (o, rad)
+    Point.prototype.setCoordinate = function (coordinate)
+    {
+        this.coordinate = coordinate;
+    }
+    Point.prototype.changeCoordinate = function (coordinate)
+    {
+        var p = this.coordinate.pointMapTo(coordinate);
+        this.x = p.x;
+        this.y = p.y;
+        this.coordinate = coordinate;
+    }
+    Point.prototype.rotate = function (rad, o)
     {
         //alert(this+"->"+rad);
         var x = this.x - o.x;
@@ -154,7 +244,7 @@
     {
 
     }
-    engine.Point = Point;
+    Engine.Point = Point;
     window.Point = Point;
 
     //-------Line
@@ -180,6 +270,7 @@
         this.p2 = p2;
         this.center = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
         this.position = this.center;
+        this.coordinate = Coordinate.Default;
         this.strokeStyle = new Color(0, 0, 0, 1.00);
     }
     Line.prototype.copy = function ()
@@ -189,11 +280,28 @@
         var line = new Line(p1, p2);
         line.setCenter(this.center.x, this.center.y);
         line.position = this.position.copy();
+        line.coordinate = this.coordinate;
         if (this.strokeStyle.copy)
             line.strokeStyle = this.strokeStyle.copy();
         else
             line.strokeStyle = this.strokeStyle;
         return line;
+    }
+    Line.prototype.setCoordinate = function (coordinate)
+    {
+        this.coordinate = coordinate;
+        this.position.setCoordinate(coordinate);
+        this.center.setCoordinate(coordinate);
+        this.p1.setCoordinate(coordinate);
+        this.p2.setCoordinate(coordinate);
+    }
+    Line.prototype.changeCoordinate = function (coordinate)
+    {
+        this.p1.changeCoordinate(coordinate);
+        this.p2.changeCoordinate(coordinate);
+        this.center.changeCoordinate(coordinate);
+        this.position.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
     }
     Line.prototype.setCenter = function (x, y)
     {
@@ -211,7 +319,7 @@
         this.center.x = x;
         this.center.y = y;
     }
-    Line.prototype.rotate = function (o, rad)
+    Line.prototype.rotate = function (rad, o)
     {
         this.p1.rotate(o, rad);
         this.p2.rotate(o, rad);
@@ -268,9 +376,11 @@
     }
     Line.prototype.render = function (graphics, x, y, r, dt)
     {
+        var p1 = this.p1.coordinate.pFrom(this.p1.x, this.p1.y);
+        var p2 = this.p2.coordinate.pFrom(this.p2.x, this.p2.y);
         graphics.beginPath();
-        graphics.moveTo(this.p1.x, this.p1.y);
-        graphics.lineTo(this.p2.x, this.p2.y);
+        graphics.moveTo(p1.x, p1.y);
+        graphics.lineTo(p2.x, p2.y);
         graphics.strokeStyle = this.strokeStyle;
         graphics.stroke();
     }
@@ -280,12 +390,14 @@
         obj.graphic = this;
         return obj;
     }
-    engine.Line = Line;
+    Engine.Line = Line;
     window.Line = Line;
 
-    function Arc(o, r, startAng, endAng, antiCW)
+    function Arc(r, startAng, endAng, antiCW)
     {
-        this.o = o;
+        this.o = new Point(0, 0);
+        this.position = new Point(0, 0);
+        this.coordinate = Coordinate.Default;
         this.r = r;
         this.start = startAng;
         this.end = endAng;
@@ -297,13 +409,28 @@
     }
     Arc.prototype.copy = function ()
     {
-        var arc = new Arc(this.o.copy(), this.r, this.start, this.end, this.antiCW);
+        var arc = new Arc(this.r, this.start, this.end, this.antiCW);
+        arc.o = this.o.copy();
+        arc.position = this.position.copy();
+        arc.coordinate = this.coordinate;
         arc.strokeStyle = this.strokeStyle.copy ? this.strokeStyle.copy() : this.strokeStyle;
         arc.fillStyle = this.fillStyle.copy ? this.fillStyle.copy() : this.fillStyle;
         arc.strokeWidth = this.strokeWidth;
         return arc;
     }
-    Arc.prototype.rotate = function (o, ang)
+    Arc.prototype.setCoordinate = function (coordinate)
+    {
+        this.o.setCoordinate(coordinate);
+        this.position.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Arc.prototype.changeCoordinate = function (coordinate)
+    {
+        this.o.changeCoordinate(coordinate);
+        this.position.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Arc.prototype.rotate = function (ang, o)
     {
         this.o.rotate(o, ang);
         this.start += ang;
@@ -311,8 +438,9 @@
     }
     Arc.prototype.render = function (graphics, x, y, r, dt)
     {
+        var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
         graphics.beginPath();
-        graphics.arc(this.o.x, this.o.y, this.r, this.start, this.end, this.antiCW);
+        graphics.arc(o.x, o.y, this.r, this.start, this.end, this.antiCW);
         graphics.lineCap = this.lineCap;
         graphics.strokeWidth = this.strokeWidth;
         graphics.strokeStyle = this.strokeStyle;
@@ -320,8 +448,783 @@
         graphics.fill();
         graphics.stroke();
     }
-    engine.Arc = Arc;
+    Engine.Arc = Arc;
     window.Arc = Arc;
+
+    //Font
+    function Font(fontFamily, fontSize)
+    {
+        fontFamily = fontFamily ? fontFamily : "sans-serif";
+        fontSize = fontSize || fontSize == 0 ? fontSize : "10px";
+        this.fontFamily = fontFamily;
+        this.fontSize = fontSize;
+        this.fontStyle = FontStyle.Normal;
+        this.fontVariant = FontVariant.Normal;
+        this.fontWeight = FontWeight.Normal;
+        this.caption = "";
+        this.icon = "";
+        this.menu = "";
+        this.messageBox = "";
+        this.smallCaption = "";
+        this.statusBar = "";
+    }
+    Font.prototype.copy = function ()
+    {
+        var f = new Font(this.fontFamily, this.fontSize);
+        f.fontStyle = this.fontStyle;
+        f.fontVariant = this.fontVariant;
+        f.fontWeight = this.fontWeight;
+        f.caption = this.caption;
+        f.icon = this.icon;
+        f.menu = this.menu;
+        f.messageBox = this.messageBox;
+        f.smallCaption = this.smallCaption;
+        f.statusBar = this.statusBar;
+        return f;
+    }
+    Font.prototype.toString = function ()
+    {
+        return this.fontStyle + " " + this.fontVariant + " " + this.fontWeight + " " + this.fontSize + "px " + this.fontFamily;
+    }
+    window.Font = Font;
+    function FontStyle() { }
+    FontStyle.Normal = "normal";
+    FontStyle.Italic = "italic";
+    FontStyle.Oblique = "oblique";
+    window.FontStyle = FontStyle;
+    function FontVariant() { }
+    FontVariant.Normal = "normal";
+    FontVariant.SmallCaps = "small-caps";
+    window.FontVariant = FontVariant;
+    function FontWeight() { }
+    FontWeight.Normal = "normal";
+    FontWeight.Bold = "bold";
+    FontWeight.Bolder = "bolder";
+    FontWeight.Lighter = "lighter";
+    window.FontWeight = FontWeight;
+    function TextAlign() { }
+    TextAlign.Start = "start";
+    TextAlign.End = "end";
+    TextAlign.Center = "center";
+    TextAlign.Left = "left";
+    TextAlign.Right = "right";
+    window.TextAlign = TextAlign;
+    function TextBaseline() { }
+    TextBaseline.Alphabetic = "alphabetic";
+    TextBaseline.Top = "top";
+    TextBaseline.Hanging = "hanging";
+    TextBaseline.Middle = "middle";
+    TextBaseline.Ideographic = "ideographic";
+    TextBaseline.Bottom = "bottom";
+    window.TextBaseline = TextBaseline;
+
+    //Text
+    function Text(text)
+    {
+        this.text = text;
+        this.font = new Font("sans-serif", 16);
+        this.position = new Point(0, 0);
+        this.coordinate = Coordinate.Default;
+        this.center = new Point(0, 0);
+        this.fillStyle = new Color(0, 0, 0, 1);
+        this.strokeStyle = new Color(255, 255, 255, 0);
+        this.onRender = null;
+    }
+    Text.prototype.copy = function ()
+    {
+        var text = new Text(this.text);
+        text.font = this.font.copy();
+        text.position = this.position.copy();
+        text.coordinate = this.coordinate;
+        text.center = this.center.copy();
+        text.onRender = this.onRender;
+        if (this.fillStyle && this.fillStyle.copy)
+            text.fillStyle = this.fillStyle.copy();
+        else
+            text.fillStyle = this.fillStyle;
+        if (this.strokeStyle && this.strokeStyle.copy)
+            text.strokeStyle = this.strokeStyle.copy();
+        else
+            text.strokeStyle = this.strokeStyle;
+        return text;
+    }
+    Text.prototype.setCoordinate = function (coordinate)
+    {
+        this.position.setCoordinate(coordinate);
+        this.center.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Text.prototype.changeCoordinate = function (coordinate)
+    {
+        this.position.changeCoordinate(coordinate);
+        this.center.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Text.prototype.setCenter = function (x, y, align)
+    {
+        this.position = new Point(x, y);
+        if (!align)
+            throw new Error("未指定对齐方式");
+        this.center = align(this.width, this.height);
+        this.center.x = x - this.center.x;
+        this.center.y = y + this.center.y;
+    }
+    Text.prototype.moveTo = function (x, y)
+    {
+        var rx = this.position.x;
+        var ry = this.position.y;
+        this.position.x = x;
+        this.position.y = y;
+        this.center.x = this.center.x - rx + x;
+        this.center.y = this.center.y - ry + y;
+    }
+    Text.prototype.drawToCanvas = function (canvas, x, y, r, dt)
+    {
+        var ctx = canvas.getContext("2d");
+        ctx.font = this.fontStyle + " "
+                 + this.fontVariant + " "
+                 + this.fontWeight + " "
+                 + this.fontSize + "px "
+                 + this.fontFamily;
+        ctx.fillStyle = this.fillStyle;
+        ctx.strokeStyle = this.strokeStyle;
+        ctx.fillText(this.text, x, y);
+        ctx.strokeText(this.text, x, y);
+    }
+    Text.prototype.render = function (graphics, x, y, r, dt)
+    {
+        if (!graphics || !graphics.ctx)
+            return;
+        if (this.onRender)
+            this.onRender();
+        var center = this.center.coordinate.pFrom(this.center.x, this.center.y);
+        graphics.textAlign = TextAlign.Left;
+        graphics.textBaseline = TextBaseline.Top;
+        graphics.font = this.font;
+        graphics.fillStyle = this.fillStyle;
+        graphics.strokeStyle = this.strokeStyle;
+        graphics.fillText(this.text, center.x, center.y);
+        graphics.strokeText(this.text, center.x, center.y);
+    }
+    Engine.Text = Text;
+    window.Text = Text;
+
+    //Image
+    function Image(img)
+    {
+        if (!img)
+            img = new window.Image();
+        this.img = img;
+        this.position = new Point(0, 0);
+        this.coordinate = Coordinate.Default;
+        this.o = new Point(0, 0);
+        this.onRender = null;
+
+        var obj = this;
+        Object.defineProperty(this, "width", {
+            get: function ()
+            {
+                return obj.img.width;
+            },
+            set: function (value)
+            {
+                obj.img.width = value;
+            }
+        });
+        Object.defineProperty(this, "height", {
+            get: function ()
+            {
+                return obj.img.height;
+            },
+            set: function (value)
+            {
+                obj.img.height = value;
+            }
+        });
+    }
+    Image.prototype.copy = function ()
+    {
+        var img = new Engine.Image(img);
+        img.position = this.position.copy();
+        img.coordinate = this.coordinate;
+        img.o = this.o.copy();
+        img.onRender = this.onRender;
+    }
+    Image.prototype.setCoordinate = function (coordinate)
+    {
+        this.o.setCoordinate(coordinate);
+        this.position.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Image.prototype.changeCoordinate = function (coordinate)
+    {
+        this.o.changeCoordinate(coordinate);
+        this.position.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Image.prototype.setCenter = function (x, y, align)
+    {
+        this.position = new Point(x, y);
+        if (!align)
+            throw new Error("未指定对齐方式");
+        this.o = align(this.width, this.height);
+        this.o.x = x - this.o.x;
+        this.o.y = y + this.o.y;
+    }
+    Image.prototype.moveTo = function (x, y)
+    {
+        var rx = this.position.x;
+        var ry = this.position.y;
+        this.position.x = x;
+        this.position.y = y;
+        this.o.x = this.o.x - rx + x;
+        this.o.y = this.o.y - ry + y;
+    }
+    Image.prototype.loadFromUrl = function (url, width, height, callback)
+    {
+        this.img = new window.Image();
+        var me = this;
+        this.img.onload = function (e)
+        {
+            me.width = me.img.naturalWidth;
+            me.height = me.img.naturalHeight;
+            if (!width)
+                return;
+            if (!height)
+            {
+                width();
+                return;
+            }
+            if (!callback)
+            {
+                me.img.width = width;
+                me.img.height = height;
+                return;
+            }
+            if (callback)
+                callback();
+        }
+        this.img.src = url;
+        if (this.img.complete)
+        {
+            return;
+        }
+    }
+    Image.prototype.render = function (graphics, x, y, r, dt)
+    {
+        if (!graphics)
+            return;
+        if (this.onRender)
+            this.onRender();
+        var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
+        graphics.drawImage(this.img, o.x, o.y, this.width, this.height);
+    }
+    Engine.Image = Image;
+
+    //Path
+    function Path()
+    {
+        this.pList = (function ()
+        {
+            var list = [];
+            list.add = function (p)
+            {
+                list[list.length] = p;
+            }
+            list.remove = function (index)
+            {
+                for (var i = index + 1; i < list.length; i++)
+                {
+                    list[i - 1] = list[i];
+                }
+                list.pop();
+            }
+            list.clear = function ()
+            {
+                while (list.length)
+                {
+                    list.pop();
+                }
+            }
+            list.last = function ()
+            {
+                return list[list.length - 1];
+            }
+            return list;
+        })();
+        this.position = new Point(0, 0);
+        this.coordinate = Coordinate.Default;
+        this.center = this.position;
+        this.strokeStyle = new Color(0, 0, 0, 1);
+        this.fillStyle = new Color(255, 255, 255, 1);
+        this.strokeWidth = 1;
+    }
+    Path.Point = function (x, y)
+    {
+        this.x = x;
+        this.y = y;
+        this.coordinate = Coordinate.Default;
+        this.cp1 = new Point(x, y);
+        this.cp2 = new Point(x, y);
+    }
+    Path.Point.prototype.copy = function ()
+    {
+        var p = new Path.Point(this.x, this.y);
+        p.coordinate = this.coordinate;
+        p.cp1 = this.cp1.copy();
+        p.cp2 = this.cp2.copy();
+        return p;
+    }
+    Path.Point.prototype.setCoordinate = function (coordinate)
+    {
+        this.cp1.setCoordinate(coordinate);
+        this.cp2.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Path.Point.prototype.changeCoordinate = function (coordinate)
+    {
+        this.cp1.changeCoordinate(coordinate);
+        this.cp2.changeCoordinate(coordinate);
+        var p = this.coordinate.pointMapTo(coordinate);
+        this.x = p.x;
+        this.y = p.y;
+        this.coordinate = coordinate;
+    }
+    Path.Point.prototype.moveTo = function (x, y)
+    {
+        var dx = x - this.x;
+        var dy = y - this.y;
+        this.cp1.x += dx;
+        this.cp1.y += dy;
+        this.cp2.x += dx;
+        this.cp2.y += dy;
+        this.x = x;
+        this.y = y;
+    }
+    Path.prototype.copy = function ()
+    {
+        var path = new Path();
+        path.coordinate = this.coordinate;
+        for (var i = 0; i < this.pList.length; i++)
+        {
+            path.pList[i] = this.pList[i].copy();
+        }
+        return path;
+    }
+    Path.prototype.setCoordinate = function (coordinate)
+    {
+        for (var i = 0; i < this.pList; i++)
+        {
+            this.pList[i].setCoordinate(coordinate);
+        }
+        this.position.setCoordinate(coordinate);
+        this.center.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Path.prototype.changeCoordinate = function (coordinate)
+    {
+        for (var i = 0; i < this.pList; i++)
+        {
+            this.pList[i].changeCoordinate(coordinate);
+        }
+        this.position.changeCoordinate(coordinate);
+        this.center.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Path.prototype.setCenter = function (x, y)
+    {
+        if (!isNaN(x) && !isNaN(y))
+        {
+            this.position.x = x;
+            this.position.y = y;
+            this.center = this.position;
+        }
+    }
+    Path.prototype.moveTo = function (x, y)
+    {
+        var dx = x - this.position.x;
+        var dy = y - this.position.y;
+        for (var i = 0; i < this.pList.length; i++)
+        {
+            this.pList[i].moveTo(this.pList[i].x + dx, this.pList[i].y + dy);
+        }
+        this.position.x = x;
+        this.position.y = y;
+    }
+    Path.prototype.close = function ()
+    {
+        if (this.pList.length)
+            this.pList.add(this.pList[0]);
+    }
+    Path.prototype.render = function (graphics, x, y, r, dt)
+    {
+        graphics.beginPath();
+        for (var i = 0; i < this.pList.length - 1; i++)
+        {
+            var p1 = this.pList[i].coordinate.pFrom(this.pList[i].x, this.pList[i].y);
+            p1.cp2 = this.pList[i].cp2.coordinate.pFrom(this.pList[i].cp2.x, this.pList[i].cp2.y);
+            var p2 = this.pList[i + 1].coordinate.pFrom(this.pList[i + 1].x, this.pList[i + 1].y);
+            p2.cp1 = this.pList[i + 1].cp1.coordinate.pFrom(this.pList[i + 1].cp1.x, this.pList[i + 1].cp1.y);
+            
+            graphics.lineTo(p1.x, p1.y);
+            graphics.bezierCurveTo(p1.cp2.x, p1.cp2.y, p2.cp1.x, p2.cp1.y, p2.x, p2.y);
+        }
+        if (this.pList.last() == this.pList[0])
+            graphics.closePath();
+        graphics.fillStyle = this.fillStyle.toString();
+        graphics.strokeStyle = this.strokeStyle.toString();
+        graphics.lineWidth = this.strokeWidth;
+        graphics.fill();
+        graphics.stroke();
+    }
+    Engine.Path = Path;
+    window.Path = Path;
+
+    //Combination
+    function Combination()
+    {
+        this.objectList = ArrayList();
+        this.position = new Point(0, 0);
+        this.center = new Point(0, 0);
+        this.rotation = 0;
+        this.coordinate = Coordinate.Default;
+    }
+    Combination.prototype.copy = function ()
+    {
+        var comb = new Combination();
+        for (var i = 0; i < this.objectList.length; i++)
+        {
+            comb.objectList[i] = this.objectList[i].copy();
+        }
+        comb.position = this.position.copy();
+        comb.center = this.center.copy();
+        comb.coordinate = this.coordinate;
+        return comb;
+    }
+    Combination.prototype.addObject = function (obj)
+    {
+        this.objectList.add(obj);
+    }
+    Combination.prototype.removeObject = function (obj)
+    {
+        this.objectList.remove(obj);
+    }
+    Combination.prototype.removeObjectAt = function (index)
+    {
+        this.objectList.removeAt(index);
+    }
+    Combination.prototype.setCoordinate = function (coordinate)
+    {
+        for (var i = 0; i < this.objectList.length ; i++)
+        {
+            if (this.objectList[i].setCoordinate)
+                this.objectList[i].setCoordinate(coordinate);
+        }
+        this.position.setCoordinate(coordinate);
+        this.center.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Combination.prototype.changeCoordinate = function (coordinate)
+    {
+        for (var i = 0; i < this.objectList.length ; i++)
+        {
+            if (this.objectList[i].changeCoordinate)
+                this.objectList[i].changeCoordinate(coordinate);
+        }
+        this.position.changeCoordinate(coordinate);
+        this.center.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Combination.prototype.setPositionPoint = function (x, y)
+    {
+        this.position = new Point(x, y);
+    }
+    Combination.prototype.setCenterPoint = function (x, y)
+    {
+        this.center = new Center(x, y);
+    }
+    Combination.prototype.moveTo = function (x, y)
+    {
+        var dx = x - this.position.x;
+        var dy = y - this.position.y;
+        for (var i = 0; i < this.objectList.length ; i++)
+        {
+            this.objectList[i].moveTo(this.objectList[i].position.x + dx, this.objectList[i].position.y + dy);
+        }
+        this.position.x += dx;
+        this.position.y += dy;
+        this.center.x += dx;
+        this.center.y += dy;
+    }
+    Combination.prototype.move = function (dx, dy)
+    {
+        for (var i = 0; i < this.objectList.length ; i++)
+        {
+            this.objectList[i].moveTo(this.objectList[i].position.x + dx, this.objectList[i].position.y + dy);
+        }
+        this.position.x += dx;
+        this.position.y += dy;
+        this.center.x += dx;
+        this.center.y += dy;
+    }
+    Combination.prototype.rotate = function (ang, center)
+    {
+        if (!center)
+        {
+            center = this.center;
+        }
+        for (var i = 0; i < this.objectList.length ; i++)
+        {
+            if (this.objectList[i].rotate)
+                this.objectList[i].rotate(ang, center);
+        }
+        this.position.rotate(ang, center);
+        this.center.rotate(ang, center);
+        this.rotation += ang;
+    }
+    Combination.prototype.render = function (graphics, x, y, r, dt)
+    {
+        for (var i = 0; i < this.objectList.length; i++)
+        {
+            this.objectList[i].render(graphics, this.objectList[i].position.x, this.objectList[i].position.y, this.objectList[i].rotation, dt);
+        }
+    }
+    Engine.Combination = Combination;
+    window.Combination = Combination;
+
+    //ImageAnimation
+    function ImageAnimation()
+    {
+        this.center = new Point(0, 0);
+        this.position = this.center.copy();
+        this.coordinate = Coordinate.Default;
+        this.fCount = 0;
+        this.fps = 0;
+        this.clipX = 0;
+        this.clipY = 0;
+        this.fWidth = 0;
+        this.fHeight = 0;
+        this.time = 0;
+        this.img = null;
+        this.frame = 0;
+        this.playing = true;
+        this.reverse = false;
+        this.width = 0;
+        this.heigh = 0;
+        this.onBegine = null;
+        this.onEnd = null;
+        this.onFrameUpdate = null;
+        this.loop = new ImageAnimation.Loop();
+    }
+    //---ImagImageAnimation.Loop
+    ImageAnimation.Loop = function ()
+    {
+        this.from = 0;
+        this.to = 0;
+        this.length = 0;
+        this.loopTimes = -1;
+        this.lt = 0;
+        this.enable = true;
+        this.onEnd = null;
+        this.onStart = null;
+    }
+    ImageAnimation.Loop.prototype.copy = function ()
+    {
+        var loop = new ImageAnimation.Loop();
+        loop.from = this.from;
+        loop.to = this.to;
+        loop.length = this.length;
+        loop.loopTimes = this.loopTimes;
+        loop.lt = this.lt;
+        loop.enable = this.enable;
+        loop.onEnd = this.onEnd;
+        loop.onStart = this.onStart;
+        return loop;
+    }
+    ImageAnimation.Loop.prototype.begin = function ()
+    {
+        this.enable = true;
+        if (this.onStart)
+            this.onStart();
+    }
+    ImageAnimation.Loop.prototype.end = function ()
+    {
+        var t = this.enable;
+        this.enable = false;
+        if (t && this.onEnd)
+            this.onEnd();
+    }
+    ImageAnimation.loadFromUrl = function (url, clipX, clipY, fWidth, fHeight, width, height, fCount, fps, callback)
+    {
+        var ia = new ImageAnimation;
+        ia.img = new Image();
+        ia.img.onload = function (e)
+        {
+            ia.fps = fps;
+            ia.width = width;
+            ia.heigh = height;
+            ia.clipFrame(clipX, clipY, fWidth, fHeight, fCount);
+            if (callback)
+                callback();
+        }
+        ia.img.src = url;
+        return ia;
+    }
+    ImageAnimation.create = function (width, height, fCount, fps)
+    {
+    }
+    ImageAnimation.prototype.copy = function ()
+    {
+        var ia = new ImageAnimation;
+        ia.img = this.img;
+        ia.center = this.center.copy();
+        ia.position = this.position.copy();
+        ia.coordinate = this.coordinate;
+        ia.fCount = this.fCount;
+        ia.fps = this.fps;
+        ia.clipX = this.clipX;
+        ia.clipY = this.clipY;
+        ia.fWidth = this.fWidth;
+        ia.fHeight = this.fHeight;
+        ia.time = this.time;
+        ia.width = this.width;
+        ia.heigh = this.heigh;
+        ia.frame = this.frame;
+        ia.playing = this.playing;
+        ia.reverse = this.reverse;
+        ia.onBegine = this.onBegine;
+        ia.onEnd = this.onEnd;
+        ia.onFrameUpdate = this.onFrameUpdate;
+        ia.loop = this.loop.copy();
+        return ia;
+    }
+    ImageAnimation.prototype.setCoordinate = function (coordinate)
+    {
+        this.position.setCoordinate(coordinate);
+        this.position.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    ImageAnimation.prototype.changeCoordinate = function (coordinate)
+    {
+        this.position.changeCoordinate(coordinate);
+        this.position.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    ImageAnimation.prototype.setCenter = function (x, y, align)
+    {
+        this.position = new Point(x, y);
+        if (!align)
+            throw new Error("未指定对齐方式");
+        this.center = align(this.width, this.heigh);
+        this.center.x = x - this.center.x;
+        this.center.y = y + this.center.y;
+    }
+    ImageAnimation.prototype.moveTo = function (x, y)
+    {
+        var rx = this.position.x;
+        var ry = this.position.y;
+        this.position.x = x;
+        this.position.y = y;
+        this.center.x = this.center.x - rx + x;
+        this.center.y = this.center.y - ry + y;
+    }
+    ImageAnimation.prototype.clipFrame = function (clipX, clipY, fWidth, fHeight, fCount)
+    {
+        this.clipX = clipX;
+        this.clipY = clipY;
+        this.fWidth = fWidth;
+        this.fHeight = fHeight;
+        this.fCount = fCount;
+        this.loop.from = 0;
+        this.loop.to = fCount - 1;
+    }
+    ImageAnimation.prototype.begine = function ()
+    {
+        this.playing = true;
+        this.time = 0;
+        this.frame = 0;
+        this.loop.lt = 0;
+    }
+    ImageAnimation.prototype.end = function ()
+    {
+        var t = this.playing;
+        this.playing = false;
+        if (this.onEnd && t)
+        {
+            this.onEnd();
+        }
+    }
+    ImageAnimation.prototype.play = function ()
+    {
+        this.playing = true;
+        this.time = 0;
+    }
+    ImageAnimation.prototype.drawToCanvas = function (canvas, x, y, r, dt)
+    {
+
+    }
+    ImageAnimation.prototype.preload = function (graphics)
+    {
+        graphics.drawImage(this.img, 0, 0, this.fWidth, this.fHeight, 0, 0, this.width, this.heigh);
+        graphics.clearRect(0, 0, this.width, this.height);
+    }
+    ImageAnimation.prototype.render = function (graphics, x, y, r, dt)
+    {
+        if (this.time == 0 && this.onBegine)
+            this.onBegine();
+        this.time += dt;
+        var f = Math.floor(this.time / (1 / this.fps));
+        if (this.reverse)
+            f = this.fCount - f;
+        if (this.loop.enable)
+        {
+            if (f > this.loop.to)
+            {
+                this.loop.lt++;
+                if (this.loop.loopTimes > 0 && this.loop.lt >= this.loop.loopTimes)
+                {
+                    this.loop.enable = false;
+                    f = f % this.fCount;
+                }
+                else
+                {
+                    f -= this.loop.from;
+                    f %= (this.loop.to - this.loop.from);
+                    if (!f)
+                        f = 0;
+                    f = this.loop.from + f;
+                }
+            }
+        }
+        else if (this.playing)
+        {
+            if (f >= this.fCount && !this.reverse)
+            {
+                this.frame = f = this.fCount - 1;
+                this.end();
+            }
+            if (f <= 0 && this.reverse)
+            {
+                this.frame = f = 0;
+                this.end();
+            }
+            //f = f % this.fCount;
+        }
+        if (this.playing)
+        {
+            var F = f;
+            if (this.frame != f && this.onFrameUpdate)
+                F = this.onFrameUpdate(f);
+            if (!isNaN(F))
+                f = F;
+            this.frame = f;
+        }
+
+        var center = this.center.coordinate.pFrom(this.center.x, this.center.y);
+        graphics.drawImage(this.img, this.clipX + (this.fWidth * this.frame), this.clipY, this.fWidth, this.fHeight, center.x, center.y, this.width, this.heigh);
+    }
+    Engine.ImageAnimation = ImageAnimation;
+    window.ImageAnimation = ImageAnimation;
 
     //-------GameObject
     function GameObject()
@@ -343,6 +1246,7 @@
         this.position = new Point(0, 0);
         this.center = this.position;
         this.rotation = 0.0;
+        this.coordinate = Engine.Coordinate.Default;
         this.onRender = null;
         this.onUpdate = null;
         this.onStart = null;
@@ -384,6 +1288,7 @@
         obj.position = this.position.copy();
         obj.center = obj.position;
         obj.rotation = this.rotation;
+        obj.coordinate = this.coordinate;
         obj.onRender = this.onRender;
         obj.onUpdate = this.onUpdate;
         obj.onStart = this.onStart;
@@ -393,6 +1298,26 @@
         obj.onClick = this.onClick;
         obj.onDoubleClick = this.onDoubleClick;
         return obj;
+    }
+    GameObject.prototype.setCoordinate = function (coordinate)
+    {
+        this.center.setCoordinate(coordinate);
+        this.position.setCoordinate(coordinate);
+        if (this.graphic && this.graphic.setCoordinate)
+            this.graphic.setCoordinate(coordinate);
+        if (this.collider && this.collider.setCoordinate)
+            this.collider.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    GameObject.prototype.changeCoordinate = function (coordinate)
+    {
+        this.center.changeCoordinate(coordinate);
+        this.position.changeCoordinate(coordinate);
+        if (this.graphic && this.graphic.changeCoordinate)
+            this.graphic.changeCoordinate(coordinate);
+        if (this.collider && this.collider.changeCoordinate)
+            this.collider.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
     }
     GameObject.prototype.resetForce = function ()
     {
@@ -469,7 +1394,7 @@
         this.position.x = x;
         this.position.y = y;
     }
-    GameObject.prototype.rotate = function (center, rad)
+    GameObject.prototype.rotate = function ( rad, center)
     {
         if (this.graphic && this.graphic.rotate)
         {
@@ -501,7 +1426,7 @@
             }
         }
     }
-    engine.GameObject = GameObject;
+    Engine.GameObject = GameObject;
     window.GameObject = GameObject;
 
 
@@ -522,6 +1447,7 @@
         this.center = this.position;
         this.angV = 0;
         this.rotation = 0;
+        this.coordinate = Coordinate.Default;
         this.rigidBody = false;
         this.e = 1;
         this.I = 1;//moment of inercial
@@ -539,6 +1465,7 @@
         circle.setCenter(this.position.x, this.position.y);
         circle.angV = this.angV.copy();
         circle.rotation = this.rotation;
+        circle.coordinate = this.coordinate;
         circle.rigidBody = this.rigidBody;
         circle.e = this.e;
         circle.I = this.I;
@@ -555,6 +1482,20 @@
         else
             circle.fillStyle = this.fillStyle;
         return circle;
+    }
+    Circle.prototype.setCoordinate = function (coordinate)
+    {
+        this.center.setCoordinate(coordinate);
+        this.position.setCoordinate(coordinate);
+        this.o.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Circle.prototype.changeCoordinate = function (coordinate)
+    {
+        this.center.changeCoordinate(coordinate);
+        this.position.changeCoordinate(coordinate);
+        this.o.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
     }
     Circle.prototype.setPosition = function (x, y)
     {
@@ -590,8 +1531,9 @@
     }
     Circle.prototype.render = function (graphics, x, y, r, dt)
     {
+        var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
         graphics.beginPath();
-        graphics.arc(this.o.x, this.o.y, this.r, 0, 2 * Math.PI);
+        graphics.arc(o.x, o.y, this.r, 0, 2 * Math.PI);
         graphics.lineWidth = this.strokeWidth;
         graphics.strokeStyle = this.strokeStyle;
         graphics.fillStyle = this.fillStyle;
@@ -630,14 +1572,16 @@
         }
         else if (col instanceof Rectangle)
         {
-            if (col.o.x <= this.o.x && this.o.x <= col.o.x + col.width)
+            var o = new Point(col.o.x + col.center.x, col.o.y + col.center.y);
+
+            if (o.x <= this.o.x && this.o.x <= o.x + col.width)
             {
-                if (col.o.y - this.r <= this.o.y && this.o.y <= col.o.y + col.height + this.r)
+                if (o.y - this.r <= this.o.y && this.o.y <= o.y + col.height + this.r)
                     return true;
             }
-            if (col.o.y <= this.o.y && this.o.y <= col.o.y + col.height)
+            if (o.y <= this.o.y && this.o.y <= o.y + col.height)
             {
-                if (col.o.x - this.r <= this.o.x && this.o.x <= col.o.x + col.width + this.r)
+                if (o.x - this.r <= this.o.x && this.o.x <= o.x + col.width + this.r)
                     return true;
             }
             for (var i = 0; i < 4; i++)
@@ -885,6 +1829,7 @@
         this.dff = 0;
         this.angV = 0;
         this.rotation = 0;
+        this.coordinate = Coordinate.Default;
         this.I = 1;
         this.rigidBody = false;
         this.static = false;
@@ -922,6 +1867,7 @@
         var pol = new Polygon(v);
         pol.angV = this.angV.copy();
         pol.rotation = this.rotation;
+        pol.coordinate = this.coordinate;
         pol.rigidBody = this.rigidBody;
         pol.e = this.e;
         pol.I = this.I;
@@ -943,6 +1889,34 @@
 
         return pol;
     }
+    Polygon.prototype.setCoordinate = function (coordinate)
+    {
+        for (var i = 0; i < this.V.length; i++)
+        {
+            this.V[i].setCoordinate(coordinate);
+        }
+        for (var i = 0; i < this.E.length; i++)
+        {
+            this.E[i].setCoordinate(coordinate);
+        }
+        this.position.setCoordinate(coordinate);
+        this.center.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Polygon.prototype.changeCoordinate = function (coordinate)
+    {
+        for (var i = 0; i < this.V.length; i++)
+        {
+            this.V[i].changeCoordinate(coordinate);
+        }
+        for (var i = 0; i < this.E.length; i++)
+        {
+            this.E[i].changeCoordinate(coordinate);
+        }
+        this.position.changeCoordinate(coordinate);
+        this.center.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
     Polygon.prototype.moveTo = function (x, y)
     {
         var dx = x - this.position.x;
@@ -955,7 +1929,7 @@
         this.position.x = x;
         this.position.y = y;
     }
-    Polygon.prototype.rotate = function (center, rad)
+    Polygon.prototype.rotate = function (rad, center)
     {
         for (var i = 0; i < this.V.length; i++)
         {
@@ -1044,10 +2018,14 @@
         graphics.beginPath();
         if (this.V.length < 3)
             throw new Error("The polygen must contains at least 3 points.");
-        graphics.moveTo(this.V[0].x, this.V[0].y);
+        var v0 = this.V[0].coordinate.pFrom(this.V[0].x, this.V[0].y);
+        graphics.moveTo(v0.x, v0.y);
         for (var i = 1; i < this.V.length; i++)
-            graphics.lineTo(this.V[i].x, this.V[i].y);
-        graphics.lineTo(this.V[0].x, this.V[0].y);
+        {
+            var v = this.V[i].coordinate.pFrom(this.V[i].x, this.V[i].y);
+            graphics.lineTo(v.x, v.y);
+        }
+        graphics.lineTo(v0.x, v0.y);
         graphics.lineWidth = this.strokeWidth;
         graphics.strokeStyle = this.strokeStyle.toString();
         graphics.fillStyle = this.fillStyle.toString();
@@ -1737,9 +2715,10 @@
         h = isNaN(h) ? 0 : h;
         this.width = w;
         this.height = h;
-        this.o = new Point(0, 0);
-        this.position = new Point(w / 2, h / 2);
-        this.center = this.position;
+        this.o = new Point(-w / 2, -h / 2);
+        this.position = new Point(0, 0);
+        this.coordinate = Coordinate.Default;
+        this.center = new Point(0, 0);
         this.rigidBody = false;
         this.dff = 0;//dynamic friction factor
         this.e = 1;
@@ -1797,6 +2776,7 @@
         var rect = new Rectangle(this.width, this.height);
         rect.o = this.o.copy();
         rect.position = this.position.copy();
+        rect.coordinate = this.coordinate;
         rect.rigidBody = this.rigidBody;
         rect.e = this.e;
         rect.dff = this.dff;
@@ -1814,8 +2794,29 @@
             rect.fillStyle = this.fillStyle;
         return rect;
     }
-    Rectangle.prototype.setCenter = function (x, y)
+    Rectangle.prototype.setCoordinate = function (coordinate)
     {
+        //this.o.setCoordinate(coordinate);
+        this.position.setCoordinate(coordinate);
+        this.center.setCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Rectangle.prototype.changeCoordinate = function (coordinate)
+    {
+        //this.o.changeCoordinate(coordinate);
+        this.position.changeCoordinate(coordinate);
+        this.center.changeCoordinate(coordinate);
+        this.coordinate = coordinate;
+    }
+    Rectangle.prototype.setCenterPoint = function (x, y)
+    {
+        var dx = x - this.center.x;
+        var dy = y - this.center.x;
+        this.center.x = x;
+        this.center.y = y;
+        this.o.x -= dx;
+        this.o.y -= dy;
+        /*
         if (!isNaN(x) && !isNaN(y))
         {
             this.position.x = x;
@@ -1826,13 +2827,17 @@
             this.position.x = this.o.x + (x(this.width, this.height)).x;
             this.position.y = this.o.y + this.height - (x(this.width, this.height)).y;
         }
+        */
+    }
+    Rectangle.prototype.setPositionPoint = function (x, y)
+    {
+        this.position.x = x;
+        this.position.y = y;
     }
     Rectangle.prototype.moveTo = function (x, y)
     {
         var dx = x - this.position.x;
         var dy = y - this.position.y;
-        this.o.x += dx;
-        this.o.y += dy;
         for (var i = 0; i < 4; i++)
         {
             this.V[i].x += dx;
@@ -1842,7 +2847,12 @@
         this.position.y = y;
 
     }
-    Rectangle.prototype.setPosition = Rectangle.prototype.moveTo;
+    Rectangle.prototype.rotate = function (rad, center)
+    {
+        if (!center)
+            center = this.center;
+
+    }
     Rectangle.prototype.drawToCanvas = function (canvas, x, y, r, dt)
     {
         var ctx = canvas.getContext("2d");
@@ -1855,31 +2865,37 @@
     {
         graphic.fillStyle = this.fillStyle;
         graphic.strokeStyle = this.strokeStyle;
-        graphic.fillRect(this.o.x, this.o.y + this.height, this.width, this.height);
-        graphic.strokeRect(this.o.x, this.o.y + this.height, this.width, this.height);
+        var o = this.position.coordinate.pFrom(this.position.x, this.position.y);
+        o.x += this.o.x;
+        o.y += this.o.y;
+        graphic.fillRect(o.x, o.y + this.height, this.width, this.height);
+        graphic.strokeRect(o.x, o.y + this.height, this.width, this.height);
     }
     Rectangle.prototype.isCollideWith = function (obj)
     {
         if (obj instanceof Ground)
         {
-            return (!(this.o.x > obj.xR || this.o.x + this.width < obj.xL) && (this.o.y >= obj.y && obj.y >= this.o.y - this.height));
+            var o = new Point(this.o.x + this.center.x, this.o.y + this.center.y);
+            return (!(o.x > obj.xR || o.x + this.width < obj.xL) && (o.y >= obj.y && obj.y >= o.y - this.height));
         }
         else if (obj instanceof Wall)
         {
-            return (!(this.o.y - this.height > obj.yH || this.o.y < obj.yL) && (this.o.x <= obj.x && obj.x <= this.o.x + this.width));
+            var o = new Point(this.o.x + this.center.x, this.o.y + this.center.y);
+            return (!(o.y - this.height > obj.yH || o.y < obj.yL) && (o.x <= obj.x && obj.x <= o.x + this.width));
         }
         else if (obj instanceof Rectangle)
         {
-            if (this.o.x - obj.width <= obj.o.x && obj.o.x <= this.o.x + this.width
-             && this.o.y - obj.height <= obj.o.y && obj.o.y <= this.o.y + this.height)
+            var o = new Point(this.o.x + this.center.x, this.o.y + this.center.y);
+            if (o.x - obj.width <= obj.o.x && obj.o.x <= o.x + this.width
+             && o.y - obj.height <= obj.o.y && obj.o.y <= o.y + this.height)
                 return true;
             return false;
-            var x1 = (obj.o.x - this.o.x) * (obj.o.x + obj.width - this.o.x);
-            var x2 = (obj.o.x - (this.o.x + this.width)) * (obj.o.x + obj.width - (this.o.x + this.width));
-            var y1 = (obj.o.y - this.o.y) * (obj.o.y + obj.height - this.o.y);
-            var y2 = (obj.o.y - (this.o.y + this.height)) * (obj.o.y + obj.height - (this.o.y + this.height));
-            if (obj.o.x + obj.width < this.o.x || this.o.x + this.width < obj.o.x ||
-               obj.o.y - obj.height > this.o.y || this.o.y - this.height > obj.o.y)
+            var x1 = (obj.o.x - o.x) * (obj.o.x + obj.width - o.x);
+            var x2 = (obj.o.x - (o.x + this.width)) * (obj.o.x + obj.width - (o.x + this.width));
+            var y1 = (obj.o.y - o.y) * (obj.o.y + obj.height - o.y);
+            var y2 = (obj.o.y - (o.y + this.height)) * (obj.o.y + obj.height - (o.y + this.height));
+            if (obj.o.x + obj.width < o.x || o.x + this.width < obj.o.x ||
+               obj.o.y - obj.height > o.y || o.y - this.height > obj.o.y)
             {
                 return false;
             }
@@ -1888,7 +2904,8 @@
         }
         else if (obj instanceof Point)
         {
-            if (this.o.x <= obj.x && obj.x <= this.o.x + this.width && obj.y <= this.o.y && this.o.y - this.height <= obj.y)
+            var o = new Point(this.o.x + this.center.x, this.o.y + this.center.y);
+            if (o.x <= obj.x && obj.x <= o.x + this.width && obj.y <= o.y && o.y - this.height <= obj.y)
                 return true;
             else
                 return false;
@@ -2194,7 +3211,7 @@
 
     }
 
-    engine.Colliders = Colliders;
+    Engine.Colliders = Colliders;
     window.Colliders = Colliders;
 
 })(window.SarEngine);
