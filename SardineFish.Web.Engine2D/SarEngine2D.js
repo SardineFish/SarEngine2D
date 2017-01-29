@@ -64,8 +64,6 @@
         var engine = this;
         function animationFrame(delay)
         {
-            try
-            {
                 if (engine.status == EngineStatus.Starting)
                 {
                     engine.status = EngineStatus.Running;
@@ -158,7 +156,7 @@
                     engine.onUpdate(delay, engine);
                 engine.scene.updateFrame(delay);
 
-            }
+            /*}
             catch (ex)
             {
                 if (engine.onError)
@@ -168,7 +166,7 @@
                     if (exArgs.stop)
                         return;
                 }
-            }
+            }*/
 
             engine.animationFrameId = requestAnimationFrame(animationFrame);
 
@@ -239,6 +237,8 @@
         this.cameraList = ArrayList();
         this.layers = new LayerCollection();
         this.collideGroups = new ArrayList();
+        this.collideGroups.ignoreGroup = new CollideGroup();
+        this.collideGroups.defaultGroup = new CollideGroup();
         this.collideTable = new Matrix(0, 0);
         this.runtime = 0;
         this.GUI = null;
@@ -279,9 +279,9 @@
     }
     LayerCollection.prototype.add = function (layer, depth)
     {
-        if (!this.scene)
+        if (layer.scene)
         {
-            throw new Error("This LayerCollection must belong to a Scene before operaion.");
+            throw new Error("This Layer has belong to another Scene.");
         }
         if (isNaN(depth) || this[depth])
         {
@@ -321,6 +321,15 @@
             }
         }
         this.count++;
+        
+        for (var i = 0; i < this.scene.cameraList.length; i++)
+        {
+            var camera = this.scene.cameraList[i];
+            for (var j = 0; j < camera.outputList.length ; j++)
+            {
+                camera.outputList[j].setLayer(this.count);
+            }
+        }
     }
     LayerCollection.prototype.removeAt = function (depth)
     {
@@ -377,7 +386,7 @@
     Scene.prototype.physicalSimulate = function (dt)
     {
         var scene = this;
-        var useGroup = this.collideGroups.length > 0;
+        var useGroup = true;
 
         for (var d = 0; d < this.layers.depthList.length; d++)
         {
@@ -437,37 +446,83 @@
             }
         }
 
-        if (useGroup)
+        //check defaultGroup
+        for (var i = 0; i < this.collideGroups.defaultGroup.objectList.length; i++)
         {
-            for (var group1 = 0; group1 < this.collideGroups.length; group1++)
+            var obj1 = this.collideGroups.defaultGroup.objectList[i];
+            for (var group2 = 0; group2 < this.collideGroups.length; group2++)
             {
-                for (var i = 0; i < this.collideGroups[group1].objectList.length; i++)
+                for (var j = 0; j < this.collideGroups[group2].objectList.length; j++)
                 {
-                    var obj1 = this.collideGroups[group1].objectList[i];
-                    if (!obj1.collider || !obj1.collider.rigidBody)
+                    var obj2 = this.collideGroups[group2].objectList[j];
+                    if (obj1 == obj2)
                         continue;
-                    for (var group2 = 0; group2 < this.collideGroups.length; group2++)
+                    if (obj1.layer.coordinate != obj2.layer.coordinate)
+                        continue;
+                    if (obj1.id < 0 || obj2.id < 0)
+                        continue;
+                    if (this.collideTable[obj1.id][obj2.id] == this.runtime)
+                        continue;
+                    if (!obj2.collider)
+                        continue;
+                    this.collideTable[obj1.id][obj2.id] = this.collideTable[obj2.id][obj1.id] = this.runtime;
+                    if (obj1.collider.isCollideWith(obj2.collider, obj1.v, obj2.v, dt))
                     {
-                        if (group1 == group2)
-                            continue;
-                        if (this.collideGroups[group1].ignoreList.contain(this.collideGroups[group2]))
-                            continue;
-                        for (var j = 0; j < this.collideGroups[group2].objectList.length; j++)
+                        if (obj1.onCollide)
                         {
-                            var obj2 = this.collideGroups[group2].objectList[j];
-                            if (obj1 == obj2)
-                                continue;
-                            if (obj1.layer != obj2.layer)
-                                continue;
-                            if (this.collideTable[obj1.id][obj2.id] == this.runtime)
-                                continue;
-                            if (!obj2.collider || !obj2.collider.rigidBody)
-                                continue;
-                            this.collideTable[obj1.id][obj2.id] = this.collideTable[obj2.id][obj1.id] = this.runtime;
-                            if (obj1.collider.isCollideWith(obj2.collider))
+                            var args = { target: obj2 };
+                            obj1.onCollide(args);
+                        }
+                        if (obj2.onCollide)
+                        {
+                            var args = { target: obj1 };
+                            obj2.onCollide(args);
+                        }
+                        obj1.collider.collide(obj1, obj2, dt);
+                    }
+                }
+            }
+        }
+        for (var group1 = 0; group1 < this.collideGroups.length; group1++)
+        {
+            for (var i = 0; i < this.collideGroups[group1].objectList.length; i++)
+            {
+                var obj1 = this.collideGroups[group1].objectList[i];
+                   if (!obj1.collider)
+                    continue;
+                for (var group2 = 0; group2 < this.collideGroups.length; group2++)
+                {
+                    if (group1 == group2)
+                        continue;
+                    if (this.collideGroups[group1].ignoreList.contain(this.collideGroups[group2]))
+                        continue;
+                    for (var j = 0; j < this.collideGroups[group2].objectList.length; j++)
+                    {
+                        var obj2 = this.collideGroups[group2].objectList[j];
+                        if (obj1 == obj2)
+                            continue;
+                        if (obj1.layer.coordinate != obj2.layer.coordinate)
+                            continue;
+                        if (obj1.id < 0 || obj2.id < 0)
+                            continue;
+                        if (this.collideTable[obj1.id][obj2.id] == this.runtime)
+                            continue;
+                        if (!obj2.collider)
+                            continue;
+                        this.collideTable[obj1.id][obj2.id] = this.collideTable[obj2.id][obj1.id] = this.runtime;
+                        if (obj1.collider.isCollideWith(obj2.collider, obj1.v, obj2.v, dt))
+                        {
+                            if (obj1.onCollide)
                             {
-                                obj1.collider.collide(obj1, obj2, dt);
+                                var args = { target: obj2 };
+                                obj1.onCollide(args);
                             }
+                            if (obj2.onCollide)
+                            {
+                                var args = { target: obj1 };
+                                obj2.onCollide(args);
+                            }
+                            obj1.collider.collide(obj1, obj2, dt);
                         }
                     }
                 }
@@ -544,8 +599,8 @@
     }
     Scene.prototype.updateFrame = function (delay)
     {
-        try
-        {
+        /*try
+        {*/
             var scene = this;
             this.runtime += delay;
             var dt = delay / 1000;
@@ -560,11 +615,12 @@
             for (var i = 0; i < this.objectList.length; i++)
             {
                 var obj = this.objectList[i];
+                obj.lifeTime += delay;
                 if (obj.deleted)
                     return;
                 if (obj.onUpdate)
                     obj.onUpdate(obj, dt);
-                for (var j = 0; j < this.objectList[i].animationCallbackList.length; j++)
+                for (var j = 0; this.objectList[i] && j < this.objectList[i].animationCallbackList.length; j++)
                 {
                     this.objectList[i].animationCallbackList[j](dt);
                 }
@@ -574,7 +630,7 @@
             whileRender = false;
             this.physicalSimulate(dt);
             //this.render(dt);
-        } catch (ex) { alert(whileRender + ex.message); }
+        /*} catch (ex) { alert(whileRender + ex.message); }*/
     }
     Scene.prototype.initEvents = function (output)
     {
@@ -1005,22 +1061,37 @@
         {
             throw new Error("Object existed.");
         }
-        if (isNaN(layer))
-            layer = 0;
-        if (!this.layers[layer])
-            throw new Error("Invalid layer.");
 
         this.objectList.add(obj);
         obj.id = this._objList.add(obj);
-        this.layers[layer].addGameObject(obj);
+
+        if (layer instanceof Layer)
+        {
+            if (!layer.scene)
+                this.layers.add(layer, this.layers.topDepth + 1);
+            layer.addGameObject(obj);
+        }
+        else
+        {
+            if (isNaN(layer))
+                layer = 0;
+            if (!this.layers[layer])
+                throw new Error("Invalid layer.");
+            this.layers[layer].addGameObject(obj);
+        }
+
         if (collideGroup)
         {
             if (!this.collideGroups.contain(collideGroup))
                 this.addCollideGroup(collideGroup);
             collideGroup.addGameObject(obj);
         }
-        this.collideTable.rows = this.objectList.length;
-        this.collideTable.columns = this.objectList.length;
+        else
+        {
+            this.collideGroups.defaultGroup.addGameObject(obj);
+        }
+        this.collideTable.rows = this._objList.length;
+        this.collideTable.columns = this._objList.length;
         return obj.id;
     }
     Scene.prototype.removeGameObject = function (id)
@@ -1046,25 +1117,21 @@
         var obj = this._objList[id];
         if (!obj)
             throw new Error("Object not existed.");
+        obj.layer.removeGameObject(obj);
         this.objectList.remove(obj);
+        for (var i = 0; i < obj.collideGroups.length; i++)
+        {
+            obj.collideGroups[i].removeGameObject(obj);
+        }
         this._objList[id] = null;
-        node.object.id = -1;
+        obj.id = -1;
 
-        this.collideTable.rows = this.objectList.length;
-        this.collideTable.columns = this.objectList.length;
+        /*this.collideTable.rows = this.objectList.length;
+        this.collideTable.columns = this.objectList.length;*/
     }
     Scene.prototype.addLayer = function (layer, depth)
     {
-        layer.scene = this;
         this.layers.add(layer, depth);
-        for (var i = 0; i < this.cameraList.length; i++)
-        {
-            var camera=this.cameraList[i];
-            for (var j = 0; j < camera.outputList.length ; j++)
-            {
-                camera.outputList[j].setLayer(this.layers.count);
-            }
-        }
     }
     Scene.prototype.removeLayer = function (depth)
     {
@@ -1512,11 +1579,11 @@
             {
                 if (list[i] == obj)
                 {
-                    for (; i < list.length + 1; i++)
+                    for (; i < list.length - 1; i++)
                     {
                         list[i] = list[i + 1];
                     }
-                    list[i].length -= 1;
+                    list.length -= 1;
                     return;
                 }
             }
@@ -1543,6 +1610,7 @@
         }
         return list;
     }
+    Engine.ArrayList = ArrayList;
 
     //Matrix
     function Matrix(m,n)
@@ -2127,6 +2195,11 @@
             return;
         this.objectList.add(obj);
         obj.collideGroups.add(this);
+    }
+    CollideGroup.prototype.removeGameObject = function (obj)
+    {
+        this.objectList.remove(obj);
+        obj.collideGroups.remove(this);
     }
     Engine.CollideGroup = CollideGroup;
     window.CollideGroup = CollideGroup;

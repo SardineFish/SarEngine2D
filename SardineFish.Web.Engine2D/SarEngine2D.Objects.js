@@ -468,6 +468,28 @@
                 return true;
             return false;
         }
+        else if (obj instanceof Rectangle)
+        {
+            for (var i = 0; i < obj.E.length; i++)
+            {
+                if (this.isCross(obj.E[i]))
+                    return true;
+            }
+            return false;
+        }
+        else if (obj instanceof Polygon)
+        {
+            for (var i = 0; i < obj.E.length; i++)
+            {
+                if (this.isCross(obj.E[i]))
+                    return true;
+            }
+            return false;
+        }
+        else if (obj instanceof Particle)
+        {
+            return obj.isCollideWith(this, 0, 0);
+        }
     }
     Line.prototype.render = function (graphics, x, y, r, dt)
     {
@@ -1372,6 +1394,7 @@
         this.collideGroups = ArrayList();
         this.animationCallbackList = ArrayList();
         this.links = ArrayList();
+        this.lifeTime = 0;
         this.layer = null;
         this.zIndex = 0;
         this.mass = 1;
@@ -1391,6 +1414,7 @@
         this.onUpdate = null;
         this.onStart = null;
         this.onCollide = null;
+        this.onCollideSimulate = null;
         this.onMouseDown = null;
         this.onMouseUp = null;
         this.onClick = null;
@@ -1674,7 +1698,133 @@
     //-------Colliders
     function Colliders() { }
 
+    //Particle
+    function Particle()
+    {
+        this.size = 1;
+        this.color = new Color(0, 0, 0, 1);
+        this.v = new Vector2(0, 0);
+        this.position = new Point(0, 0);
+        this.center = new Point(0, 0);
+        this.o = new Point(0, 0);
+        this.rotation = 0;
+        this.coordinate = Coordinate.Default;
+    }
+    Particle.prototype.copy = function ()
+    {
+        var p = new Particle();
+        p.size = this.size;
+        if (this.color && this.color.copy)
+            p.color = this.color.copy();
+        else
+            p.color = this.color;
+        p.v = this.v.copy();
+    }
+    Particle.prototype.setCoordinate = function (coordinate)
+    {
+        this.coordinate = coordinate;
+        this.position.setCoordinate(coordinate);
+        this.center.setCoordinate(coordinate);
+        this.o.setCoordinate(coordinate);
+        this.v.setCoordinate(coordinate);
+    }
+    Particle.prototype.changeCoordinate = function (coordinate)
+    {
+        this.coordinate = coordinate;
+        this.position.changeCoordinate(coordinate);
+        this.center.changeCoordinate(coordinate);
+        this.o.changeCoordinate(coordinate);
+        this.v.changeCoordinate(coordinate);
+    }
+    Particle.prototype.move = function (dx, dy)
+    {
+        this.position.x += dx;
+        this.position.y += dy;
+        this.center.x += dx;
+        this.center.y += dy;
+    }
+    Particle.prototype.moveTo = function (x, y)
+    {
+        var dx = x - this.position.x;
+        var dy = y - this.position.y;
+        this.position.x += dx;
+        this.position.y += dy;
+        this.center.x += dx;
+        this.center.y += dy;
+    }
+    Particle.prototype.setCenter = function (x, y)
+    {
+        var dx = x - this.center.x;
+        var dy = y - this.center.y;
+        this.center = new Point(x, y);
+        this.o.x -= dx;
+        this.o.y -= dy;
+    }
+    Particle.prototype.setPosition = function (x, y)
+    {
+        this.position = new Point(x, y);
+    }
+    Particle.prototype.rotate = function (rad, x, y)
+    {
+        if (isNaN(x) || isNaN(y))
+        {
+            this.position.rotate(rad, this.center.x, this.center.y);
+        }
+        else
+        {
+            this.position.rotate(rad, x, y);
+            this.center.rotate(rad, x, y);
+        }
+        this.rotation += rad;
+    }
+    Particle.prototype.rotateTo = function (rad, x, y)
+    {
+        if (isNaN(x) || isNaN(y))
+        {
+            this.position.rotate(rad - this.rotation, this.center.x, this.center.y);
+        }
+        else
+        {
+            this.position.rotate(rad - this.rotation, x, y);
+            this.center.rotate(rad - this.rotation, x, y);
+        }
+        this.rotation += rad;
+    }
+    Particle.prototype.render = function (graphics, x, y, r, dt)
+    {
+        var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
+        o.x += this.center.x;
+        o.y += this.center.y;
+        graphics.beginPath();
+        graphics.arc(o.x, o.y, this.size, 0, 2 * Math.PI);
+        graphics.fillStyle = this.color;
+        graphics.fill();
+    }
+    Particle.prototype.isCollideWith = function (target, v1, v2, dt)
+    {
+        var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
+        o.x += this.center.x;
+        o.y += this.center.y;
 
+        var l = new Line(o, new Point(v1.x * dt + o.x, v1.y * dt + o.y));
+
+        if (target instanceof Particle)
+        {
+            var o2 = this.o.coordinate.pFrom(target.o.x, target.o.y);
+            o2.x += target.center.x;
+            o2.y += target.center.y;
+            var l2 = new Line(o, new Point(v2.x * dt + o2.x, v2.y * dt + o2.y));
+            return l2.isCross(l);
+        }
+
+        return l.isCross(target);
+    }
+    Particle.prototype.collide = function (self, target, dt)
+    {
+
+    }
+    Engine.Particle = Particle;
+    window.Particle = Particle;
 
     //-------Circle
     function Circle(r)
@@ -1801,7 +1951,7 @@
             return this.isCollideWith(obj);
         }
     }
-    Circle.prototype.isCollideWith = function (col)
+    Circle.prototype.isCollideWith = function (col, v1, v2, dt)
     {
         if (col instanceof Polygon)
         {
@@ -1841,6 +1991,10 @@
                     return true;
             }
             return false;
+        }
+        else if (col instanceof Particle)
+        {
+            return col.isCollideWith(this, v2, v1, dt);
         }
     }
     Circle.prototype.collide = function (self, target, dt)
@@ -2118,7 +2272,7 @@
             v[i] = new Point(this.V[i].x, this.V[i].y);
         }
         var pol = new Polygon(v);
-        pol.angV = this.angV.copy();
+        pol.angV = this.angV;
         pol.rotation = this.rotation;
         pol.coordinate = this.coordinate;
         pol.rigidBody = this.rigidBody;
@@ -2291,7 +2445,7 @@
         graphics.fill();
         graphics.stroke();
     }
-    Polygon.prototype.isCollideWith = function (col)
+    Polygon.prototype.isCollideWith = function (col,v1,v2,dt)
     {
         if (!(this.E instanceof Array))
         {
@@ -2369,6 +2523,10 @@
                 }
             return false;
         }
+        else if (col instanceof Particle)
+        {
+            return col.isCollideWith(this, v2, v1, dt);
+        }
         return false;
     }
     Polygon.prototype.collide = function (self, target, dt)
@@ -2394,6 +2552,7 @@
                 if (args.ignore)
                     return;
             }
+            
             var e = args.e;
             var dff = args.dff;
             var poly = self.collider;
@@ -3136,7 +3295,7 @@
         graphic.fillRect(o.x, o.y + this.height, this.width, this.height);
         graphic.strokeRect(o.x, o.y + this.height, this.width, this.height);
     }
-    Rectangle.prototype.isCollideWith = function (obj)
+    Rectangle.prototype.isCollideWith = function (obj, v1,v2,dt)
     {
         if (obj instanceof Ground)
         {
@@ -3180,6 +3339,10 @@
             return obj.isCollideWith(this);
         else if (obj instanceof Polygon)
             return obj.isCollideWith(this);
+        else if (obj instanceof Particle)
+        {
+            return obj.isCollideWith(this, v2, v1, dt);
+        }
     }
     Rectangle.prototype.collide = function (self, target, dt)
     {

@@ -22,7 +22,7 @@
 </head>
 <body>
     <div id="center">
-        <canvas id="output"></canvas>
+        <div id="output"></div>
     </div>
     <script>
         var Width = window.innerWidth;
@@ -36,15 +36,30 @@
         var PI = Math.PI;
         var speed = 800;
         var turnA = 3000;
-        var bulletSpeed = 4399;
+        var turnAngV = 1.6;
+        var bulletSpeed = 5000;
         var speedUpTime = 0.5;//s
+        var shootCD = 50;//ms
+        var bulletLifeTime = 100;
+        var flightLife = 100;
+        var bulletDamage = 10;
+        var enemyGroup = new CollideGroup();
+        var friendGroup = new CollideGroup();
+        var player;
+        var backgroundLayer = new Layer();
+        var flightLayer = new Layer();
+        var bulletLayer = new Layer();
 
         function init()
         {
-            engine = SarEngine.createByCanvas($("#output").get(0), Width, Height);
+            engine = SarEngine.createInNode($("#output").get(0), Width, Height);
             scene = engine.scene;
             camera = scene.cameraList[0];
             engine.start();
+
+            scene.addLayer(backgroundLayer, -1);
+            scene.addLayer(flightLayer, 100);
+            scene.addLayer(bulletLayer, 10);
             
             scene.onUpdate = sceneUpdate;
             scene.onKeyDown = sceneKeyDown;
@@ -63,52 +78,135 @@
 
             Coordinate.Default.axis.visible = true;
 
-            /*flightImg = new Polygon([new Point(0, 10), new Point(10, 0), new Point(-10, 0)]);
-            flightImg.strokeStyle = "black";*/
+            /*var triangle = new Polygon([new Point(0, 20), new Point(40, -20), new Point(-40, -20)]);
+            triangle.strokeStyle = "black";
+            var comb = new Combination();
+            comb.addObject(flightImg);*/
+            //comb.addObject(triangle);
+
             flightImg = SarEngine.Image.fromUrl("img/Flight.png", 64, 64);
             
-            bullet = new Line(new Point(0, -10), new Point(0, 10));
+            bullet = new Line(new Point(0, -20), new Point(0, 20));
             bullet.strokeStyle = Color.fromString("#66CCFF");
             bullet.strokeWidth = 2;
 
             flight = createFlight();
-            scene.addGameObject(flight, 0);
+            scene.addGameObject(flight, flightLayer, friendGroup);
             //flight.center.setCoordinate(camera.viewCoordinate);
             //flight.position.setCoordinate(camera.viewCoordinate);
 
             flight.moveTo(0, 0);
             camera.moveTo(0, 0);
             camera.linkTo(flight);
+
+            player = flight;
+            for (var i = 0; i < 5; i++)
+            {
+                var x = -2000 + Math.random() * 4000;
+                var y = -2000 + Math.random() * 4000;
+                initAI(x, y, false);
+            }
+        }
+        function initAI(x, y, friend)
+        {
+            var flight = createFlight();
+            
+
+            flight.moveTo(x, y);
+            if (!friend)
+                scene.addGameObject(flight, flightLayer, enemyGroup);
+            else
+                scene.addGameObject(flight, flightLayer, friendGroup);
+            flight.onUpdate = FlightUpdate;
+            var behaviour = null;
+            var control = flyFoward;
+            function FlightUpdate()
+            {
+                if (behaviour)
+                    behaviour(flight, enemyGroup);
+                if (control)
+                    control(flight, enemyGroup);
+            }
+            function AIBehaviour()
+            {
+                speedUp(flight, speed, speedUpTime);
+                var v = new Vector2(player.position.x - flight.position.x, player.position.y - flight.position.y);
+                var cosAng = Vector2.multi(v, flight.forward) / v.mod();
+                if (cosAng > 0.8)
+                {
+                    control = flyFoward;
+                    behaviour = null;
+                }
+                if (cosAng > 0.86)
+                {
+                    behaviour = Shoot;
+                }
+                else if (v.x * flight.forward.y - flight.forward.x * v.y > 0)
+                {
+                    control = turnRight;
+                    behaviour = null;
+                }
+                else
+                {
+                    control = turnLeft;
+                    behaviour = null;
+                }
+                setTimeout(AIBehaviour, 500);
+            }
+            AIBehaviour();
         }
         function createFlight()
         {
             var flight = new GameObject();
             flight.graphic = flightImg.copy();
+            var triangle = new Polygon([new Point(0, 20), new Point(40, -20), new Point(-40, -20)]);
+            flight.collider = triangle;
             flight.forward = new Vector2(0, 1);
             flight.forward.position = { x: 0, y: 0 };
             flight.links.add(flight.forward);
             flight.speed = 0;
+            flight.lastShoot = 0;
+            flight.life = flightLife;
+            flight.onCollide = flightCollide;
+            flight.name = "flight";
+            function Destroy(flight)
+            {
+                scene.removeGameObject(flight.id);
+            }
+            function flightCollide(e)
+            {
+                if (e.target.name == "bullet")
+                {
+                    flight.life -= bulletDamage;
+                    if (flight.life < 0)
+                    {
+                        flight.life = 0;
+                        Destroy(flight);
+                    }
+
+                }
+            }
             return flight;
         }
         function turnLeft(flight)
         {
             flight.v.x = 0;
             flight.v.y = 0;
-            var R = flight.speed * flight.speed / turnA + 100;
+            var R = flight.speed / turnAngV;
             var vct = Vector2.multi(flight.forward, R);
             vct.rotate(PI / 2);
             flight.setCenter(flight.position.x + vct.x, flight.position.y + vct.y);
-            flight.angV = flight.speed / R;
+            flight.angV = turnAngV;
         }
         function turnRight(flight)
         {
             flight.v.x = 0;
             flight.v.y = 0;
-            var R = flight.speed * flight.speed / turnA + 100;
+            var R = flight.speed / turnAngV;
             var vct = Vector2.multi(flight.forward, R);
             vct.rotate(-PI / 2);
             flight.setCenter(flight.position.x + vct.x, flight.position.y + vct.y);
-            flight.angV = -flight.speed / R;
+            flight.angV = -turnAngV;
         }
         function speedUp(flight, speed, time)
         {
@@ -134,23 +232,66 @@
             flight.speed = flight.speed;
             flight.v = v;
         }
-        function Shoot(flight)
+        function Shoot(flight, group)
         {
+            if (flight.lastShoot + shootCD > scene.runtime)
+                return;
+            flight.lastShoot = scene.runtime;
+            var vLeft = Vector2.multi(flight.forward, 20);
+            vLeft.rotate(PI / 2);
+            var vRight = Vector2.multi(flight.forward, 20);
+            vRight.rotate(-PI / 2);
             var b = bullet.copy();
             b.rotate(flight.rotation);
-            var obj = new GameObject();
-            obj.graphic = b;
-            obj.moveTo(flight.position.x, flight.position.y);
-            obj.v = Vector2.multi(flight.forward, bulletSpeed);
-            scene.addGameObject(obj, 0);
+            var bulletLeft = new GameObject();
+            bulletLeft.graphic = b.copy();
+            bulletLeft.v = Vector2.multi(flight.forward, bulletSpeed);
+            var bulletRight = new GameObject();
+            bulletRight.graphic = b.copy();
+            bulletRight.v = Vector2.multi(flight.forward, bulletSpeed);
+
+            var particle = new Particle();
+
+            bulletLeft.collider = particle.copy();
+            bulletRight.collider = particle;
+
+            bulletLeft.moveTo(flight.position.x + vLeft.x, flight.position.y + vLeft.y);
+            bulletRight.moveTo(flight.position.x + vRight.x, flight.position.y + vRight.y);
+
+            scene.addGameObject(bulletLeft, bulletLayer, group);
+            scene.addGameObject(bulletRight, bulletLayer, group);
+
+            bulletLeft.name = "bullet";
+            bulletRight.name = "bullet";
+
+            bulletLeft.onUpdate = checkLifeTime;
+            bulletRight.onUpdate = checkLifeTime;
+            function checkLifeTime(obj)
+            {
+                if (obj.lifeTime > bulletLifeTime)
+                {
+                    scene.removeGameObject(obj.id);
+                }
+            }
         }
         function sceneUpdate(e)
         {
             if (scene.device.keyboard.keys[Keys.Space] == Keyboard.KeyState.Down)
             {
-                Shoot(flight);
+                if (flight.lastShoot + shootCD < scene.runtime)
+                {
+                    Shoot(flight, friendGroup);
+                }
             }
             var key = controlStack.peak();
+            if (scene.device.keyboard.keys[Keys.W] == Keyboard.KeyState.Down || scene.device.keyboard.keys[Keys.Up] == Keyboard.KeyState.Down)
+            {
+                speedUp(flight, speed, speedUpTime);
+            }
+            else
+            {
+                slowDown(flight, 0, speedUpTime);
+            }
             for (var i = controlStack.length - 1; i >= 0 ; i--)
             {
                 if (Keys.check(controlStack[i], [Keys.A, Keys.Left]))
@@ -163,6 +304,14 @@
                     turnRight(flight);
                     return;
                 }
+            }
+            if (scene.device.keyboard.keys[Keys.W] == Keyboard.KeyState.Down || scene.device.keyboard.keys[Keys.Up] == Keyboard.KeyState.Down)
+            {
+                speedUp(flight, speed, speedUpTime);
+            }
+            else
+            {
+                slowDown(flight, 0, speedUpTime);
             }
             if (key == Keyboard.Keys.W || key == Keyboard.Keys.Up)
             {
@@ -180,12 +329,7 @@
             if (e.key == Keyboard.Keys.A || e.key == Keyboard.Keys.S || e.key == Keyboard.Keys.D || e.key == Keyboard.Keys.W ||
                 e.key == Keyboard.Keys.Left || e.key == Keyboard.Keys.Up || e.key == Keyboard.Keys.Down || e.key == Keyboard.Keys.Right)
             {
-                speedUp(flight, speed, speedUpTime);
                 controlStack.push(e.key);
-            }
-            if (e.key == Keys.Space)
-            {
-                Shoot(flight);
             }
             if (Keyboard.checkKeys(e.key, [Keys.W, Keys.Up]) && flight.action != flyFoward)
             {
