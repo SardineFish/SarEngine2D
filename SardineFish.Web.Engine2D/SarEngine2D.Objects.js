@@ -219,12 +219,12 @@
     Point.prototype.rotate = function (rad, x0, y0)
     {
         //alert(this+"->"+rad);
-        var x = this.innerX - x0;
-        var y = this.innerY - y0;
+        var x = this.x - x0;
+        var y = this.y - y0;
         var dx = x * Math.cos(rad) - y * Math.sin(rad);
         var dy = y * Math.cos(rad) + x * Math.sin(rad);
-        this.x = o.x + dx;
-        this.y = o.y + dy;
+        this.x = x0 + dx;
+        this.y = y0 + dy;
         //alert(this);
     }
     Point.prototype.isBelongTo = function (l)
@@ -353,9 +353,10 @@
         this.p1 = p1;
         this.p2 = p2;
         this.center = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
-        this.position = this.center;
+        this.position = new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
         this.coordinate = Coordinate.Default;
         this.strokeStyle = new Color(0, 0, 0, 1.00);
+        this.strokeWidth = 1;
     }
     Line.prototype.copy = function ()
     {
@@ -369,6 +370,7 @@
             line.strokeStyle = this.strokeStyle.copy();
         else
             line.strokeStyle = this.strokeStyle;
+        line.strokeWidth = this.strokeWidth;
         return line;
     }
     Line.prototype.setCoordinate = function (coordinate)
@@ -394,19 +396,28 @@
     }
     Line.prototype.moveTo = function (x, y)
     {
-        if (x == this.center.x && y == this.center.y)
+        if (x == this.position.x && y == this.position.y)
             return;
-        this.p1.x = this.p1.x - this.center.x + x;
-        this.p1.y = this.p1.y - this.center.y + y;
-        this.p2.x = this.p2.x - this.center.x + x;
-        this.p2.y = this.p2.y - this.center.y + y;
-        this.center.x = x;
-        this.center.y = y;
+        var dx = x - this.position.x;
+        var dy = y - this.position.y;
+        this.p1.x += dx;
+        this.p1.y += dy;
+        this.p2.x += dx;
+        this.p2.y += dy;
+        this.center.x += dx;
+        this.center.y += dy;
+        this.position.x = x;
+        this.position.y = y;
     }
     Line.prototype.rotate = function (rad, x, y)
     {
-        this.p1.rotate(o, x, y);
-        this.p2.rotate(o, x, y);
+        if (isNaN(x) || isNaN(y))
+        {
+            x = this.center.x;
+            y = this.center.y;
+        }
+        this.p1.rotate(rad, x, y);
+        this.p2.rotate(rad, x, y);
     }
     Line.prototype.isCross = function (obj)
     {
@@ -466,6 +477,7 @@
         graphics.moveTo(p1.x, p1.y);
         graphics.lineTo(p2.x, p2.y);
         graphics.strokeStyle = this.strokeStyle;
+        graphics.strokeWidth = this.strokeWidth;
         graphics.stroke();
     }
     Line.prototype.toGameObject = function ()
@@ -729,12 +741,16 @@
             }
         });
     }
-    Image.fromUrl = function (url)
+    Image.fromUrl = function (url, width, height)
     {
         var img = new window.Image();
         var image = new Image(img);
+        image.o.x = -width / 2;
+        image.o.y = height / 2;
         img.onload = function ()
         {
+            image.width = width;
+            image.height = height;
             image.o.x = -img.width / 2;
             image.o.y = img.height / 2;
             img.onload = null;
@@ -744,11 +760,14 @@
     }
     Image.prototype.copy = function ()
     {
-        var img = new Engine.Image(img);
-        img.position = this.position.copy();
-        img.coordinate = this.coordinate;
+        var img = new Engine.Image(this.img);
+        var image = this;
+        img.setPosition(this.position.x, this.position.y);
+        img.setCenter(this.center.x, this.center.y);
         img.o = this.o.copy();
+        img.coordinate = this.coordinate;
         img.onRender = this.onRender;
+        return img;
     }
     Image.prototype.setCoordinate = function (coordinate)
     {
@@ -1455,10 +1474,21 @@
             (function (obj, key, from, to, time, callback)
             {
                 var delta = (to - from) / time;
+                if (delta == 0)
+                    return;
                 var animeCallback = function (dt)
                 {
                     obj[key] += delta * dt;
-                    if (obj[key] > to)
+                    if (delta < 0 && obj[key] <= to)
+                    {
+                        obj[key] = to;
+                        gameObject.animationCallbackList.remove(animeCallback);
+                        if (callback)
+                        {
+                            callback();
+                        }
+                    }
+                    else if (delta > 0 && obj[key] >= to)
                     {
                         obj[key] = to;
                         gameObject.animationCallbackList.remove(animeCallback);
@@ -1471,6 +1501,10 @@
                 gameObject.animationCallbackList.add(animeCallback);
             })(obj, lastKey, obj[lastKey], properties[key], time, callback);
         }
+    }
+    GameObject.prototype.stop = function ()
+    {
+        this.animationCallbackList.length = 0;
     }
     GameObject.prototype.linkTo = function (gameObject)
     {
@@ -2060,7 +2094,10 @@
         if (v instanceof Array)
         {
             this.beginInit();
-            this.V = v;
+            for (var i = 0; i < v.length; i++)
+            {
+                this.addPoint(v[i]);
+            }
             this.endInit();
         }
     }

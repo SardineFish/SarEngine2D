@@ -1,6 +1,6 @@
-﻿(function (engine)
+﻿(function (Engine)
 {
-    if (!engine)
+    if (!Engine)
     {
         throw new Error("Engine not found.");
     }
@@ -710,7 +710,7 @@
         if (this.onTouchMove)
             this.onTouchMove(e);
     }
-    engine.GUI = GUI;
+    Engine.GUI = GUI;
     window.GUI = GUI;
 
     function Block(width, height)

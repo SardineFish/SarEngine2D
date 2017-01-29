@@ -549,6 +549,13 @@
             var scene = this;
             this.runtime += delay;
             var dt = delay / 1000;
+            if (scene.onUpdate)
+            {
+                args = { dt: dt, cancle: false };
+                scene.onUpdate(args);
+                if (args.cancle)
+                    return;
+            }
             //dt=0.016;
             for (var i = 0; i < this.objectList.length; i++)
             {
@@ -860,8 +867,6 @@
         }
         function KeyUpCallback(e)
         {
-            scene.device.keyboard.keys[e.keyCode] = Keyboard.KeyState.Up;
-
             if (scene.device.keyboard.keys[e.keyCode] == Keyboard.KeyState.Down)
             {
                 scene.device.keyboard.keys[e.keyCode] = Keyboard.KeyState.Up;
@@ -2305,7 +2310,7 @@
 
         function DFS(obj, target)
         {
-            for (var i = 0; i < obj.links.length; i++)
+            for (var i = 0;obj.links && i < obj.links.length; i++)
             {
                 if (obj.links[i] == target)
                 {
@@ -3712,11 +3717,30 @@
         }
         return keys;
     })(Keyboard.Keys);
+    Keyboard.Keys.check = function (key, keys)
+    {
+        for (var i = 0; i < keys.length; i++)
+        {
+            if (key == keys[i])
+                return true;
+        }
+        return false;
+    }
+    window.Keys = Keyboard.Keys;
     Keyboard.KeyState = {};
     Keyboard.KeyState.None = 0;
     Keyboard.KeyState.Down = 1;
     Keyboard.KeyState.Up = 2;
     Keyboard.KeyState.Pressed = 3;
+    Keyboard.checkKeys = function (key, keys)
+    {
+        for (var i = 0; i < keys.length; i++)
+        {
+            if (key == keys[i])
+                return true;
+        }
+        return false;
+    }
     function KeyEventArgs()
     {
         this.key = 0;

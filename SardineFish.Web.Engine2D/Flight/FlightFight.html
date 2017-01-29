@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Flight Fight</title>
+    <script src="lib/jquery.min.js"></script>
+    <script src="../SardineFish.Web.js"></script>
+    <script src="../SardineFish.Web.UI.js"></script>
+    <script src="../SarEngine2D.js"></script>
+    <script src="../SarEngine2D.Objects.js"></script>
+    <script src="../SarEngine2D.GUI.js"></script>
+    <style >
+        html{
+            -ms-touch-action: none; 
+            overflow: hidden;
+        }
+        body{
+            margin:0px;
+            padding:0px;
+            background-color: #FAFAFA;
+        }
+    </style>
+</head>
+<body>
+    <div id="center">
+        <canvas id="output"></canvas>
+    </div>
+    <script>
+        var Width = window.innerWidth;
+        var Height = window.innerHeight;
+        var engine, scene, camera;
+        var flightImg;
+        var flight;
+        var bullet;
+        var forward = new Vector2(0, 1);
+        var controlStack = Stack.createAsArray();
+        var PI = Math.PI;
+        var speed = 800;
+        var turnA = 3000;
+        var bulletSpeed = 4399;
+        var speedUpTime = 0.5;//s
+
+        function init()
+        {
+            engine = SarEngine.createByCanvas($("#output").get(0), Width, Height);
+            scene = engine.scene;
+            camera = scene.cameraList[0];
+            engine.start();
+            
+            scene.onUpdate = sceneUpdate;
+            scene.onKeyDown = sceneKeyDown;
+            scene.onKeyUp = sceneKeyUp;
+            scene.onMouseWheel = function (e)
+            {
+                if (e.wheelDelta > 0)
+                {
+                    camera.zoomTo(camera.zoom * 1.2, e.x, e.y);
+                }
+                else
+                {
+                    camera.zoomTo(camera.zoom / 1.2, e.x, e.y);
+                }
+            }
+
+            Coordinate.Default.axis.visible = true;
+
+            /*flightImg = new Polygon([new Point(0, 10), new Point(10, 0), new Point(-10, 0)]);
+            flightImg.strokeStyle = "black";*/
+            flightImg = SarEngine.Image.fromUrl("img/Flight.png", 64, 64);
+            
+            bullet = new Line(new Point(0, -10), new Point(0, 10));
+            bullet.strokeStyle = Color.fromString("#66CCFF");
+            bullet.strokeWidth = 2;
+
+            flight = createFlight();
+            scene.addGameObject(flight, 0);
+            //flight.center.setCoordinate(camera.viewCoordinate);
+            //flight.position.setCoordinate(camera.viewCoordinate);
+
+            flight.moveTo(0, 0);
+            camera.moveTo(0, 0);
+            camera.linkTo(flight);
+        }
+        function createFlight()
+        {
+            var flight = new GameObject();
+            flight.graphic = flightImg.copy();
+            flight.forward = new Vector2(0, 1);
+            flight.forward.position = { x: 0, y: 0 };
+            flight.links.add(flight.forward);
+            flight.speed = 0;
+            return flight;
+        }
+        function turnLeft(flight)
+        {
+            flight.v.x = 0;
+            flight.v.y = 0;
+            var R = flight.speed * flight.speed / turnA + 100;
+            var vct = Vector2.multi(flight.forward, R);
+            vct.rotate(PI / 2);
+            flight.setCenter(flight.position.x + vct.x, flight.position.y + vct.y);
+            flight.angV = flight.speed / R;
+        }
+        function turnRight(flight)
+        {
+            flight.v.x = 0;
+            flight.v.y = 0;
+            var R = flight.speed * flight.speed / turnA + 100;
+            var vct = Vector2.multi(flight.forward, R);
+            vct.rotate(-PI / 2);
+            flight.setCenter(flight.position.x + vct.x, flight.position.y + vct.y);
+            flight.angV = -flight.speed / R;
+        }
+        function speedUp(flight, speed, time)
+        {
+            if (flight.action == speedUp)
+                return;
+            flight.stop();
+            flight.action = speedUp;
+            flight.animate({ "speed": speed }, time);
+        }
+        function slowDown(flight, speed, time)
+        {
+            if (flight.action == slowDown)
+                return;
+            flight.stop();
+            flight.action = slowDown;
+            flight.animate({ "speed": speed }, time);
+        }
+        function flyFoward(flight)
+        {
+            flight.setCenter(flight.position.x, flight.position.y);
+            flight.angV = 0;
+            var v = Vector2.multi(flight.forward, flight.speed);
+            flight.speed = flight.speed;
+            flight.v = v;
+        }
+        function Shoot(flight)
+        {
+            var b = bullet.copy();
+            b.rotate(flight.rotation);
+            var obj = new GameObject();
+            obj.graphic = b;
+            obj.moveTo(flight.position.x, flight.position.y);
+            obj.v = Vector2.multi(flight.forward, bulletSpeed);
+            scene.addGameObject(obj, 0);
+        }
+        function sceneUpdate(e)
+        {
+            if (scene.device.keyboard.keys[Keys.Space] == Keyboard.KeyState.Down)
+            {
+                Shoot(flight);
+            }
+            var key = controlStack.peak();
+            for (var i = controlStack.length - 1; i >= 0 ; i--)
+            {
+                if (Keys.check(controlStack[i], [Keys.A, Keys.Left]))
+                {
+                    turnLeft(flight);
+                    return;
+                }
+                if (Keys.check(controlStack[i], [Keys.D, Keys.Right]))
+                {
+                    turnRight(flight);
+                    return;
+                }
+            }
+            if (key == Keyboard.Keys.W || key == Keyboard.Keys.Up)
+            {
+                speedUp(flight, speed, speedUpTime);
+                flyFoward(flight);
+            }
+            else
+            {
+                slowDown(flight, 0, speedUpTime);
+                flyFoward(flight);
+            }
+        }
+        function sceneKeyDown(e)
+        {
+            if (e.key == Keyboard.Keys.A || e.key == Keyboard.Keys.S || e.key == Keyboard.Keys.D || e.key == Keyboard.Keys.W ||
+                e.key == Keyboard.Keys.Left || e.key == Keyboard.Keys.Up || e.key == Keyboard.Keys.Down || e.key == Keyboard.Keys.Right)
+            {
+                speedUp(flight, speed, speedUpTime);
+                controlStack.push(e.key);
+            }
+            if (e.key == Keys.Space)
+            {
+                Shoot(flight);
+            }
+            if (Keyboard.checkKeys(e.key, [Keys.W, Keys.Up]) && flight.action != flyFoward)
+            {
+            }
+            else if (Keyboard.checkKeys(e.key, [Keys.Left, Keys.A]) && flight.action != turnLeft)
+            {
+            }
+            else if (Keyboard.checkKeys(e.key, [Keys.Right, Keys.D]) && flight.action != turnRight)
+            {
+            }
+        }
+        function sceneKeyUp(e)
+        {
+            if (e.key == Keyboard.Keys.A || e.key == Keyboard.Keys.S || e.key == Keyboard.Keys.D || e.key == Keyboard.Keys.W ||
+                e.key == Keyboard.Keys.Left || e.key == Keyboard.Keys.Up || e.key == Keyboard.Keys.Down || e.key == Keyboard.Keys.Right)
+            {
+                for (var i = controlStack.length - 1; i >= 0; i--)
+                {
+                    if (controlStack[i] == e.key)
+                    {
+                        controlStack.removeAt(i);
+                        break;
+                    }
+                }
+            }
+            return;
+            if (e.key == Keyboard.Keys.A || e.key == Keyboard.Keys.Up)
+            {
+                flight.v.y = 0;
+                flight.v.x = 0;
+            }
+            if (e.key == Keyboard.Keys.A || e.key == Keyboard.Keys.Left)
+            {
+                flight.setCenter(flight.position.x, flight.position.y);
+                flight.angV = 0;
+                flight.v.y = 0;
+            }
+        }
+        init();
+    </script>
+</body>
+</html>

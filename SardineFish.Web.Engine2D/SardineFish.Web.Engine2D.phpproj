@@ -29,6 +29,12 @@
     <Content Include="0.1.0\SardineFish.Web.js" />
     <Content Include="0.1.0\SardineFish.Web.UI.js" />
     <Content Include="color.js" />
+    <Content Include="Flight\FlightFight.html" />
+    <Content Include="Flight\fonts\MaterialIcons-Regular.ttf" />
+    <Content Include="Flight\fonts\MaterialIcons-Regular.woff" />
+    <Content Include="Flight\fonts\MaterialIcons-Regular.woff2" />
+    <Content Include="Flight\img\Flight.png" />
+    <Content Include="Flight\lib\jquery.min.js" />
     <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />
     <Content Include="release\0.2.0\SardineFish.Web.Engine2D.js" />
     <Content Include="release\0.3.0\SardineFish.Web.Engine2D.js" />
@@ -39,6 +45,7 @@
     <Content Include="release\0.3.2\SardineFish.Web.Engine2D.js" />
     <Content Include="release\0.3.2\SardineFish.Web.Engine2D.zip" />
     <Content Include="release\0.4.0\SarEngine2D.js" />
+    <Content Include="release\1.0.0\SarEngine2D.js" />
     <Content Include="SardineFish.Web.Engine2D.Colliders.js" />
     <Content Include="SarEngine2D.Objects.js" />
     <Content Include="SarEngine2D.GUI.js" />
@@ -78,6 +85,10 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="0.1.0\" />
+    <Folder Include="Flight\" />
+    <Folder Include="Flight\fonts\" />
+    <Folder Include="Flight\img\" />
+    <Folder Include="Flight\lib\" />
     <Folder Include="release\" />
     <Folder Include="release\0.2.0\" />
     <Folder Include="release\0.1.0\" />
@@ -85,6 +96,7 @@
     <Folder Include="release\0.3.1\" />
     <Folder Include="release\0.3.2\" />
     <Folder Include="release\0.4.0\" />
+    <Folder Include="release\1.0.0\" />
     <Folder Include="Test\" />
   </ItemGroup>
 </Project>
