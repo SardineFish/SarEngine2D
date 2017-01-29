@@ -48,6 +48,7 @@
     <Content Include="Test\blank.html" />
     <Content Include="Test\cameraTest.html" />
     <Content Include="Test\colliderTest.html" />
+    <Content Include="Test\collideTestNew.html" />
     <Content Include="Test\crouch.png" />
     <Content Include="Test\crouchLeft.png" />
     <Content Include="Test\engineTest.html" />

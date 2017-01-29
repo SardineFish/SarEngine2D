@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="jquery.min.js"></script>
+    <script src="../SardineFish.Web.js"></script>
+    <script src="../SarEngine2D.js"></script>
+    <script src="../SarEngine2D.Objects.js"></script>
+    <script src="../SarEngine2D.GUI.js"></script>
+    <style >
+        html{
+            -ms-touch-action: none; 
+            overflow: hidden;
+        }
+        body{
+            margin:0px;
+            padding:0px;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <div>
+        <canvas id="canvas"></canvas>
+    </div>
+    <script >
+        var Width = window.innerWidth;
+        var Height = window.innerHeight;
+        var canvas = $("#canvas").get(0);
+        var engine = SarEngine.createByCanvas(canvas, Width, Height);
+        var scene = engine.scene;
+        var camera = scene.cameraList[0];
+        engine.start();
+
+        scene.layers[0].coordinate.axis.visible = true;
+
+        var lastP = new Point(0, 0);
+        var wall = new Rectangle(Width, Height);
+        wall.fillStyle = "#66CCFF";
+        wall.rigidBody = true;
+        wall.soft = false;
+        wall.static = true;
+
+        var wallLeft = new GameObject();
+        wallLeft.graphic = wall.copy();
+        wallLeft.collider = wallLeft.graphic;
+        wallLeft.moveTo(-Width, 0);
+        scene.addGameObject(wallLeft, 0);
+
+        var wallTop = new GameObject();
+        wallTop.graphic = wall.copy();
+        wallTop.collider = wallTop.graphic;
+        wallTop.moveTo(0, Height);
+        scene.addGameObject(wallTop, 0);
+
+        var wallRight = new GameObject();
+        wallRight.graphic = wall.copy();
+        wallRight.collider = wallRight.graphic;
+        wallRight.moveTo(Width, 0);
+        scene.addGameObject(wallRight, 0);
+
+        var wallBottom = new GameObject();
+        wallBottom.graphic = wall.copy();
+        wallBottom.collider = wallBottom.graphic;
+        wallBottom.moveTo(0, -Height);
+        scene.addGameObject(wallBottom, 0);
+
+        var group1 = new CollideGroup();
+        var group2 = new CollideGroup();
+        var groupWall = new CollideGroup();
+
+        scene.addCollideGroup(group1);
+        scene.addCollideGroup(group2);
+        scene.addCollideGroup(groupWall);
+
+        groupWall.addGameObject(wallLeft);
+        groupWall.addGameObject(wallTop);
+        groupWall.addGameObject(wallRight);
+        groupWall.addGameObject(wallBottom);
+
+        var lastObject = null;
+
+        scene.onClick = function (e)
+        {
+            if (e.button == Mouse.Buttons.Wheel)
+            {
+                lastObject.rotate(Math.PI * 1 / 7, e.x, e.y);
+                return;
+            }
+            var img = SarEngine.Image.fromUrl("stand.png");
+            //img.rotation = Math.PI * 1 / 4;
+            img.rotateTo(Math.PI * 1 / 4);
+            var obj = new GameObject();
+            obj.graphic = img;
+            obj.moveTo(e.x, e.y);
+            scene.addGameObject(obj);
+            if (!lastObject)
+            {
+                obj.angV = 1;
+                camera.linkTo(obj);
+            }
+            else
+                lastObject.linkTo(obj);
+            lastObject = obj;
+            return;
+            if (scene.objectList.length % 3 == 0)
+            {
+                var polygon = new Polygon();
+                polygon.beginInit();
+                polygon.addPoint(new Point( - 30, + 40));
+                polygon.addPoint(new Point( + 50,  + 30));
+                polygon.addPoint(new Point( - 60,  - 20));
+                polygon.endInit();
+                polygon.strokeStyle = "black";
+                polygon.fillStyle = "white";
+                polygon.rigidBody = true;
+                polygon.soft = true;;
+                polygon.static = false;
+                var obj = new GameObject();
+                obj.graphic = polygon;
+                obj.collider = polygon;
+                obj.moveTo(e.x, e.y);
+                scene.addGameObject(obj, 0);
+                obj.v = new Vector2(lastP.x - e.x, lastP.y - e.y);
+                lastP.x = e.x;
+                lastP.y = e.y;
+                group1.addGameObject(obj);
+            }
+            else if (scene.objectList.length % 3 == 1)
+            {
+                var circle = new Circle(100);
+                circle.strokeStyle = "black";
+                circle.fillStyle = "white";
+                circle.rigidBody = true;
+                circle.soft = true;;
+                circle.static = false;
+                var obj = new GameObject();
+                obj.graphic = circle;
+                obj.collider = circle;
+                obj.moveTo(e.x, e.y);
+                scene.addGameObject(obj, 0);
+                //obj.v = new Vector2(lastP.x - e.x, lastP.y - e.y);
+                lastP.x = e.x;
+                lastP.y = e.y;
+                group2.addGameObject(obj);
+
+
+
+                lastObject = obj;
+                obj.animate({ "position.x": 300 }, 1);
+            }
+            else
+            {
+                var rect = new Rectangle(100, 200);
+                rect.strokeStyle = "black";
+                rect.fillStyle = "white";
+                rect.rigidBody = true;
+                rect.soft = true;;
+                rect.static = false;
+                var obj = new GameObject();
+                obj.graphic = rect;
+                obj.collider = rect;
+                obj.moveTo(e.x, e.y);
+                scene.addGameObject(obj, 0);
+                obj.v = new Vector2(lastP.x - e.x, lastP.y - e.y);
+                lastP.x = e.x;
+                lastP.y = e.y;
+                group1.addGameObject(obj);
+                lastObject.linkTo(obj);
+            }
+        }
+        scene.onMouseWheel = function (e)
+        {
+            if (e.wheelDelta > 0)
+            {
+                camera.zoomTo(camera.zoom * 1.2, e.x, e.y);
+            }
+            else
+            {
+                camera.zoomTo(camera.zoom / 1.2, e.x, e.y);
+            }
+        }
+    </script>
+</body>
+</html>

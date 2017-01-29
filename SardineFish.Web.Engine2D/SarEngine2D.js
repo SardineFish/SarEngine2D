@@ -28,23 +28,35 @@
             set: function (value)
             {
                 scene = value;
-                scene.initEvents();
+                scene.initEvents(scene.eventSource);
                 scene.engine = engine;
             }
         }
         );
     }
     Engine.Version = 0.50;
-    Engine.createByCanvas = function (canvas)
+    Engine.createByCanvas = function (canvas, width, height)
     {
         var engine = new Engine();
-        var graphics = new Graphics(canvas);
+        var output = new Output(canvas, width, height);
         var scene = new Scene();
-        scene.eventSource = canvas;
+        scene.eventSource = output;
         engine.scene = scene;
         var camera = new Camera(0, 0, 0, 0, 1);
-        camera.graphics = graphics;
-        scene.camera = camera;
+        camera.addOutput(output);
+        scene.addCamera(camera);
+        return engine;
+    }
+    Engine.createInNode = function (node, width, height)
+    {
+        var engine = new Engine();
+        var output = new Output(node, width, height);
+        var scene = new Scene();
+        scene.eventSource = output;
+        engine.scene = scene;
+        var camera = new Camera(0, 0, 0, 0, 1);
+        camera.addOutput(output);
+        scene.addCamera(camera);
         return engine;
     }
     Engine.prototype.start = function ()
@@ -134,8 +146,8 @@
                 }
 
                 var x = delay;
-                delay = delay - lastDelay;
-                //delay = 13;
+                //delay = delay - lastDelay;
+                delay = 13;
                 lastDelay = x;
                 /*if(engine.debug.clear)
                     engine.debug.clear();
@@ -226,6 +238,9 @@
         this.physics = new Scene.Physics();
         this.cameraList = ArrayList();
         this.layers = new LayerCollection();
+        this.collideGroups = new ArrayList();
+        this.collideTable = new Matrix(0, 0);
+        this.runtime = 0;
         this.GUI = null;
         this.background = null;
         this.device = new Device();
@@ -362,6 +377,8 @@
     Scene.prototype.physicalSimulate = function (dt)
     {
         var scene = this;
+        var useGroup = this.collideGroups.length > 0;
+
         for (var d = 0; d < this.layers.depthList.length; d++)
         {
             var objectList = this.layers[this.layers.depthList[d]].objectList;
@@ -382,45 +399,103 @@
                 {
                     var w = obj.collider.angV;
                     var ang = w * dt;
-                    obj.rotate(obj.collider.center, ang);
+                    obj.rotate(ang, obj.collide.center.x, obj.collide.center.y);
+                }
+                if (obj.angV)
+                {
+                    var w = obj.angV;
+                    var ang = w * dt;
+                    obj.rotate(ang);
                 }
                 obj.resetForce();
                 if (obj.collider)
                     obj.collider.landed = false;
             }
 
-            for (var i = 0; i < objectList.length; i++)
+            if (!useGroup)
             {
-                if (obj.collider && obj.collider.rigidBody)
+                for (var i = 0; i < objectList.length; i++)
                 {
-                    for (var j = i + 1; j < objectList.length; j++)
+                    var obj = this.layers[this.layers.depthList[d]].objectList[i];
+                    if (obj.collider && obj.collider.rigidBody)
                     {
-                        var target = objectList[j];
-                        if (target.collider && target.collider.rigidBody)
+                        for (var j = i + 1; j < objectList.length; j++)
                         {
-
-                            if (obj.collider.isCollideWith(target.collider))
+                            var target = objectList[j];
+                            if (target.collider && target.collider.rigidBody)
                             {
 
-                                obj.collider.collide(obj, target, dt);
+                                if (obj.collider.isCollideWith(target.collider))
+                                {
+
+                                    obj.collider.collide(obj, target, dt);
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
+        if (useGroup)
+        {
+            for (var group1 = 0; group1 < this.collideGroups.length; group1++)
+            {
+                for (var i = 0; i < this.collideGroups[group1].objectList.length; i++)
+                {
+                    var obj1 = this.collideGroups[group1].objectList[i];
+                    if (!obj1.collider || !obj1.collider.rigidBody)
+                        continue;
+                    for (var group2 = 0; group2 < this.collideGroups.length; group2++)
+                    {
+                        if (group1 == group2)
+                            continue;
+                        if (this.collideGroups[group1].ignoreList.contain(this.collideGroups[group2]))
+                            continue;
+                        for (var j = 0; j < this.collideGroups[group2].objectList.length; j++)
+                        {
+                            var obj2 = this.collideGroups[group2].objectList[j];
+                            if (obj1 == obj2)
+                                continue;
+                            if (obj1.layer != obj2.layer)
+                                continue;
+                            if (this.collideTable[obj1.id][obj2.id] == this.runtime)
+                                continue;
+                            if (!obj2.collider || !obj2.collider.rigidBody)
+                                continue;
+                            this.collideTable[obj1.id][obj2.id] = this.collideTable[obj2.id][obj1.id] = this.runtime;
+                            if (obj1.collider.isCollideWith(obj2.collider))
+                            {
+                                obj1.collider.collide(obj1, obj2, dt);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
     Scene.prototype.render = function (dt)
     {
         var scene = this;
-        if (!this.camera)
+        if (!this.cameraList.length)
             return;
-        scene.camera.clear();
         if (scene.onRender)
-            scene.onRender(scene.camera.graphics, dt);
+        {
+            var args = { dt: dt, cancel: false };
+            scene.onRender(args);
+            if (args.cancel)
+                return;
+        }
+        for (var i = 0; i < this.cameraList.length; i++)
+        {
+            this.cameraList[i].clear();
+            this.cameraList[i].render(dt);
+        }
+
         //scene.camera.graphics.clearRect(scene.camera.center.x - scene.camera.width / 2, scene.camera.center.y + scene.camera.height / 2, scene.camera.width, scene.camera.height);
 
-        for (var i = 0; i < this.layers.depthList.length; i++)
+        /*for (var i = 0; i < this.layers.depthList.length; i++)
         {
             var layer = this.layers[this.layers.depthList[i]];
             if (layer.onRender)
@@ -430,14 +505,14 @@
                 if (args.cancel)
                     continue;
             }
-
+            
             layer.render(scene.camera.graphics, dt);
 
             if (layer.onEndRender)
             {
                 layer.onEndRender();
             }
-        }
+        }*/
         /*
         for (var i = 0; i < this.objectList.length; i++)
         {
@@ -448,6 +523,12 @@
             }
             obj.render(scene.camera.graphics, obj.position.x, obj.position.y, 0, dt);
         }*/
+        return;
+        
+
+
+
+
         if (scene.GUI)
         {
             scene.camera.resetTransform();
@@ -466,6 +547,7 @@
         try
         {
             var scene = this;
+            this.runtime += delay;
             var dt = delay / 1000;
             //dt=0.016;
             for (var i = 0; i < this.objectList.length; i++)
@@ -475,6 +557,10 @@
                     return;
                 if (obj.onUpdate)
                     obj.onUpdate(obj, dt);
+                for (var j = 0; j < this.objectList[i].animationCallbackList.length; j++)
+                {
+                    this.objectList[i].animationCallbackList[j](dt);
+                }
             }
             var whileRender = true;
             this.render(dt);
@@ -483,13 +569,13 @@
             //this.render(dt);
         } catch (ex) { alert(whileRender + ex.message); }
     }
-    Scene.prototype.initEvents = function ()
+    Scene.prototype.initEvents = function (output)
     {
         var clickTime = 0;
         var scene = this;
         function mouseMoveCallback(e)
         {
-            var mapTo = scene.camera.map(e.pageX, e.pageY);
+            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -507,8 +593,8 @@
             if (args.handled)
                 return;
 
-            /*args.x = (e.pageX / scene.camera.zoom) + (scene.camera.center.x - scene.camera.width / 2);
-            args.y = (scene.camera.height - e.pageY / scene.camera.zoom) + (scene.camera.center.y - scene.camera.height / 2);*/
+            /*args.x = (e.pageX / output.camera.zoom) + (output.camera.center.x - output.camera.width / 2);
+            args.y = (output.camera.height - e.pageY / output.camera.zoom) + (output.camera.center.y - output.camera.height / 2);*/
             args.x = mapTo.x;
             args.y = mapTo.y;
 
@@ -518,8 +604,8 @@
         function mouseOverCallback(e)
         {
             var args = new MouseEventArgs();
-            args.x = scene.camera.map(e.pageX, e.pageY).x;
-            args.y = scene.camera.map(e.pageX, e.pageY).y;
+            args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
+            args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
             args.button = e.button;
             args.buttonState = Mouse.ButtonState.None;
             args.handled = false;
@@ -529,8 +615,8 @@
         function mouseOutCallback(e)
         {
             var args = new MouseEventArgs();
-            args.x = scene.camera.map(e.pageX, e.pageY).x;
-            args.y = scene.camera.map(e.pageX, e.pageY).y;
+            args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
+            args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
             args.button = e.button;
             args.buttonState = Mouse.ButtonState.None;
             args.handled = false;
@@ -539,7 +625,7 @@
         }
         function mouseDownCallback(e)
         {
-            var mapTo = scene.camera.map(e.pageX, e.pageY);
+            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -591,7 +677,7 @@
         }
         function mouseUpCallback(e)
         {
-            var mapTo = scene.camera.map(e.pageX, e.pageY);
+            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -644,7 +730,7 @@
         }
         function mouseWheelCallback(e)
         {
-            var mapTo = scene.camera.map(e.pageX, e.pageY);
+            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -698,8 +784,8 @@
                 if (args.handled)
                     return;
 
-                args.x = scene.camera.map(e.pageX, e.pageY).x;
-                args.y = scene.camera.map(e.pageX, e.pageY).y;
+                args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
+                args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
 
                 clickTime = 0;
                 for (var i = 0; i < scene.objectList.length; i++)
@@ -730,8 +816,8 @@
                 if (args.handled)
                     return;
 
-                args.x = scene.camera.map(e.pageX, e.pageY).x;
-                args.y = scene.camera.map(e.pageX, e.pageY).y;
+                args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
+                args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
 
                 clickTime = t;
                 for (var i = 0; i < scene.objectList.length; i++)
@@ -809,8 +895,8 @@
             for (var i = 0; i < e.changedTouches.length ; i++)
             {
                 var t = new Touch(e.changedTouches[i].identifier);
-                t.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                t.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                t.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                t.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
                 t.type = Touch.Types.Start;
                 scene.device.touches.add(t);
 
@@ -821,8 +907,8 @@
                 argsGUI.y = e.changedTouches[i].pageY;
 
                 var args = argsGUI.copy();
-                args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                args.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                args.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
 
                 if (scene.GUI)
                     scene.GUI.touchStartCallback(argsGUI);
@@ -836,7 +922,7 @@
         {
             for (var i = 0; i < e.changedTouches.length ; i++)
             {
-                var mapTo = scene.camera.map(e.pageX, e.pageY);
+                var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
                 var id = e.changedTouches[i].identifier;
                 var t = scene.device.touches.id(id);
                 t.dx = mapTo.x - scene.device.mouse.x;
@@ -854,8 +940,8 @@
 
                 var args = argsGUI.copy();
                 args.type = Touch.Types.Move;
-                args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                args.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                args.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
 
                 if (scene.GUI)
                     scene.GUI.touchMoveCallback(argsGUI);
@@ -883,8 +969,8 @@
                 var args = argsGUI.copy();
                 args.type = Touch.Types.End;
                 args.touches = touchList.toArray();
-                args.x = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                args.y = scene.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                args.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                args.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
 
                 if (scene.GUI)
                     scene.GUI.touchEndCallback(argsGUI);
@@ -894,34 +980,42 @@
                     scene.onTouchEnd(args);
             }
         }
-        this.eventSource.addEventListener("mousemove",mouseMoveCallback);
-        this.eventSource.addEventListener("mouseover",mouseOverCallback);
-        this.eventSource.addEventListener("mouseout", mouseOutCallback);
-        this.eventSource.addEventListener("mousedown", mouseDownCallback);
-        this.eventSource.addEventListener("mouseup", mouseUpCallback);
-        this.eventSource.addEventListener("mousewheel", mouseWheelCallback);
-        this.eventSource.addEventListener("click", clickCallback);
+        output.outputDOM.addEventListener("mousemove",mouseMoveCallback);
+        output.outputDOM.addEventListener("mouseover", mouseOverCallback);
+        output.outputDOM.addEventListener("mouseout", mouseOutCallback);
+        output.outputDOM.addEventListener("mousedown", mouseDownCallback);
+        output.outputDOM.addEventListener("mouseup", mouseUpCallback);
+        output.outputDOM.addEventListener("mousewheel", mouseWheelCallback);
+        output.outputDOM.addEventListener("click", clickCallback);
         window.addEventListener("keydown", keyDownCallback);
         window.addEventListener("keyup", KeyUpCallback);
         window.addEventListener("keypress", keyPressCallback);
-        this.eventSource.addEventListener("touchstart", touchStartCallback);
-        this.eventSource.addEventListener("touchmove", touchMoveCallback);
-        this.eventSource.addEventListener("touchend", touchEndCallback);
+        output.outputDOM.addEventListener("touchstart", touchStartCallback);
+        output.outputDOM.addEventListener("touchmove", touchMoveCallback);
+        output.outputDOM.addEventListener("touchend", touchEndCallback);
     }
-    Scene.prototype.addGameObject = function (obj, layer)
+    Scene.prototype.addGameObject = function (obj, layer, collideGroup)
     {
         if (obj.id >= 0)
         {
             throw new Error("Object existed.");
         }
+        if (isNaN(layer))
+            layer = 0;
+        if (!this.layers[layer])
+            throw new Error("Invalid layer.");
+
         this.objectList.add(obj);
         obj.id = this._objList.add(obj);
-        if (!isNaN(layer))
+        this.layers[layer].addGameObject(obj);
+        if (collideGroup)
         {
-            if (!this.layers[layer])
-                throw new Error("Invalid layer.");
-            this.layers[layer].addGameObject(obj);
+            if (!this.collideGroups.contain(collideGroup))
+                this.addCollideGroup(collideGroup);
+            collideGroup.addGameObject(obj);
         }
+        this.collideTable.rows = this.objectList.length;
+        this.collideTable.columns = this.objectList.length;
         return obj.id;
     }
     Scene.prototype.removeGameObject = function (id)
@@ -950,15 +1044,35 @@
         this.objectList.remove(obj);
         this._objList[id] = null;
         node.object.id = -1;
+
+        this.collideTable.rows = this.objectList.length;
+        this.collideTable.columns = this.objectList.length;
     }
     Scene.prototype.addLayer = function (layer, depth)
     {
         layer.scene = this;
-        this.layers.add(layer,depth);
+        this.layers.add(layer, depth);
+        for (var i = 0; i < this.cameraList.length; i++)
+        {
+            var camera=this.cameraList[i];
+            for (var j = 0; j < camera.outputList.length ; j++)
+            {
+                camera.outputList[j].setLayer(this.layers.count);
+            }
+        }
     }
     Scene.prototype.removeLayer = function (depth)
     {
         return this.layers.removeAt(depth);
+
+        for (var i = 0; i < this.cameraList.length; i++)
+        {
+            var camera = this.cameraList[i];
+            for (var j = 0; j < camera.outputList.length ; j++)
+            {
+                camera.outputList[j].setLayer(this.layers.count);
+            }
+        }
     }
     Scene.prototype.addCamera = function (camera)
     {
@@ -968,6 +1082,10 @@
         }
         camera.scene = this;
         this.cameraList.add(camera);
+        for (var i = 0; i < camera.outputList.length ; i++)
+        {
+            camera.outputList[i].setLayer(this.layers.count);
+        }
     }
     Scene.prototype.removeCamera = function (camera)
     {
@@ -977,6 +1095,11 @@
             throw new Error("Not found.");
         }
         this.cameraList.removeAt(index);
+        camera.scene = null;
+    }
+    Scene.prototype.addCollideGroup = function (group)
+    {
+        this.collideGroups.add(group);
     }
     Engine.Scene = Scene;
     window.Scene = Scene;
@@ -1070,16 +1193,14 @@
     {
         var originX = x;
         var originY = y;
-        var xZoom = unitX;
-        var yZoom = unitY;
         var rotation = rotation;
         function pointTo(x, y)
         {
             if (rotation == 0)
             {
                 return {
-                    x: (x - originX) / xZoom,
-                    y: (y - originY) / yZoom
+                    x: (x - originX) / unitX,
+                    y: (y - originY) / unitY
                 };
             }
             else
@@ -1089,8 +1210,8 @@
                 var dx = x - originX;
                 var dy = x - originY;
                 return {
-                    x: (dx * cos - dy * sin) / xZoom,
-                    y: (dy * cos + dx * sin) / yZoom
+                    x: (dx * cos - dy * sin) / unitX,
+                    y: (dy * cos + dx * sin) / unitY
                 };
             }
         }
@@ -1099,16 +1220,16 @@
             if (rotation == 0)
             {
                 return {
-                    x: x * xZoom + originX,
-                    y: y * yZoom + originY
+                    x: x * unitX + originX,
+                    y: y * unitY + originY
                 };
             }
             else
             {
                 var cos = Math.cos(rotation);
                 var sin = Math.sin(rotation);
-                var dx = x * xZoom;
-                var dy = y * yZoom;
+                var dx = x * unitX;
+                var dy = y * unitY;
                 return {
                     x: dx * cos - dy * sin + originX,
                     y: dy * cos + dx * sin + originY
@@ -1157,11 +1278,56 @@
         }
 
         var coordinate = new Coordinate(pointTo, pointFrom, vectorTo, vectorFrom);
-        coordinate.originX = originX;
-        coordinate.originY = originY;
-        coordinate.unitX = unitX;
-        coordinate.unitY = unitY;
-        coordinate.rotation = rotation;
+        Object.defineProperty(coordinate, "originX", {
+            get: function ()
+            {
+                return originX;
+            },
+            set: function (value)
+            {
+                originX = value;
+            }
+        });
+        Object.defineProperty(coordinate, "originY", {
+            get: function ()
+            {
+                return originY;
+            },
+            set: function (value)
+            {
+                originY = value;
+            }
+        });
+        Object.defineProperty(coordinate, "unitX", {
+            get: function ()
+            {
+                return unitX;
+            },
+            set: function (value)
+            {
+                unitX = value;
+            }
+        });
+        Object.defineProperty(coordinate, "unitY", {
+            get: function ()
+            {
+                return unitY;
+            },
+            set: function (value)
+            {
+                unitY = value;
+            }
+        });
+        Object.defineProperty(coordinate, "rotation", {
+            get: function ()
+            {
+                return rotation;
+            },
+            set: function (value)
+            {
+                rotation = value;
+            }
+        });
         var axis = new Coordinate.Axis();
         coordinate.axis = axis;
         var lineX = new Line(new Point(-1024, 0), new Point(1024, 0));
@@ -1274,6 +1440,7 @@
         {
             this.objectList.add(obj);
         }
+        obj.layer = this;
         if (!keepCoordinate)
             obj.setCoordinate(this.coordinate);
     }
@@ -1365,20 +1532,90 @@
                 list[list.length] = arr[i];
             }
         }
+        list.contain = function (obj)
+        {
+            return (list.indexOf(obj) >= 0);
+        }
         return list;
     }
 
     //Matrix
     function Matrix(m,n)
     {
-        this.rows = 0;
-        this.columns = 0;
+        var rows = 0;
+        var columns = 0;
         this._innerMatrix = [];
         var matrix = this;
+        Object.defineProperty(this, "rows", {
+            get: function ()
+            {
+                return rows;
+            },
+            set: function (value)
+            {
+                if (value < rows)
+                {
+                    for (var i = value; i < rows; i++)
+                    {
+                        delete matrix[i];
+                    }
+                    matrix._innerMatrix.length = value;
+                    rows = value;
+                    return;
+                }
+                while (rows < value)
+                {
+                    matrix._innerMatrix[rows] = [];
+                    for (var i = 0; i < columns; i++)
+                    {
+                        matrix._innerMatrix[rows][i] = 0;
+                    }
+                    (function (index)
+                    {
+                        Object.defineProperty(matrix, index, {
+                            configurable: true,
+                            get: function ()
+                            {
+                                return matrix._innerMatrix[index];
+                            }
+                        });
+                    })(rows);
+                    rows++;
+                }
+            }
+        });
+        Object.defineProperty(this, "columns", {
+            get: function ()
+            {
+                return columns;
+            },
+            set: function (value)
+            {
+                if (value < columns)
+                {
+                    for (var i = 0; i < rows; i++)
+                    {
+                        matrix._innerMatrix[i].length = value;
+                    }
+                    columns = value;
+                }
+                else if (columns < value)
+                {
+                    for (var i = 0; i < rows; i++)
+                    {
+                        for (var j = columns; j < value; j++)
+                        {
+                            matrix._innerMatrix[i][j] = 0;
+                        }
+                    }
+                    columns = value;
+                }
+            }
+        });
         if (m instanceof Array)
         {
-            this.rows = m.length;
-            for (var i = 0; i < arr.length; i++)
+            rows = m.length;
+            for (var i = 0; i < rows; i++)
             {
                 if (!(m[i] instanceof Array))
                 {
@@ -1387,13 +1624,13 @@
                 matrix._innerMatrix[i] = [];
                 //Get columns number
                 if (i == 0)
-                    this.columns = m[i].length;
-                else if (this.columns != m[i].length)
+                    columns = m[i].length;
+                else if (columns != m[i].length)
                 {
                     throw new Error("Columns not same.");
                 }
 
-                for (var j = 0; j < this.columns ; j++)
+                for (var j = 0; j < columns ; j++)
                 {
                     matrix._innerMatrix[i][j] = m[i][j];
                 }
@@ -1401,6 +1638,7 @@
                 (function (index)
                 {
                     Object.defineProperty(matrix, index.toString(), {
+                        configurable: true,
                         get: function ()
                         {
                             return matrix._innerMatrix[index];
@@ -1411,8 +1649,8 @@
         }
         else if ((!isNaN(m)) && (!isNaN(n)))
         {
-            this.rows = m;
-            this.columns = n;
+            rows = m;
+            columns = n;
             for (var i = 0; i < m; i++)
             {
                 matrix._innerMatrix[i] = [];
@@ -1423,6 +1661,7 @@
                 (function (index)
                 {
                     Object.defineProperty(matrix, index.toString(), {
+                        configurable: true,
                         get: function ()
                         {
                             return matrix._innerMatrix[index];
@@ -1622,6 +1861,8 @@
         this.getLayer = function (z) { };
         this.setLayer = function (count) { };
         this.camera = null;
+        this.layers = ArrayList();
+        this.outputDOM = null;
         var outputDom = null;
         var graphics = null;
         var width = 0;
@@ -1632,8 +1873,10 @@
         if (node.nodeName == "CANVAS")
         {
             outputDom = node;
-            this.type = Output.OutputTypes.None;
+            this.outputDOM = node;
+            this.type = Output.OutputTypes.Single;
             graphics = new Graphics(node);
+            this.layers[0] = graphics;
             this.getLayer = function (z)
             {
                 return graphics;
@@ -1723,12 +1966,14 @@
         else
         {
             outputDom = node;
+            this.outputDOM = node;
             if (getComputedStyle(outputDom).position == "static")
             {
                 outputDom.style.position = "relative";
             }
             this.type = Output.OutputTypes.MultiLayer;
             graphics = ArrayList();
+            this.layers = graphics;
             this.getLayer = function (z)
             {
                 if (graphics.length <= 0)
@@ -1763,11 +2008,22 @@
                         canvas.style.position = "absolute";
                         canvas.style.left = "0px";
                         canvas.style.top = "0px";
+                        canvas.style.backgroundColor = "transparent";
                         outputDom.appendChild(canvas);
                         var i = graphics.add(new Graphics(canvas));
                         canvas.style.zIndex = i;
                     }
                 }
+            }
+
+            if (!isNaN(w) && !isNaN(h))
+            {
+                width = w;
+                height = h;
+                renderWidth = w;
+                renderHeight = h;
+                applySize();
+                applyRenderSize();
             }
 
             Object.defineProperty(this, "width", {
@@ -1850,19 +2106,73 @@
     Engine.Output = Output;
     window.Output = Output;
 
+    //CollideGroup
+    function CollideGroup()
+    {
+        this.objectList = ArrayList();
+        this.ignoreList = ArrayList();
+    }
+    CollideGroup.prototype.addGameObject = function (obj)
+    {
+        if (!(obj instanceof GameObject))
+        {
+            throw new Error("Must be GameObject");
+        }
+        if (obj.collideGroups.contain(this))
+            return;
+        this.objectList.add(obj);
+        obj.collideGroups.add(this);
+    }
+    Engine.CollideGroup = CollideGroup;
+    window.CollideGroup = CollideGroup;
 
     //Camera
-    function Camera(x, y, w, h, z)
+    function Camera(x, y)
     {
-        this.center = new Point(x, y);
-        this.position = new Point(x, y);
-        this.width = w;
-        this.height = h;
-        this.zoom = z;
-        this.rotate = 0;
+        this.center = new Engine.Position(x, y);
+        this.position = new Engine.Position(x, y);
+        this.coordinate = Coordinate.Default;
+        this.viewCoordinate = Coordinate.createCartesian(x, y, 1, -1, 0);
+        this.width = 0;
+        this.height = 0;
         this.graphics = null;
         this.outputList = ArrayList();
         this.scene = null;
+        var camera = this;
+        var zoom = 1;
+        var rotation = 0;
+        Object.defineProperty(this, "zoom", {
+            get: function ()
+            {
+                return zoom;
+            },
+            set: function (value)
+            {
+                zoom = value;
+                camera.viewCoordinate.unitX = 1 / zoom;
+                camera.viewCoordinate.unitY = -1 / zoom;
+            }
+        });
+        Object.defineProperty(this, "rotation", {
+            get: function ()
+            {
+                return rotation;
+            },
+            set: function (value)
+            {
+                rotation = value;
+                camera.viewCoordinate.rotation = rotation;
+            }
+        });
+        this.position.changeCallback = function (e)
+        {
+            var dx = e.x - camera.position.x;
+            var dy = e.y - camera.position.y;
+            camera.center.x += dx;
+            camera.center.y += dy;
+            camera.viewCoordinate.originX += dx;
+            camera.viewCoordinate.originY += dy;
+        }
     }
     Camera.prototype.copy = function ()
     {
@@ -1881,36 +2191,43 @@
     }
     Camera.prototype.moveTo = function (x, y)
     {
-        this.center.x += (x - this.position.x);
-        this.center.y += (y - this.position.y);
         this.position.x = x;
         this.position.y = y;
-        if (!this.graphics || !this.graphics.ctx)
-            return;
-        //this.resetTransform();
     }
     Camera.prototype.zoomTo = function (z, x, y)
     {
         var k = this.zoom / z;
-        this.zoom = z;
         if (!isNaN(x) && !isNaN(y))
         {
-
             var ox = this.center.x;
             var oy = this.center.y;
             ox = x - ((x - ox) * k);
             oy = y - ((y - oy) * k);
             this.moveTo(ox, oy);
         }
-        if (!this.graphics || !this.graphics.ctx)
-            return;
-        //this.resetTransform();
+        this.zoom = z;
     }
-    Camera.prototype.rotateTo = function (angle)
+    Camera.prototype.rotate = function (angle, x, y)
     {
-        this.rotate = angle;
-        if (!this.graphics || !this.graphics.ctx)
-            return;
+        if (!isNaN(x) && !isNaN(y))
+        {
+            this.position.rotate(angle, x, y);
+            this.center.rotate(angle, x, y);
+            this.viewCoordinate.originX = this.center.x;
+            this.viewCoordinate.originY = this.center.y;
+        }
+        this.rotation += angle;
+    }
+    Camera.prototype.rotateTo = function (angle, x, y)
+    {
+        if (!isNaN(x) && !isNaN(y))
+        {
+            this.position.rotate(angle - this.rotation, x, y);
+            this.center.rotate(angle - this.rotation, x, y);
+            this.viewCoordinate.originX = this.center.x;
+            this.viewCoordinate.originY = this.center.y;
+        }
+        this.rotation = angle;
     }
     Camera.prototype.resetTransform = function (graphics)
     {
@@ -1920,22 +2237,44 @@
     }
     Camera.prototype.clear = function (bgColor)
     {
-        if (!this.graphics || !this.graphics.ctx)
-            return;
-        this.resetTransform();
-        this.graphics.ctx.clearRect(0, 0, this.graphics.canvas.width, this.graphics.canvas.height);
-        //this.graphics.ctx.fillStyle="rgba(255,255,255,0.1)";
-        if (bgColor)
-            this.graphics.ctx.fillStyle = bgColor;
-        this.graphics.ctx.fillRect(0, 0, this.graphics.canvas.width, this.graphics.canvas.height);
-        this.applyTransform();
+        for (var i = 0; i < this.outputList.length; i++)
+        {
+            var output = this.outputList[i];
+            if (output.type == Output.OutputTypes.Single)
+            {
+                var graphics = output.layers[0];
+                this.resetTransform(graphics);
+                graphics.ctx.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
+                if (bgColor)
+                {
+                    graphics.ctx.fillStyle = bgColor;
+                    graphics.ctx.fillRect(0, 0, graphics.canvas.width, graphics.canvas.height);
+                }
+                this.applyTransform();
+            }
+            else if (output.type == Output.OutputTypes.MultiLayer)
+            {
+                for (var j = 0; j < output.layers.length ; j++)
+                {
+                    var graphics = output.layers[j];
+                    this.resetTransform(graphics);
+                    graphics.ctx.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
+                    if (bgColor)
+                    {
+                        graphics.ctx.fillStyle = bgColor;
+                        graphics.ctx.fillRect(0, 0, graphics.canvas.width, graphics.canvas.height);
+                    }
+                    this.applyTransform();
+                }
+            }
+        }
     }
     Camera.prototype.applyTransform = function (graphics)
     {
         if (!graphics || !graphics.ctx)
             return;
-        var sinA = Math.sin(this.rotate);
-        var cosA = Math.cos(this.rotate);
+        var sinA = Math.sin(this.rotation);
+        var cosA = Math.cos(this.rotation);
         var rw = graphics.width;//real width
         var rh = graphics.height;//real height
         this.width = graphics.canvas.width / this.zoom;
@@ -1951,9 +2290,43 @@
 
         graphics.ky = -1;
     }
-    Camera.prototype.map = function (x, y)
+    Camera.prototype.map = function (x, y, output, coordinate)
     {
+        var x0 = x - (output.renderWidth / 2);
+        var y0 = y - (output.renderHeight / 2);
+        var p = this.viewCoordinate.pointMapTo(coordinate, x0, y0);
+        return p;
         return new Point((x / this.zoom) + (this.center.x - this.width / 2), (this.height - y / this.zoom) + (this.center.y - this.height / 2));
+    }
+    Camera.prototype.linkTo = function (target)
+    {
+        if (!target.links)
+            throw new Error("Cannot link to this target.");
+
+        function DFS(obj, target)
+        {
+            for (var i = 0; i < obj.links.length; i++)
+            {
+                if (obj.links[i] == target)
+                {
+                    return true;
+                }
+                return DFS(obj.links[i], target);
+            }
+            return false;
+        }
+        if (DFS(target, this))
+            throw new Error("Link Loop.");
+        target.links.add(this);
+    }
+    Camera.prototype.unlink = function (target)
+    {
+        if (!target.links)
+            throw new Error("Are you kidding me?");
+        var index = target.links.indexOf(this);
+        if (index < 0)
+            return false;
+        target.links.removeAt(index);
     }
     Camera.prototype.addOutput = function (output)
     {
@@ -1989,7 +2362,7 @@
             var layer = this.scene.layers[this.scene.layers.depthList[i]];
             for (var j = 0; j < this.outputList.length; j++)
             {
-                var graphics = this.outputList[i].getLayer(i);
+                var graphics = this.outputList[j].getLayer(i);
                 this.resetTransform(graphics);
                 this.applyTransform(graphics);
                 layer.render(graphics, dt);
@@ -2277,9 +2650,18 @@
     {
         return this.ctx.scale(scalewidth, scaleheight);
     }
-    Graphics.prototype.rotate = function (angle)
+    Graphics.prototype.rotate = function (angle, x, y)
     {
-        return this.ctx.rotate(angle);
+        if (!isNaN(x) && !isNaN(y))
+        {
+            
+            this.ctx.translate(this.kx * x, this.ky * y);
+            var r = this.ctx.rotate(sign(this.kx) * sign(this.ky) * angle);
+            this.ctx.translate(-this.kx * x, -this.ky * y);
+            return r;
+        }
+        else
+            return this.ctx.rotate(angle);
     }
     Graphics.prototype.translate = function (x, y)
     {
@@ -2328,7 +2710,7 @@
     {
         if (isNaN(x) && !isNaN(sx))
         {
-            return this.ctx.drawImage(img, sx, sy, swidth, sheight);
+            return this.ctx.drawImage(img, this.kx * sx, this.ky * sy, this.kw * swidth, this.kh * sheight);
         }
         else
             return this.ctx.drawImage(img, sx, sy, swidth, sheight, this.kx * x, this.ky * y, this.kw * width, this.kh * height);
@@ -3392,6 +3774,15 @@
     function int(x)
     {
         return parseInt(x);
+    }
+
+    function sign(x)
+    {
+        if (x > 0)
+            return 1;
+        else if (x < 0)
+            return -1;
+        return 0;
     }
 
     //-------------------------Objects
