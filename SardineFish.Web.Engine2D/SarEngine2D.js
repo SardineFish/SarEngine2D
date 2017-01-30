@@ -242,7 +242,7 @@
         this.collideTable = new Matrix(0, 0);
         this.runtime = 0;
         this.GUI = null;
-        this.background = null;
+        this.background = new BackgroundCollection(this);
         this.device = new Device();
         this.doubleClickDelay = 200;
         this.onUpdate = null;
@@ -276,6 +276,13 @@
         this.bottom = null;
         this.scene = null;
         this.depthList = ArrayList();
+        var layerCollection = this;
+        Object.defineProperty(this, "count", {
+            get: function ()
+            {
+                return layerCollection.depthList.length;
+            }
+        });
     }
     LayerCollection.prototype.add = function (layer, depth)
     {
@@ -320,14 +327,13 @@
                 }
             }
         }
-        this.count++;
         
         for (var i = 0; i < this.scene.cameraList.length; i++)
         {
             var camera = this.scene.cameraList[i];
             for (var j = 0; j < camera.outputList.length ; j++)
             {
-                camera.outputList[j].setLayer(this.count);
+                camera.outputList[j].setLayer(this.count + this.scene.background.count);
             }
         }
     }
@@ -354,9 +360,92 @@
             this.bottomDepth = NaN;
             this.bottomDepth = null;
         }
+
+        var camera = this.scene.cameraList[i];
+        for (var j = 0; j < camera.outputList.length ; j++)
+        {
+            camera.outputList[j].setLayer(this.count + this.scene.background.count);
+        }
         return layer;
     }
     Scene.LayerCollection = LayerCollection;
+    function BackgroundCollection(scene)
+    {
+        this.bgList = ArrayList();
+        this.scene = scene;
+        var bgCollection = this;
+        Object.defineProperty(this, "count", {
+            get: function ()
+            {
+                return bgCollection.bgList.length;
+            }
+        });
+    }
+    BackgroundCollection.prototype.add = function (bg, zIndex)
+    {
+        if (!bg)
+        {
+            throw new Error("Give me a Background please!");
+        }
+        if (!this.scene)
+        {
+            throw new Error("Are you kidding me?");
+        }
+        if (bg.scene)
+        {
+            throw new Error("Existed.");
+        }
+        bg.scene = this.scene;
+        if (isNaN(zIndex))
+            zIndex = this.bgList.length;
+        if (zIndex < 0)
+            zIndex = 0;
+        this.bgList.insert(bg, zIndex);
+        for (var i = 0; i < this.scene.cameraList; i++)
+        {
+            for (var j = 0; j < this.scene.cameraList[i].outputList.length; j++)
+            {
+                var output = this.scene.cameraList[i].outputList[j];
+                output.setLayer(this.count + this.scene.layers.count);
+            }
+        }
+        var bgCollection = this;
+        (function (index)
+        {
+            Object.defineProperty(bgCollection, index, {
+                configurable: true,
+                get: function ()
+                {
+                    return bgCollection.bgList[index];
+                }
+            });
+        })(this.count-1);
+    }
+    BackgroundCollection.prototype.remove = function (bg)
+    {
+        if (!bg)
+        {
+            throw new Error("Give me a Background please!");
+        }
+        if (!this.scene)
+        {
+            throw new Error("Are you kidding me?");
+        }
+        var index = this.bgList.indexOf(ob);
+        if (index < 0)
+            return false;
+        this.bgList.removeAt(index);
+        for (var i = 0; i < this.scene.cameraList; i++)
+        {
+            for (var j = 0; j < this.scene.cameraList[i].outputList.length; j++)
+            {
+                var output = this.scene.cameraList[i].outputList[j];
+                output.setLayer(this.count + this.scene.layers.count);
+            }
+        }
+        delete this[this.count];
+    }
+    Scene.BackgroundCollection = BackgroundCollection;
     Scene.Physics = function ()
     {
         this.g = new Vector2(0, 0);
@@ -542,6 +631,7 @@
             if (args.cancel)
                 return;
         }
+
         for (var i = 0; i < this.cameraList.length; i++)
         {
             this.cameraList[i].clear();
@@ -1071,6 +1161,12 @@
                 this.layers.add(layer, this.layers.topDepth + 1);
             layer.addGameObject(obj);
         }
+        else if (layer instanceof Background)
+        {
+            if (!layer.scene)
+                this.background.add(layer);
+            layer.addGameObject(obj);
+        }
         else
         {
             if (isNaN(layer))
@@ -1145,6 +1241,14 @@
                 camera.outputList[j].setLayer(this.layers.count);
             }
         }
+    }
+    Scene.prototype.addBackground = function (bg, zIndex)
+    {
+        return this.background.add(bg, zIndex);
+    }
+    Scene.prototype.removeBackground = function (bg)
+    {
+        return this.background.remove(bg);
     }
     Scene.prototype.addCamera = function (camera)
     {
@@ -1234,6 +1338,13 @@
             {
                 return { x: x, y: y };
             });
+        coordinate.copy = function ()
+        {
+            var cdn = Coordinate.createCartesian(0, 0, 1, 1, 0);
+            if (coordinate.axis.graphic)
+                cdn.axis.graphic = coordinate.axis.graphic.copy();
+            return cdn;
+        }
         var axis = new Coordinate.Axis();
         var axisVisible = false;
         Object.defineProperty(axis, "visible", {
@@ -1400,6 +1511,13 @@
                 rotation = value;
             }
         });
+        coordinate.copy = function ()
+        {
+            var cdn = Coordinate.createCartesian(originX, originY, unitX, unitY, rotation);
+            if (coordinate.axis.graphic)
+                cdn.axis.graphic = coordinate.axis.graphic.copy();
+            return cdn;
+        }
         var axis = new Coordinate.Axis();
         coordinate.axis = axis;
         var lineX = new Line(new Point(-1024, 0), new Point(1024, 0));
@@ -1539,6 +1657,48 @@
     }
     Engine.Layer = Layer;
     window.Layer = Layer;
+
+    //Background
+    function Background()
+    {
+        this.followSpeed = 1;
+        this.objectList = ArrayList();
+        this.scene = null;
+        this.coordinate = Coordinate.Default.copy();
+    }
+    Background.prototype.addGameObject = function (obj, zIndex)
+    {
+        if (!this.scene)
+            throw new Error("The Background is not belong to any Scene.");
+        if (!this.objectList.contain(obj))
+            this.objectList.add(obj);
+        obj.setCoordinate(this.coordinate);
+        obj.layer = this;
+    }
+    Background.prototype.removeGameObject = function (obj)
+    {
+        var index = this.objectList.indexOf(obj);
+        if (index < 0)
+            return false;
+        this.objectList.removeAt(index);
+    }
+    Background.prototype.render = function (graphics, dt, camera)
+    {
+        var dx = 0, dy = 0;
+        if (camera)
+        {
+            dx = camera.viewCoordinate.originX * this.followSpeed;
+            dy = camera.viewCoordinate.originY * this.followSpeed;
+        }
+        this.coordinate.originX = dx;
+        this.coordinate.originY = dy;
+        for (var i = 0; i < this.objectList.length ; i++)
+        {
+            this.objectList[i].render(graphics, 0, 0, 0, dt);
+        }
+    }
+    Engine.Background = Background;
+    window.Background = Background;
 
     //ArrayList
     function ArrayList()
@@ -2038,6 +2198,7 @@
         }
         else
         {
+            node.innerHTML = "";
             outputDom = node;
             this.outputDOM = node;
             if (getComputedStyle(outputDom).position == "static")
@@ -2435,12 +2596,24 @@
         {
             throw new Error("Camera not in scene.");
         }
+        for (var i = 0; i < this.scene.background.count; i++)
+        {
+            var layer = this.scene.background[i];
+            for (var j = 0; j < this.outputList.length; j++)
+            {
+                var graphics = this.outputList[j].getLayer(i);
+                this.resetTransform(graphics);
+                this.applyTransform(graphics);
+                layer.render(graphics, dt, this);
+            }
+        }
+        var bgCount = this.scene.background.count;
         for (var i = 0; i < this.scene.layers.depthList.length; i++)
         {
             var layer = this.scene.layers[this.scene.layers.depthList[i]];
             for (var j = 0; j < this.outputList.length; j++)
             {
-                var graphics = this.outputList[j].getLayer(i);
+                var graphics = this.outputList[j].getLayer(bgCount + i);
                 this.resetTransform(graphics);
                 this.applyTransform(graphics);
                 layer.render(graphics, dt);

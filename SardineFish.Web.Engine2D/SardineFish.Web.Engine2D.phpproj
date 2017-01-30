@@ -33,6 +33,7 @@
     <Content Include="Flight\fonts\MaterialIcons-Regular.ttf" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.woff" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.woff2" />
+    <Content Include="Flight\img\Background.jpg" />
     <Content Include="Flight\img\Flight.png" />
     <Content Include="Flight\lib\jquery.min.js" />
     <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />

@@ -16,12 +16,43 @@
         body{
             margin:0px;
             padding:0px;
-            background-color: #FAFAFA;
+            background-color: #77b9d8;
+        }
+        .progressBar{
+            width: 100%;
+            height: 10px;
+        }
+        .progressBar .progress{
+            background-color: red;
+            width: 70%;
+            height:100%;
+        }
+
+        #GUI{
+            position: fixed;
+            width: 100%;
+            z-index: 100000;
+        }
+        #output{
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+        #lifeBar{
+            z-index: 100000;
+        }
+        #lifeBar .progress{
+            background-color: rgba(255, 107, 107, 1);
         }
     </style>
 </head>
 <body>
     <div id="center">
+        <div id="GUI">
+            <div id="lifeBar" class="progressBar">
+                <div class="progress"></div>
+            </div>
+        </div>
         <div id="output"></div>
     </div>
     <script>
@@ -35,29 +66,41 @@
         var controlStack = Stack.createAsArray();
         var PI = Math.PI;
         var speed = 800;
+        var highSpeed = 3200;
         var turnA = 3000;
         var turnAngV = 1.6;
         var bulletSpeed = 5000;
         var speedUpTime = 0.5;//s
         var shootCD = 50;//ms
-        var bulletLifeTime = 100;
+        var bulletLifeTime = 150;
         var flightLife = 100;
         var bulletDamage = 10;
+        var cloudCount = 50;
+        var cloudLayerCount = 3;
         var enemyGroup = new CollideGroup();
         var friendGroup = new CollideGroup();
         var player;
-        var backgroundLayer = new Layer();
+        var backgroundLayer = new Background();
+        var cloudLayers = SarEngine.ArrayList();
         var flightLayer = new Layer();
         var bulletLayer = new Layer();
 
         function init()
         {
+            enemyGroup = new CollideGroup();
+            friendGroup = new CollideGroup();
+            backgroundLayer = new Background();
+            cloudLayers = SarEngine.ArrayList();
+            flightLayer = new Layer();
+            bulletLayer = new Layer();
+            controlStack = Stack.createAsArray();
             engine = SarEngine.createInNode($("#output").get(0), Width, Height);
             scene = engine.scene;
             camera = scene.cameraList[0];
             engine.start();
 
-            scene.addLayer(backgroundLayer, -1);
+            camera.zoomTo(0.8);
+
             scene.addLayer(flightLayer, 100);
             scene.addLayer(bulletLayer, 10);
             
@@ -84,27 +127,87 @@
             comb.addObject(flightImg);*/
             //comb.addObject(triangle);
 
+            initBackground();
+
             flightImg = SarEngine.Image.fromUrl("img/Flight.png", 64, 64);
             
             bullet = new Line(new Point(0, -20), new Point(0, 20));
-            bullet.strokeStyle = Color.fromString("#66CCFF");
+            bullet.strokeStyle = Color.fromString("#ff756e");
             bullet.strokeWidth = 2;
 
+            initPlayer();
+
+            for (var i = 0; i < 5; i++)
+            {
+                var x = -2000 + Math.random() * 4000;
+                var y = -2000 + Math.random() * 4000;
+                initAI(x, y, false);
+            }
+        }
+        function initBackground()
+        {
+            backgroundLayer.followSpeed = 0.9;
+            scene.addBackground(backgroundLayer);
+            var bg = SarEngine.Image.fromUrl("img/Background.jpg");
+            var obj = new GameObject();
+            obj.graphic = bg;
+            scene.addGameObject(obj, backgroundLayer, scene.collideGroups.ignoreGroup);
+
+            //Init cloud
+            var range = { x: 10000, y: 10000 };
+            for (var i = 0; i < cloudLayerCount; i++)
+            {
+                var cloudLayer = new Background();
+                cloudLayer.followSpeed = i / cloudLayerCount;
+                scene.addBackground(cloudLayer);
+                cloudLayers.add(cloudLayer);
+            }
+            for (var i = 0; i < cloudCount; i++)
+            {
+                var imgID = parseInt(Math.random() * 7 + 1);
+                var layer = parseInt(Math.random() * cloudLayerCount);
+                layer = cloudLayers[layer];
+                var x = Math.random() * range.x * 2 - range.x;
+                var y = Math.random() * range.y * 2 - range.y;
+                var img = SarEngine.Image.fromUrl("img/Cloud-" + imgID + ".png");
+                var obj = new GameObject();
+                obj.graphic = img;
+                obj.moveTo(x, y);
+                scene.addGameObject(obj, layer, scene.collideGroups.ignoreGroup);
+            }
+            //obj.setCoordinate(camera.viewCoordinate);
+        }
+        function initPlayer()
+        {
+            var lifeBar = $("#lifeBar .progress");
+            lifeBar.stop();
+            lifeBar.css("width", "0%");
+            lifeBar.animate({ width: "100%" }, 500);
             flight = createFlight();
             scene.addGameObject(flight, flightLayer, friendGroup);
-            //flight.center.setCoordinate(camera.viewCoordinate);
-            //flight.position.setCoordinate(camera.viewCoordinate);
 
             flight.moveTo(0, 0);
             camera.moveTo(0, 0);
             camera.linkTo(flight);
 
             player = flight;
-            for (var i = 0; i < 5; i++)
+            
+            player.onCollide = function (e)
             {
-                var x = -2000 + Math.random() * 4000;
-                var y = -2000 + Math.random() * 4000;
-                initAI(x, y, false);
+                if (e.target.name == "bullet")
+                {
+                    flight.life -= bulletDamage;
+                    lifeBar.stop();
+                    lifeBar.animate({ width: (flight.life / flightLife) * 100 + "%" }, 100);
+                    if (flight.life <= 0)
+                    {
+                        flight.life = 0;
+                        //Destroy(flight);
+                        engine.end();
+                        init();
+                    }
+
+                }
             }
         }
         function initAI(x, y, friend)
@@ -132,6 +235,14 @@
                 speedUp(flight, speed, speedUpTime);
                 var v = new Vector2(player.position.x - flight.position.x, player.position.y - flight.position.y);
                 var cosAng = Vector2.multi(v, flight.forward) / v.mod();
+                if (v.mod() > 2000)
+                {
+                    speedUp(flight, highSpeed, speedUpTime);
+                }
+                else
+                {
+                    speedUp(flight, speed, 10);
+                }
                 if (cosAng > 0.8)
                 {
                     control = flyFoward;
@@ -178,7 +289,7 @@
                 if (e.target.name == "bullet")
                 {
                     flight.life -= bulletDamage;
-                    if (flight.life < 0)
+                    if (flight.life <= 0)
                     {
                         flight.life = 0;
                         Destroy(flight);
@@ -210,11 +321,15 @@
         }
         function speedUp(flight, speed, time)
         {
-            if (flight.action == speedUp)
+            if (flight.action == speedUp && flight.targetSpeed == speed)
                 return;
             flight.stop();
             flight.action = speedUp;
-            flight.animate({ "speed": speed }, time);
+            flight.targetSpeed = speed;
+            flight.animate({ "speed": speed }, time, function ()
+            {
+                flight.action = null;
+            });
         }
         function slowDown(flight, speed, time)
         {
@@ -255,8 +370,8 @@
             bulletLeft.collider = particle.copy();
             bulletRight.collider = particle;
 
-            bulletLeft.moveTo(flight.position.x + vLeft.x, flight.position.y + vLeft.y);
-            bulletRight.moveTo(flight.position.x + vRight.x, flight.position.y + vRight.y);
+            bulletLeft.moveTo(flight.position.x + vLeft.x + flight.forward.x * 10, flight.position.y + vLeft.y + flight.forward.y * 10);
+            bulletRight.moveTo(flight.position.x + vRight.x + flight.forward.x * 10, flight.position.y + vRight.y + flight.forward.y * 10);
 
             scene.addGameObject(bulletLeft, bulletLayer, group);
             scene.addGameObject(bulletRight, bulletLayer, group);
@@ -266,11 +381,11 @@
 
             bulletLeft.onUpdate = checkLifeTime;
             bulletRight.onUpdate = checkLifeTime;
-            function checkLifeTime(obj)
+            function checkLifeTime(obj_)
             {
-                if (obj.lifeTime > bulletLifeTime)
+                if (obj_.lifeTime > bulletLifeTime)
                 {
-                    scene.removeGameObject(obj.id);
+                    scene.removeGameObject(obj_.id);
                 }
             }
         }
@@ -286,7 +401,14 @@
             var key = controlStack.peak();
             if (scene.device.keyboard.keys[Keys.W] == Keyboard.KeyState.Down || scene.device.keyboard.keys[Keys.Up] == Keyboard.KeyState.Down)
             {
-                speedUp(flight, speed, speedUpTime);
+                if (scene.device.keyboard.keys[Keys.Shift] == Keyboard.KeyState.Down)
+                {
+                    speedUp(flight, highSpeed, speedUpTime);
+                }
+                else
+                {
+                    speedUp(flight, speed, speedUpTime);
+                }
             }
             else
             {
@@ -305,24 +427,7 @@
                     return;
                 }
             }
-            if (scene.device.keyboard.keys[Keys.W] == Keyboard.KeyState.Down || scene.device.keyboard.keys[Keys.Up] == Keyboard.KeyState.Down)
-            {
-                speedUp(flight, speed, speedUpTime);
-            }
-            else
-            {
-                slowDown(flight, 0, speedUpTime);
-            }
-            if (key == Keyboard.Keys.W || key == Keyboard.Keys.Up)
-            {
-                speedUp(flight, speed, speedUpTime);
-                flyFoward(flight);
-            }
-            else
-            {
-                slowDown(flight, 0, speedUpTime);
-                flyFoward(flight);
-            }
+            flyFoward(flight);
         }
         function sceneKeyDown(e)
         {
@@ -330,6 +435,9 @@
                 e.key == Keyboard.Keys.Left || e.key == Keyboard.Keys.Up || e.key == Keyboard.Keys.Down || e.key == Keyboard.Keys.Right)
             {
                 controlStack.push(e.key);
+            }
+            if (e.key == Keys.Shift)
+            {
             }
             if (Keyboard.checkKeys(e.key, [Keys.W, Keys.Up]) && flight.action != flyFoward)
             {

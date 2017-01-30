@@ -771,6 +771,11 @@
         image.o.y = height / 2;
         img.onload = function ()
         {
+            if (isNaN(width) || isNaN(height))
+            {
+                width = img.width;
+                height = img.height;
+            }
             image.width = width;
             image.height = height;
             image.o.x = -img.width / 2;
