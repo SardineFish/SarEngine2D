@@ -34,6 +34,13 @@
     <Content Include="Flight\fonts\MaterialIcons-Regular.woff" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.woff2" />
     <Content Include="Flight\img\Background.jpg" />
+    <Content Include="Flight\img\Cloud-1.png" />
+    <Content Include="Flight\img\Cloud-2.png" />
+    <Content Include="Flight\img\Cloud-3.png" />
+    <Content Include="Flight\img\Cloud-4.png" />
+    <Content Include="Flight\img\Cloud-5.png" />
+    <Content Include="Flight\img\Cloud-6.png" />
+    <Content Include="Flight\img\Cloud-7.png" />
     <Content Include="Flight\img\Flight.png" />
     <Content Include="Flight\lib\jquery.min.js" />
     <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />
