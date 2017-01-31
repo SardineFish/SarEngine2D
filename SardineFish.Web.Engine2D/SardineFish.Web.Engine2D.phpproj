@@ -42,6 +42,7 @@
     <Content Include="Flight\img\Cloud-6.png" />
     <Content Include="Flight\img\Cloud-7.png" />
     <Content Include="Flight\img\Flight.png" />
+    <Content Include="Flight\lib\FFClient.js" />
     <Content Include="Flight\lib\jquery.min.js" />
     <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />
     <Content Include="release\0.2.0\SardineFish.Web.Engine2D.js" />
@@ -54,7 +55,9 @@
     <Content Include="release\0.3.2\SardineFish.Web.Engine2D.zip" />
     <Content Include="release\0.4.0\SarEngine2D.js" />
     <Content Include="release\1.0.0\SarEngine2D.js" />
+    <Content Include="SardineFish.API.js" />
     <Content Include="SardineFish.Web.Engine2D.Colliders.js" />
+    <Content Include="SardineFish.WebSite.API.js" />
     <Content Include="SarEngine2D.Objects.js" />
     <Content Include="SarEngine2D.GUI.js" />
     <Content Include="SarEngine2D.js" />
