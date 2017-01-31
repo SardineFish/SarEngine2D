@@ -40,7 +40,7 @@
                 return;
             }
             var request = new XMLHttpRequest();
-            request.open("GET", "/account/checkUid.php?uid=" + encodeURIComponent(uid));
+            request.open("GET", "http://www.sardinefish.com/account/checkUid.php?uid=" + encodeURIComponent(uid));
             request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             request.onreadystatechange = function (e)
             {
@@ -96,7 +96,7 @@
                 return;
             }
             var request = new XMLHttpRequest();
-            request.open("GET", "/account/getEncryption.php?uid=" + encodeURIComponent(uid));
+            request.open("GET", "http://www.sardinefish.com/account/getEncryption.php?uid=" + encodeURIComponent(uid));
             request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             request.onreadystatechange = function (e)
             {
@@ -173,7 +173,7 @@
                 }
                 var post = "uid=" + encodeURIComponent(uid) + "&pwd=" + encodeURIComponent(pwd);
                 var request = new XMLHttpRequest();
-                request.open("POST", "/account/login.php");
+                request.open("POST", "http://www.sardinefish.com/account/login.php");
                 request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.onreadystatechange = function ()
                 {
@@ -200,7 +200,7 @@
                         return;
                     }
                     if (callback)
-                        callback(true, response.msg, obj);
+                        callback(true, response.data, obj);
                     return;
                 }
                 request.send(post);
@@ -220,7 +220,7 @@
 
                 pwd = SHA1(pwd);
                 var request = new XMLHttpRequest();
-                request.open("POST", "/account/register.php");
+                request.open("POST", "http://www.sardinefish.com/account/register.php");
                 request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 var postText = "uid=" + encodeURIComponent(uid) + "&pwd=" + encodeURIComponent(pwd) + "&level=" + encodeURIComponent(level) + "&encryption=SHA1";
                 request.onreadystatechange = function (e)
@@ -265,11 +265,11 @@
             if (!uid || uid == "")
             {
                 if (callback)
-                    callback(false, "Id不能为空.");
+                    callback(false, "uid不能为空.");
                 return;
             }
             var request = new XMLHttpRequest();
-            request.open("GET", "/account/check.php?token=" + encodeURIComponent(token) + "&uid=" + encodeURIComponent(uid));
+            request.open("GET", "http://www.sardinefish.com/account/check.php?token=" + encodeURIComponent(token) + "&uid=" + encodeURIComponent(uid));
             request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             request.onreadystatechange = function ()
             {
@@ -305,7 +305,7 @@
 
             }
             var request = new XMLHttpRequest();
-            request.open("POST", "/account/user/face/setFace.php");
+            request.open("POST", "http://www.sardinefish.com/account/user/face/setFace.php");
             request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             var postText = "uid=" + encodeURIComponent(uid) + "&url=" + encodeURIComponent(url);
             request.onreadystatechange = function (e)

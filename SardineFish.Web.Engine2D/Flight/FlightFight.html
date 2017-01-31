@@ -8,6 +8,8 @@
     <script src="../SarEngine2D.js"></script>
     <script src="../SarEngine2D.Objects.js"></script>
     <script src="../SarEngine2D.GUI.js"></script>
+    <script src="http://www.sardinefish.com/api/SardineFish.API.js"></script>
+    <script src="lib/FFClient.js"></script>
     <style >
         html{
             -ms-touch-action: none; 
@@ -84,9 +86,12 @@
         var cloudLayers = SarEngine.ArrayList();
         var flightLayer = new Layer();
         var bulletLayer = new Layer();
+        var flightList = SarEngine.ArrayList();
+        var client;
 
         function init()
         {
+            client = new FFClient();
             enemyGroup = new CollideGroup();
             friendGroup = new CollideGroup();
             backgroundLayer = new Background();
@@ -135,13 +140,75 @@
             bullet.strokeStyle = Color.fromString("#ff756e");
             bullet.strokeWidth = 2;
 
-            initPlayer();
+            //initPlayer();
 
             for (var i = 0; i < 5; i++)
             {
                 var x = -2000 + Math.random() * 4000;
                 var y = -2000 + Math.random() * 4000;
-                initAI(x, y, false);
+                //initAI(x, y, false);
+            }
+            initOnlinePlay("FFTest", SHA1("FFTest"));
+        }
+        function initOnlinePlay(uid, token)
+        {
+            client = new FFClient();
+            var id = "";
+            client.connect("ws://server.dwscdv3.ga:1515/FF", function (succeed, data)
+            {
+                if (!succeed)
+                    return;
+                client.login(uid, function (succeed, errorCode, idGet)
+                {
+                    id = idGet;
+                    client.actionCallback = onAction;
+                    client.addPlayerCallback = onAdd;
+                    client.removePlayerCallback = onRemove;
+                    client.syncCallback = onSync;
+                    client.onError = onerror;
+                    //SendSync();
+                });
+            });
+            function onSync(e)
+            {
+                var x = e;
+                console.log(e);
+            }
+            function onAction(e)
+            {
+                console.log(e);
+                if (e.action == FFClient.Action.TurnLeft)
+                    flight.control = turnLeft;
+                else if (e.action == FFClient.Action.TurnRight)
+                    flight.control = turnRight;
+                else if (e.action == FFClient.Action.FlyForward)
+                    flight.control = flyFoward;
+                else if (e.action == FFClient.Action.SpeedUp)
+                    flight.action = speedUp;
+                else if (e.action == FFClient.Action.HightSpeedUp)
+                    flight.action = speedUpHigh;
+            }
+            function onAdd(e)
+            {
+                if (e.id == id)
+                {
+                    initPlayer();
+                }
+            }
+            function onRemove(e)
+            {
+                var x = e;
+            }
+            function onError(e)
+            {
+                var x = e;
+            }
+            function SendSync()
+            {
+                flight.identity = id;
+                //client.act(flight.identity, FFClient.Action.FlyForward, Math.random());
+                client.sync(flight);
+                setTimeout(SendSync, 1000);
             }
         }
         function initBackground()
@@ -186,6 +253,9 @@
             flight = createFlight();
             scene.addGameObject(flight, flightLayer, friendGroup);
 
+            flight.action = null;
+            flight.control = null;
+
             flight.moveTo(0, 0);
             camera.moveTo(0, 0);
             camera.linkTo(flight);
@@ -204,7 +274,7 @@
                         flight.life = 0;
                         //Destroy(flight);
                         engine.end();
-                        init();
+                        //init();
                     }
 
                 }
@@ -319,8 +389,10 @@
             flight.setCenter(flight.position.x + vct.x, flight.position.y + vct.y);
             flight.angV = -turnAngV;
         }
-        function speedUp(flight, speed, time)
+        function speedUp(flight)
         {
+            var speed = window.speed;
+            var time = window.speedUpTime;
             if (flight.action == speedUp && flight.targetSpeed == speed)
                 return;
             flight.stop();
@@ -331,8 +403,34 @@
                 flight.action = null;
             });
         }
-        function slowDown(flight, speed, time)
+        function speedUpHigh(flight)
         {
+            var speed = window.highSpeed;
+            var time = window.speedUpTime;
+            if (flight.action == speedUpHigh && flight.targetSpeed == speed)
+                return;
+            flight.stop();
+            flight.action = speedUp;
+            flight.targetSpeed = speed;
+            flight.animate({ "speed": speed }, time, function ()
+            {
+                flight.action = null;
+            });
+        }
+        function slowToStop(flight)
+        {
+            var speed = 0;
+            var time = window.speedUpTime;
+            if (flight.action == slowToStop)
+                return;
+            flight.stop();
+            flight.action = slowDown;
+            flight.animate({ "speed": speed }, time);
+        }
+        function slowDown(flight)
+        {
+            var speed = window.speed;
+            var time = window.speedUpTime;
             if (flight.action == slowDown)
                 return;
             flight.stop();
@@ -391,6 +489,13 @@
         }
         function sceneUpdate(e)
         {
+            if (!player)
+                return;
+            if (player.action)
+                player.action(player);
+            if (player.control)
+                player.control(player);
+            return;
             if (scene.device.keyboard.keys[Keys.Space] == Keyboard.KeyState.Down)
             {
                 if (flight.lastShoot + shootCD < scene.runtime)
@@ -431,6 +536,7 @@
         }
         function sceneKeyDown(e)
         {
+
             if (e.key == Keyboard.Keys.A || e.key == Keyboard.Keys.S || e.key == Keyboard.Keys.D || e.key == Keyboard.Keys.W ||
                 e.key == Keyboard.Keys.Left || e.key == Keyboard.Keys.Up || e.key == Keyboard.Keys.Down || e.key == Keyboard.Keys.Right)
             {
@@ -438,6 +544,26 @@
             }
             if (e.key == Keys.Shift)
             {
+                if (scene.device.keyboard.keys[Keys.A] == Keyboard.KeyState.Down || scene.device.keyboard.keys[Keys.Up] == Keyboard.KeyState.Down)
+                {
+                    client.act(player.identity, FFClient.Action.HightSpeedUp);
+                }
+            }
+            else if (Keys.check(e.key, [Keys.W, Keys.Up]))
+            {
+                client.act(player.identity, FFClient.Action.SpeedUp);
+                if (player.control != turnLeft || player.control != turnRight)
+                {
+                    client.act(player.identity, FFClient.Action.FlyForward);
+                }
+            }
+            else if (Keys.check(e.key, [Keys.A, Keys.Left]))
+            {
+                client.act(player.identity, FFClient.Action.TurnLeft);
+            }
+            else if (Keys.check(e.key, [Keys.D, Keys.Right]))
+            {
+                client.act(player.identity, FFClient.Action.TurnRight);
             }
             if (Keyboard.checkKeys(e.key, [Keys.W, Keys.Up]) && flight.action != flyFoward)
             {
