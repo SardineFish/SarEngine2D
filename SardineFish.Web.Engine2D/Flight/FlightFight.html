@@ -90,6 +90,8 @@
             var flightLayer = new Layer();
             var bulletLayer = new Layer();
 
+            var enemies = SarEngine.ArrayList();
+
             function initBackground()
             {
                 backgroundLayer.followSpeed = 0.9;
@@ -367,16 +369,53 @@
                         var y = -2000 + Math.random() * 4000;
                         initAI(x, y, false);
                     }
+
+
+                    scene.onEndRender = function () {
+                        for (var i = 0; i < enemies.length; i++) {
+                            var enemy = enemies[i];
+                            var objPos = enemy.position.coordinate.pointMapTo(
+                                camera.viewCoordinate,
+                                enemy.position.x,
+                                enemy.position.y
+                            );
+                            var halfWidth = output.renderWidth / 2, halfHeight = output.renderHeight / 2;
+                            if (objPos.x < -halfWidth || objPos.x > halfWidth || objPos.y < -halfHeight || objPos.y > halfHeight) {
+                                var angle = Math.atan2(objPos.y, objPos.x);
+                                var distance = 0;
+                                if (Math.abs(angle) == 90 / Math.PI * 180) {
+                                    distance = objPos.y;
+                                } else {
+                                    distance = Math.abs(objPos.x * (1 / Math.cos(angle)));
+                                }
+                                var size = 1000 / (distance + 500) + 0.1;
+                                if (size > 1) size = 1;
+                                image = SarEngine.Image.fromUrl("img/Arrow.png", 256 * size, 256 * size);
+                                image.setCoordinate(camera.viewCoordinate);
+                                if (objPos.y != 0) {
+                                    if (Math.abs(objPos.x) / Math.abs(objPos.y) > halfWidth / halfHeight) {
+                                        image.setPosition(objPos.x > 0 ? halfWidth : -halfWidth, objPos.y * (halfWidth / objPos.x));
+                                    } else {
+                                        image.setPosition(objPos.x * (halfHeight / objPos.y), objPos.y > 0 ? halfHeight : -halfHeight);
+                                    }
+                                } else {
+                                    image.setPosition(objPos.x > 0 ? halfWidth : -halfWidth, 0);
+                                }
+                                image.rotation = angle;
+                                image.render(output.getLayer(2));
+                            }
+                        }
+                    };
                 }
                 function initAI(x, y, friend)
                 {
                     var flight = createFlight();
 
-
                     flight.moveTo(x, y);
-                    if (!friend)
+                    if (!friend) {
                         scene.addGameObject(flight, flightLayer, enemyGroup);
-                    else
+                        enemies.add(flight);
+                    } else
                         scene.addGameObject(flight, flightLayer, friendGroup);
                     flight.onUpdate = FlightUpdate;
                     flight.onDamage = onDamage;
@@ -401,7 +440,7 @@
                     }
                     function onDestroy()
                     {
-
+                        enemies.remove(flight);
                     }
                     function AIBehaviour()
                     {
