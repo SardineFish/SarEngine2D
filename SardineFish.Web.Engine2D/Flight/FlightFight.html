@@ -413,7 +413,7 @@
                             control(flight, enemyGroup);
                         if (output.outScreen(flight))
                         {
-                            var p = flight.position.coordinate.pointMapTo(camera.coordinate, flight.position.x, flight.position.y);
+                            var p = flight.position.coordinate.pointMapTo(camera.viewCoordinate, flight.position.x, flight.position.y);
                             var x = 0;
                         }
                     }
@@ -905,6 +905,8 @@
                 }
                 init();
             }
+
+
             window.playOffline = PlayOffline;
             window.playOnline = PlayOnline;
         })();
