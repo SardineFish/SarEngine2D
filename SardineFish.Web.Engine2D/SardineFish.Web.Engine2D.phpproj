@@ -8,6 +8,13 @@
     <RootNamespace>SardineFish.Web.Engine2D</RootNamespace>
     <ProjectTypeGuids>{A0786B88-2ADB-4C21-ABE8-AA2D79766269}</ProjectTypeGuids>
     <AssemblyName>SardineFish.Web.Engine2D</AssemblyName>
+    <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+    <Server>PHPDev</Server>
+    <PublishEvent>None</PublishEvent>
+    <PHPDevAutoPort>True</PHPDevAutoPort>
+    <PHPDevPort>44381</PHPDevPort>
+    <PHPDevHostName>localhost</PHPDevHostName>
+    <IISProjectUrl>http://localhost:44381/</IISProjectUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <IncludeDebugInformation>true</IncludeDebugInformation>
@@ -16,9 +23,50 @@
     <IncludeDebugInformation>false</IncludeDebugInformation>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="0.1.0\color.js" />
+    <Content Include="0.1.0\SardineFish.Web.Engine2D.GUI.js" />
+    <Content Include="0.1.0\SardineFish.Web.Engine2D.js" />
+    <Content Include="0.1.0\SardineFish.Web.js" />
+    <Content Include="0.1.0\SardineFish.Web.UI.js" />
+    <Content Include="color.js" />
+    <Content Include="Flight\FlightFight.html" />
+    <Content Include="Flight\fonts\MaterialIcons-Regular.ttf" />
+    <Content Include="Flight\fonts\MaterialIcons-Regular.woff" />
+    <Content Include="Flight\fonts\MaterialIcons-Regular.woff2" />
+    <Content Include="Flight\img\Background.jpg" />
+    <Content Include="Flight\img\Cloud-1.png" />
+    <Content Include="Flight\img\Cloud-2.png" />
+    <Content Include="Flight\img\Cloud-3.png" />
+    <Content Include="Flight\img\Cloud-4.png" />
+    <Content Include="Flight\img\Cloud-5.png" />
+    <Content Include="Flight\img\Cloud-6.png" />
+    <Content Include="Flight\img\Cloud-7.png" />
+    <Content Include="Flight\img\Flight.png" />
+    <Content Include="Flight\lib\FFClient.js" />
+    <Content Include="Flight\lib\jquery.min.js" />
+    <Content Include="release\0.1.0\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.2.0\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.0\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.Engine2D.Colliders.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.js" />
+    <Content Include="release\0.3.1\SardineFish.Web.UI.js" />
+    <Content Include="release\0.3.2\SardineFish.Web.Engine2D.js" />
+    <Content Include="release\0.3.2\SardineFish.Web.Engine2D.zip" />
+    <Content Include="release\0.4.0\SarEngine2D.js" />
+    <Content Include="release\1.0.0\SarEngine2D.js" />
+    <Content Include="SardineFish.API.js" />
+    <Content Include="SardineFish.Web.Engine2D.Colliders.js" />
+    <Content Include="SardineFish.WebSite.API.js" />
+    <Content Include="SarEngine2D.Objects.js" />
+    <Content Include="SarEngine2D.GUI.js" />
+    <Content Include="SarEngine2D.js" />
     <Content Include="Test\animationGame.html" />
     <Content Include="Test\animationTest.html" />
+    <Content Include="Test\blank.html" />
     <Content Include="Test\cameraTest.html" />
+    <Content Include="Test\colliderTest.html" />
+    <Content Include="Test\collideTestNew.html" />
     <Content Include="Test\crouch.png" />
     <Content Include="Test\crouchLeft.png" />
     <Content Include="Test\engineTest.html" />
@@ -27,6 +75,10 @@
     <Content Include="Test\jquery.min.js" />
     <Content Include="Test\jump.png" />
     <Content Include="Test\jumpLeft.png" />
+    <Content Include="Test\Katana_Cut_1_R.png" />
+    <Content Include="Test\Katana_Cut_2_R.png" />
+    <Content Include="Test\Katana_Out_1.png" />
+    <Content Include="Test\Katana_Out_2.png" />
     <Content Include="Test\run - 副本.png" />
     <Content Include="Test\run.png" />
     <Content Include="Test\runingGame.html" />
@@ -40,8 +92,22 @@
     <Content Include="Test\standUp.png" />
     <Content Include="Test\walk.png" />
     <Content Include="Test\walkLeft.png" />
+    <Content Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="0.1.0\" />
+    <Folder Include="Flight\" />
+    <Folder Include="Flight\fonts\" />
+    <Folder Include="Flight\img\" />
+    <Folder Include="Flight\lib\" />
+    <Folder Include="release\" />
+    <Folder Include="release\0.2.0\" />
+    <Folder Include="release\0.1.0\" />
+    <Folder Include="release\0.3.0\" />
+    <Folder Include="release\0.3.1\" />
+    <Folder Include="release\0.3.2\" />
+    <Folder Include="release\0.4.0\" />
+    <Folder Include="release\1.0.0\" />
     <Folder Include="Test\" />
   </ItemGroup>
 </Project>

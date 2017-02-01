@@ -1,0 +1,302 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Collider Test</title>
+        <script src="jquery.min.js"></script>
+        <script src="../SardineFish.Web.js"></script>
+        <script src="../SardineFish.Web.UI.js"></script>
+        <script src="../SarEngine2D.js"></script>
+        <script src="../SarEngine2D.Objects.js"></script>
+        <script src="../SarEngine2D.GUI.js"></script>
+        <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no,target-densitydpi=device-dpi" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="browsermode" content="application" />
+        <meta name="full-screen" content="true" />
+        <meta name="x5-fullscreen" content="true" />
+        <meta name="x5-page-mode" content="app" />
+        <meta name="360-fullscreen" content="true" />
+        <style>
+            html{
+                -ms-touch-action: none;  /*Direct all pointer events to JavaScript code. */
+                overflow: hidden;
+            }
+            body{
+                margin: 0px;
+                padding: 0px;
+                background-color: rgb(240,240,240);
+            }
+            #debug{
+                position: fixed; 
+                top: 0px;
+                left: 0px;
+                z-index: 1000;
+                color: green;
+            }
+            #textCount{
+                top: 20px;
+                position: fixed;
+                float: left;
+                z-index: 1000;
+            }
+        </style>
+        <link rel="stylesheet" type="text/css" href="runningGame.css" />
+    </head>
+    <body oncontextmenu="return false;">
+<!--        <a href="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js" download="jquery.min.js" >jquery.min.js</a>
+        -->
+        <p id="debug" >debug</p>
+        <p id="textCount">0</p>
+        <div>
+            <canvas id="canvas" width="480" height="500"></canvas>
+            <div style="height: 200px; background-color:black"></div>
+        </div>
+        
+        <script>
+try
+{
+    Math.sign = function (x)
+    {
+        if (isNaN(x) || x == 0)
+            return 0;
+        if (x > 0)
+            return 1;
+        else
+            return -1;
+    }
+
+var canvas=document.getElementById("canvas");
+var width=canvas.width;
+var height=canvas.height;
+var game = SarEngine.createByCanvas(canvas);
+var scene=game.scene;
+var camera = scene.cameraList[0];
+var lastP = null;
+var count = 0;
+var polygon;
+scene.onTouchStart = sceneTouch;
+scene.onMouseDown = sceneTouch;
+game.onUpdate = function ()
+{
+    $("#debug").text("FPS=" + game.fps);
+}
+
+init();
+
+function init()
+{
+    width = document.body.clientWidth;
+    height = document.body.clientHeight;
+    canvas.height = height;
+    canvas.width = width;
+    game.start();
+    camera.moveTo(width / 2, height / 2);
+    scene.physics.g = new Vector2(0, -980);
+
+
+    var hor=new Rectangle(width,10);
+    hor.strokeStyle=new Color(255,0,0,1);
+    hor.fillStyle=new Color(255,0,0,1);
+    hor.rigidBody=true;
+    hor.static=true;
+    hor.soft=false;
+    var ver=new Rectangle(10,height);
+    ver.strokeStyle=new Color(255,0,0,1);
+    ver.fillStyle=new Color(255,0,0,1);
+    ver.rigidBody=true;
+    ver.static=true;
+    ver.soft=false;
+
+    var ground=new GameObject();
+    ground.graphic=hor.copy();
+    ground.collider=ground.graphic;
+    //ground.collider.setCenter(Align.middleLeft);
+    ground.collider.setPositionPoint(0, 0);
+    ground.name = "Ground";
+    scene.addGameObject(ground,0);
+
+    var roof=new GameObject();
+    roof.graphic=hor.copy();
+    roof.collider=roof.graphic;
+    //roof.collider.setCenter(Align.middleLeft);
+    roof.collider.setPositionPoint(0, height);
+    roof.name = "Roof";
+    scene.addGameObject(roof,0);
+
+    var wallLeft=new GameObject();
+    wallLeft.graphic=ver.copy();
+    wallLeft.collider=wallLeft.graphic;
+    //wallLeft.collider.setCenter(Align.bottomCenter);
+    wallLeft.collider.setPositionPoint(0, 0);
+    wallLeft.name = "WallLeft";
+    scene.addGameObject(wallLeft,0);
+
+    var wallRight=new GameObject();
+    wallRight.graphic=ver.copy();
+    wallRight.collider=wallRight.graphic;
+    //wallRight.collider.setCenter(Align.bottomCenter);
+    wallRight.collider.setPositionPoint(width, 0);
+    wallRight.name = "WallRight";
+    scene.addGameObject(wallRight,0);
+}
+
+function sceneTouch(e)
+{
+    /*setInterval(function ()
+    {
+        var e = {};
+        e.x = Math.random() * width;
+        e.y = Math.random() * height;
+        var c = new Circle(10);
+        c.rigidBody = true;
+        c.static = false;
+        c.soft = true;
+        c.setPosition(e.x, e.y);
+        //alert(c.o);
+        c.strokeStyle = new Color(0, 0, 0, 1);
+        var obj = new GameObject();
+        obj.graphic = c;
+        obj.collider = c;
+        obj.name = "Ball";
+        scene.addGameObject(obj);
+        $("#textCount").text(++count);
+        if (lastP)
+        {
+            obj.v = new Vector2(Math.random()*300, Math.random()*200);
+        }
+        lastP = new Point(e.x, e.y);
+    }, 100);*/
+    try {
+        //alert((new Point(e.x,e.y)).toString());
+        if (e.button == Mouse.Buttons.Left)
+        {
+            if (count % 2 == 0)
+            {
+                var c = new Circle(50);
+                c.rigidBody = true;
+                c.soft = false;
+                c.setPosition(e.x, e.y);
+                //alert(c.o);
+                c.strokeStyle = new Color(0, 0, 0, 1);
+                c.e = 0.5;
+                var obj = new GameObject();
+                obj.graphic = c;
+                obj.collider = c;
+                if (count == 0)
+                {
+                    c.static = true;
+                }
+                else
+                    obj.gravity = true;
+                obj.name = "Ball";
+                obj.setCenter(e.x, e.y);
+                scene.addGameObject(obj,0);
+            }
+            else
+            {
+                var rect = new Rectangle(100, 100);
+                rect.rigidBody = true;
+                rect.static = false;
+                rect.soft = false;
+                rect.e = 0.5;
+                rect.moveTo(e.x, e.y);
+                rect.strokeStyle = new Color(0, 0, 0, 1);
+                var obj = new GameObject();
+                obj.gravity = true;
+                obj.graphic = rect;
+                obj.collider = rect;
+                obj.setCenter(e.x, e.y);
+                obj.name = "Rect";
+                scene.addGameObject(obj,0);
+
+            }
+            if (lastP)
+                obj.v = Vector2.fromPoint(obj.position, lastP);
+            lastP = obj.position;
+            count++;
+        }
+        
+        if (e.button == Mouse.Buttons.Right)
+        {
+            if (!polygon)
+            {
+
+                polygon = new Polygon();
+                polygon.beginInit();
+            }
+            if (polygon.V.length < 3)
+            {
+                polygon.addPoint(new Point(e.x, e.y));
+            }
+            else
+            {
+                polygon.addPoint(new Point(e.x, e.y));
+                polygon.endInit();
+                polygon.I = 100;
+                polygon.rigidBody = true;
+                polygon.soft = false;
+
+                if (count < 4)
+                    polygon.static = true;
+                else
+                    polygon.static = false;
+                var obj = new GameObject();
+                obj.collider = polygon;
+                obj.graphic = polygon;
+                scene.addGameObject(obj,0);
+                if (count >= 4)
+                {
+                    if (!lastP)
+                        lastP = polygon.center;
+                    else
+                    {
+                        obj.v = Vector2.fromPoint(polygon.center, lastP);
+                        lastP = polygon.center.copy();
+                    }
+                }
+                polygon = new Polygon();
+                polygon.beginInit();
+                $("#textCount").text(++count);
+            }
+        }
+        
+    }catch(ex)
+    {
+        alert(ex.message);
+    }
+}
+
+}catch(ex)
+{
+    alert("global:"+ex.message);
+}
+        </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
