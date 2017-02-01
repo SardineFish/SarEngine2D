@@ -29,6 +29,8 @@
     <Content Include="0.1.0\SardineFish.Web.js" />
     <Content Include="0.1.0\SardineFish.Web.UI.js" />
     <Content Include="color.js" />
+    <Content Include="Flight\audio\Shoot.mp3" />
+    <Content Include="Flight\audio\Shoot.wav" />
     <Content Include="Flight\FlightFight.html" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.ttf" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.woff" />
@@ -97,6 +99,7 @@
   <ItemGroup>
     <Folder Include="0.1.0\" />
     <Folder Include="Flight\" />
+    <Folder Include="Flight\audio\" />
     <Folder Include="Flight\fonts\" />
     <Folder Include="Flight\img\" />
     <Folder Include="Flight\lib\" />

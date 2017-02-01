@@ -65,6 +65,7 @@
             var engine, scene, camera, output;
             var flightImg;
             var bullet;
+            var player;
             var forward = new Vector2(0, 1);
             var controlStack = Stack.createAsArray();
             var PI = Math.PI;
@@ -83,7 +84,7 @@
             var enemyGroup = new CollideGroup();
             var friendGroup = new CollideGroup();
             var backgroundLayer = new Background();
-
+            var shootSound;
 
             var cloudLayers = SarEngine.ArrayList();
             var flightLayer = new Layer();
@@ -121,6 +122,11 @@
                     scene.addGameObject(obj, layer, scene.collideGroups.ignoreGroup);
                 }
                 //obj.setCoordinate(camera.viewCoordinate);
+            }
+
+            function initAudios()
+            {
+                shootSound = new SarEngine.Audio("audio/Shoot.mp3");
             }
 
             function createFlight(group)
@@ -177,11 +183,12 @@
             {
                 flight.v.x = 0;
                 flight.v.y = 0;
-                var R = flight.speed / turnAngV;
+                var angV = Math.sqrt((flight.speed + 200)) / 40;
+                var R = flight.speed / angV;
                 var vct = Vector2.multi(flight.forward, R);
                 vct.rotate(-PI / 2);
                 flight.setCenter(flight.position.x + vct.x, flight.position.y + vct.y);
-                flight.angV = -turnAngV;
+                flight.angV = -angV;
             }
             function speedUp(flight)
             {
@@ -252,6 +259,9 @@
                 bulletLeft.onUpdate = checkLifeTime;
                 bulletRight.onUpdate = checkLifeTime;
 
+                if (flight == player)
+                    output.playNewAudio(shootSound);
+
                 bulletLeft.onCollide = function ()
                 {
                     scene.removeGameObject(bulletLeft.id);
@@ -293,7 +303,6 @@
 
             function PlayOffline()
             {
-                var player;
                 var aiPlayers = SarEngine.ArrayList();
                 var flight;
 
@@ -313,6 +322,8 @@
                     engine.start();
                     output = camera.outputList[0];
                     camera.zoomTo(0.8);
+
+                    initAudios();
 
                     scene.addLayer(flightLayer, 100);
                     scene.addLayer(bulletLayer, 10);
@@ -568,7 +579,6 @@
 
             function PlayOnline(uid ,token)
             {
-                var player;
                 var playerList = SarEngine.ArrayList();
                 var client;
 

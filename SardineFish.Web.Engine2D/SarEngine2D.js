@@ -215,7 +215,7 @@
         throw new Error("Game not run.");
     }
 
-    EngineStatus = {
+    var EngineStatus = {
         NotRun: 1,
         Running: 2,
         Paused: 4,
@@ -2104,6 +2104,7 @@
         this.setLayer = function (count) { };
         this.camera = null;
         this.layers = ArrayList();
+        this.audioTracks = ArrayList();
         this.outputDOM = null;
         this.viewArea = null;
         var outputDom = null;
@@ -2423,6 +2424,48 @@
         camera.addOutput(this);
 
     }
+    Output.prototype.addAudioTrack = function (audioTrack)
+    {
+        if (!this.audioTracks.contain(audioTrack))
+        {
+            var index = this.audioTracks.add(audioTrack);
+            audioTrack.output = this;
+            return index;
+        }
+    }
+    Output.prototype.removeAudioTrack = function (audioTrack)
+    {
+        var index = this.audioTracks.indexOf(audioTrack);
+        if (index < 0)
+            return -1;
+        this.audioTracks.removeAt(index);
+        audioTrack.output = null;
+    }
+    Output.prototype.playAudio = function (audio)
+    {
+        if (!(audio instanceof Engine.Audio) || !(audio instanceof window.Audio))
+        {
+            throw new Error("Audio required.");
+        }
+        audio.play();
+    }
+    Output.prototype.playNewAudio = function (audio)
+    {
+        if (audio instanceof window.Audio)
+        {
+            audio = new Engine.Audio(audio);
+        }
+        if(audio instanceof Engine.Audio )
+        {
+            var track = new AudioTrack(audio);
+            this.addAudioTrack(track);
+            track.play();
+        }
+        else
+        {
+            throw new Error("Audio required.");
+        }
+    }
     Engine.Output = Output;
     window.Output = Output;
 
@@ -2718,21 +2761,212 @@
     function Audio(audio)
     {
         this.src = null;
-        if (audio instanceof Element)
+        this.audio = null;
+        var self = this;
+        this.playing = false;
+        Object.defineProperty(this, "src", {
+            get: function ()
+            {
+                return self.audio.src;
+            },
+            set: function (value)
+            {
+                self.audio.src = value;
+            }
+        });
+        Object.defineProperty(this, "duration", {
+            get: function ()
+            {
+                return self.audio.duration;
+            }
+        });
+        Object.defineProperty(this, "complete", {
+            get: function ()
+            {
+                return self.audio.readyState == 4;
+            }
+        });
+        Object.defineProperty(this, "currentTime", {
+            get: function ()
+            {
+                if (!self.audio)
+                    return 0;
+                return self.audio.currentTime;
+            },
+            set: function (value)
+            {
+                if (!self.audio)
+                    return;
+                self.audio.currentTim = value;
+            }
+        })
+        if (!audio)
+        {
+            return;
+        }
+        else if (audio instanceof Element)
         {
             if (audio.nodeName != "AUDIO")
             {
                 throw new Error("A audio Element/Url/Blob required.");
             }
-            this.src = audio.src;
+            this.audio = audio;
         }
-
+        else if (typeof audio == "string")
+        {
+            this.audio = new window.Audio(audio);
+        }
+        else if (audio instanceof Blob)
+        {
+            var src = URL.createObjectURL(audio);
+            this.audio = new window.Audio(src);
+        }
+        else
+        {
+            this.audio = new window.Audio();
+        }
+        this.audio.addEventListener("ended", onEnd);
+        function onEnd(e)
+        {
+            self.playing = false;
+        }
     }
+    Audio.prototype.load = function (src, callback)
+    {
+        var self = this;
+        if (typeof src == "string")
+        {
+            this.src = src;
+        }
+        else if (src instanceof Blob)
+        {
+            this.src = URL.createObjectURL(audio);
+        }
+        if (this.audio.complete)
+        {
+            if(this.complete)
+            {
+                if (src instanceof Function)
+                    src();
+                else if (callback instanceof Function)
+                    callback();
+            }
+            this.audio.addEventListener("loadedmetadata", onLoad);
+        }
+        function onLoad(e)
+        {
+            self.audio.removeEventListener("loadedmetadata", onLoad);
+            if (src instanceof Function)
+                src();
+            else if (callback instanceof Function)
+                callback();
+        }
+    }
+    Audio.prototype.play = function ()
+    {
+        this.audio.play();
+        this.playing = true;
+    }
+    Audio.prototype.pause = function ()
+    {
+        this.audio.pause();
+        this.playing = false;
+    }
+    Audio.prototype.end = function ()
+    {
+        this.currentTime = this.duration;
+        this.pause();
+    }
+    
+    Engine.Audio = Audio;
 
     function AudioTrack(audio)
     {
-        this.audio = null;
+        var _audio = null;
+        this.time = 0;
+        this.playing = false;
+        this.output = null;
+        this.audioElement = null;
+        var audioTrack = this;
+        Object.defineProperty(this, "audio", {
+            get: function ()
+            {
+                return _audio;
+            },
+            set: function (value)
+            {
+                if (!(value instanceof Engine.Audio))
+                    throw new Error("A object of SarEngine.Audio required.");
+                _audio = value;
+                audioTrack.audioElement = new window.Audio(value.src);
+                audioTrack.audioElement.addEventListener("ended", onEnded);
+            }
+        })
+        Object.defineProperty(this, "currentTime", {
+            get: function ()
+            {
+                if (!audioTrack.audioElement)
+                    return 0;
+                return audioTrack.audioElement.currentTime;
+            },
+            set: function (value)
+            {
+                if (!audioTrack.audioElement)
+                    return;
+                audioTrack.audioElement.currentTime = value;
+            }
+        });
+        Object.defineProperty(this, "duration", {
+            get: function ()
+            {
+                return audioTrack.audio.duration;
+            }
+        });
+        if (audio instanceof Engine.Audio)
+            this.audio = audio;
+        function onEnded(e)
+        {
+            audioTrack.playing = false;
+        }
     }
+    AudioTrack.prototype.play = function ()
+    {
+        if (!this.output)
+            throw new Error("The AudioTrack must be add to an Output before playing.");
+        this.audioElement.play();
+        this.playing = true;
+    }
+    AudioTrack.prototype.pause = function ()
+    {
+        if (!this.output)
+            throw new Error("The AudioTrack must be add to an Output before playing.");
+        if (this.audioElement)
+            throw new Error("Are you kidding me?");
+        this.audioElement.pause();
+        this.playing = false;
+    }
+    AudioTrack.prototype.end = function ()
+    {
+        if (!this.output)
+            throw new Error("The AudioTrack must be add to an Output before playing.");
+        if (this.audioElement)
+            throw new Error("Are you kidding me?");
+        this.currentTime = this.duration;
+        this.pause();
+    }
+    AudioTrack.prototype.addToOutput = function (output)
+    {
+        if (!(output instanceof Output))
+            throw new Error("Output required.");
+        output.addAudioTrack(this);
+    }
+    AudioTrack.prototype.removeFromOutput = function (output)
+    {
+        if (!(output instanceof Output))
+            throw new Error("Output required.");
+        output.removeAudioTrack(this);
+    }
+    Engine.AudioTrack = AudioTrack;
 
     //--------------GUI
     //-----------------
