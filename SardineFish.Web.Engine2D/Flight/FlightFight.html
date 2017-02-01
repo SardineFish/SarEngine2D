@@ -83,6 +83,8 @@
             var enemyGroup = new CollideGroup();
             var friendGroup = new CollideGroup();
             var backgroundLayer = new Background();
+
+
             var cloudLayers = SarEngine.ArrayList();
             var flightLayer = new Layer();
             var bulletLayer = new Layer();
@@ -119,41 +121,6 @@
                     scene.addGameObject(obj, layer, scene.collideGroups.ignoreGroup);
                 }
                 //obj.setCoordinate(camera.viewCoordinate);
-            }
-
-            function initFlight()
-            {
-                var lifeBar = $("#lifeBar .progress");
-                lifeBar.stop();
-                lifeBar.css("width", "0%");
-                lifeBar.animate({ width: "100%" }, 500);
-                flight = createFlight();
-                scene.addGameObject(flight, flightLayer, friendGroup);
-
-                flight.action = null;
-                flight.control = null;
-
-                flight.moveTo(0, 0);
-                camera.moveTo(0, 0);
-                camera.linkTo(flight);
-
-                flight.onCollide = function (e)
-                {
-                    if (e.target.name == "bullet")
-                    {
-                        flight.life -= bulletDamage;
-                        lifeBar.stop();
-                        lifeBar.animate({ width: (flight.life / flightLife) * 100 + "%" }, 100);
-                        if (flight.life <= 0)
-                        {
-                            flight.life = 0;
-                            //Destroy(flight);
-                            engine.end();
-                            //init();
-                        }
-
-                    }
-                }
             }
 
             function createFlight(group)

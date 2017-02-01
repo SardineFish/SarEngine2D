@@ -1647,7 +1647,14 @@
         {
             if (this.objectList[i].onRender)
             {
-                args = { graphics: graphics, x: this.objectList[i].position.x, y: this.objectList[i].position.y, r: this.objectList[i].rotation, dt: dt, cancel: false };
+                args = {
+                    graphics: graphics,
+                    x: this.objectList[i].position.x,
+                    y: this.objectList[i].position.y,
+                    r: this.objectList[i].rotation,
+                    dt: dt,
+                    cancel: false
+                };
                 this.objectList[i].onRender(args);
                 if (args.cancel)
                     continue;
@@ -2707,6 +2714,25 @@
     }
     Engine.Camera = Camera;
     window.Camera = Camera;
+
+    function Audio(audio)
+    {
+        this.src = null;
+        if (audio instanceof Element)
+        {
+            if (audio.nodeName != "AUDIO")
+            {
+                throw new Error("A audio Element/Url/Blob required.");
+            }
+            this.src = audio.src;
+        }
+
+    }
+
+    function AudioTrack(audio)
+    {
+        this.audio = null;
+    }
 
     //--------------GUI
     //-----------------
