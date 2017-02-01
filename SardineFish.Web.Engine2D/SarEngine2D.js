@@ -539,6 +539,8 @@
         for (var i = 0; i < this.collideGroups.defaultGroup.objectList.length; i++)
         {
             var obj1 = this.collideGroups.defaultGroup.objectList[i];
+            if (!obj1.collider)
+                continue;
             for (var group2 = 0; group2 < this.collideGroups.length; group2++)
             {
                 for (var j = 0; j < this.collideGroups[group2].objectList.length; j++)
@@ -2096,6 +2098,7 @@
         this.camera = null;
         this.layers = ArrayList();
         this.outputDOM = null;
+        this.viewArea = null;
         var outputDom = null;
         var graphics = null;
         var width = 0;
@@ -2337,6 +2340,82 @@
         this._renderSizeChangeCallback = null;
     }
     Output.OutputTypes = { None: 0, Single: 1, MultiLayer: 2 };
+    Output.prototype.outScreen = function (obj)
+    {
+        if (!this.viewArea)
+            throw new Error("Are you kidding me?");
+        if (obj instanceof GameObject)
+        {
+            if (obj.graphic)
+                obj = obj.graphic;
+            else
+            {
+                var p = new Point(obj.position.x, obj.position.y);
+                p.setCoordinate(obj.position.coordinate);
+                obj = p;
+            }
+        }
+        if (obj instanceof Engine.Image)
+        {
+            var rect = new Rectangle(obj.width, obj.height);
+            rect.center = obj.center.copy();
+            rect.position = obj.position.copy();
+            rect.o = obj.o.copy();
+            obj = rect;
+
+        }
+        if (obj instanceof Point)
+        {
+            var p = obj.coordinate.pointMapTo(this.viewArea.coordinate,obj.x,obj.y);
+            return !this.viewArea.isCollideWith(new Point(p.x, p.y));
+        }
+        else if (obj instanceof Polygon)
+        {
+            for (var i = 0; i < obj.V.length; i++)
+            {
+                var p = obj.coordinate.pointMapTo(this.viewArea.coordinate, obj.V[i].x, obj.V[i].y);
+                if (this.viewArea.isCollideWith(new Point(p.x, p.y)))
+                    return false;
+            }
+            return true;
+        }
+        else if (obj instanceof Rectangle)
+        {
+            var o = obj.coordinate.pointMapTo(Coordinate.Default, obj.center.x, obj.center.y);
+            var p = obj.coordinate.pointMapTo(this.viewArea.coordinate, o.x - (obj.width / 2), o.y + (obj.height / 2));
+            if (this.viewArea.isCollideWith(new Point(p.x, p.y)))
+                return false;
+            p = obj.coordinate.pointMapTo(this.viewArea.coordinate, o.x + (obj.width / 2), o.y + (obj.height / 2));
+            if (this.viewArea.isCollideWith(new Point(p.x, p.y)))
+                return false;
+            p = obj.coordinate.pointMapTo(this.viewArea.coordinate, o.x + (obj.width / 2), o.y - (obj.height / 2));
+            if (this.viewArea.isCollideWith(new Point(p.x, p.y)))
+                return false;
+            p = obj.coordinate.pointMapTo(this.viewArea.coordinate, o.x - (obj.width / 2), o.y - (obj.height / 2));
+            if (this.viewArea.isCollideWith(new Point(p.x, p.y)))
+                return false;
+            return true;
+        }
+        else if (obj instanceof Circle)
+        {
+            var o = obj.coordinate.pointMapTo(this.viewArea.coordinate, obj.o.x, obj.o.y);
+            if (o.x + obj.r < this.viewArea.center.x - (this.viewArea.width / 2) || this.viewArea.center.x + (this.viewArea.width / 2) < o.x - obj.r)
+            {
+                return true;
+            }
+            if (o.y + obj.r < this.viewArea.center.y - (this.viewArea.height / 2) || this.viewArea.center.y + (this.viewArea.height / 2) < o.y - obj.r)
+            {
+                return true;
+            }
+        }
+    }
+    Output.prototype.connectTo = function (camera)
+    {
+        if (this.camera)
+            this.camera.removeOutput(this);
+        camera.addOutput(this);
+
+    }
     Engine.Output = Output;
     window.Output = Output;
 
@@ -2579,6 +2658,8 @@
         }
         output.camera = this;
         this.outputList.add(output);
+        output.viewArea = new Rectangle(output.renderWidth, output.renderHeight);
+        output.viewArea.setCoordinate(this.viewCoordinate);
     }
     Camera.prototype.removeOutput = function (output)
     {

@@ -309,6 +309,12 @@
             }
         })
     }
+    Position.prototype.copy = function ()
+    {
+        var pos = new Position(this.innerX, this.innerY);
+        pos.setCoordinate(this.coordinate);
+        return pos;
+    }
     Position.prototype.setCoordinate = function (coordinate)
     {
         this.coordinate = coordinate;
@@ -1724,6 +1730,7 @@
         else
             p.color = this.color;
         p.v = this.v.copy();
+        return p;
     }
     Particle.prototype.setCoordinate = function (coordinate)
     {
@@ -2004,6 +2011,8 @@
     }
     Circle.prototype.collide = function (self, target, dt)
     {
+        if (!self.collider.rigidBody || !target.collider.rigidBody)
+            return;
         if (self.collider.static && target.collider.static)
             return;
         if (target.collider instanceof Circle)
@@ -2516,6 +2525,11 @@
             {
                 throw new Error("Something wrong with the polygon");
             }
+            for (var i = 0; i < this.V.length; i++)
+            {
+                if (col.isCollideWith(this.V[i]))
+                    return true;
+            }
             for (var i = 0; i < this.E.length; i++)
                 for (var j = 0; j < col.E.length; j++)
                 {
@@ -2536,6 +2550,8 @@
     }
     Polygon.prototype.collide = function (self, target, dt)
     {
+        if (!self.collider.rigidBody || !target.collider.rigidBody)
+            return;
         if (self.collider.static && target.collider.static)
             return;
         if (target.collider instanceof Circle)
@@ -3335,7 +3351,7 @@
         else if (obj instanceof Point)
         {
             var o = new Point(this.o.x + this.center.x, this.o.y + this.center.y);
-            if (o.x <= obj.x && obj.x <= o.x + this.width && obj.y <= o.y && o.y - this.height <= obj.y)
+            if (o.x <= obj.x && obj.x <= o.x + this.width &&  o.y <= obj.y && obj.y <= o.y + this.height)
                 return true;
             else
                 return false;
@@ -3351,6 +3367,8 @@
     }
     Rectangle.prototype.collide = function (self, target, dt)
     {
+        if (!self.collider.rigidBody || !target.collider.rigidBody)
+            return;
         if (self.collider.static && target.collider.static)
             return;
         if (target.collider instanceof Rectangle)

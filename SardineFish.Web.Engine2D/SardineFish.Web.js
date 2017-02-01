@@ -194,6 +194,12 @@ window.localStorage=(function(localStorage)
                 return null;
             return this[this.length - 1];
         }
+        stack.contain = function (obj)
+        {
+            if (stack.indexOf(obj) < 0)
+                return false;
+            return true;
+        }
         return stack;
     }
     Stack.prototype.push=function(node)

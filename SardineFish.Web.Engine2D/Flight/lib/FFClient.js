@@ -107,8 +107,8 @@
                 v: { x: flight.v.x, y: flight.v.y },
                 life: flight.life,
                 speed: flight.speed,
-                id: flight.identity
-
+                id: flight.identity,
+                rotation: flight.rotation
             }];
             message.data = data;
             webSocket.send(message.toString());
@@ -376,15 +376,17 @@
     }
 
     var Action = {
-        SlowDown: 0,
-        FlyForward: 1,
-        SpeedUp: 2,
-        HightSpeedUp: 3,
-        TurnLeft: 4,
-        TurnRight: 8,
-        Damage: 16,
-        Destroy: 32,
-        Summon: 64
+        Stop: 0,
+        SlowDown: 1,
+        FlyForward: 2,
+        SpeedUp: 4,
+        HightSpeedUp: 6,
+        TurnLeft: 8,
+        TurnRight: 16,
+        Damage: 32,
+        Destroy: 64,
+        Summon: 128,
+        Shoot: 256,
     };
     FFClient.Action = Action;
     function ActionData(json)
