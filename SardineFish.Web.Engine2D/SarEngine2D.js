@@ -670,7 +670,7 @@
             }
             obj.render(scene.camera.graphics, obj.position.x, obj.position.y, 0, dt);
         }*/
-        return;
+        // return;
         
 
 
@@ -681,11 +681,11 @@
             scene.camera.resetTransform();
             scene.GUI.render(scene.camera.graphics);
         }
-        if (scene.background)
-        {
-            scene.camera.resetTransform();
-            scene.background.render(scene.camera.graphics);
-        }
+        // if (scene.background)
+        // {
+        //     scene.camera.resetTransform();
+        //     scene.background.render(scene.camera.graphics);
+        // }
         if (this.onEndRender)
             this.onEndRender();
     }
