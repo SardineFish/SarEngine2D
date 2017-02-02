@@ -99,7 +99,7 @@
     }
     Vector2.prototype.changeCoordinate = function (coordinate)
     {
-        var v = this.coordinate.vectorMapTo(coordinate);
+        var v = this.coordinate.vectorMapTo(coordinate, this.x, this.y);
         this.x = v.x;
         this.y = v.y;
         this.coordinate = coordinate;
@@ -211,7 +211,7 @@
     }
     Point.prototype.changeCoordinate = function (coordinate)
     {
-        var p = this.coordinate.pointMapTo(coordinate);
+        var p = this.coordinate.pointMapTo(coordinate, this.x, this.y);
         this.x = p.x;
         this.y = p.y;
         this.coordinate = coordinate;
@@ -321,9 +321,9 @@
     }
     Position.prototype.changeCoordinate = function (coordinate)
     {
-        var p = this.coordinate.pointMapTo(coordinate);
-        this.x = p.x;
-        this.y = p.y;
+        var p = this.coordinate.pointMapTo(coordinate, this.x, this.y);
+        this.innerX = p.x;
+        this.innerY = p.y;
         this.coordinate = coordinate;
     }
     Position.prototype.rotate = function (rad, x0, y0)
@@ -786,6 +786,7 @@
             image.height = height;
             image.o.x = -img.width / 2;
             image.o.y = img.height / 2;
+            
             img.onload = null;
         }
         img.src = url;
@@ -811,7 +812,7 @@
     }
     Image.prototype.changeCoordinate = function (coordinate)
     {
-        this.o.changeCoordinate(coordinate);
+        //this.o.changeCoordinate(coordinate);
         this.position.changeCoordinate(coordinate);
         this.center.changeCoordinate(coordinate);
         this.coordinate = coordinate;
@@ -871,7 +872,7 @@
             return;
         if (this.onRender)
             this.onRender();
-        var o = this.o.coordinate.pFrom(this.center.x, this.center.y);
+        var o = this.center.coordinate.pFrom(this.center.x, this.center.y);
         o.x += this.o.x;
         o.y += this.o.y;
         if (this.rotation)

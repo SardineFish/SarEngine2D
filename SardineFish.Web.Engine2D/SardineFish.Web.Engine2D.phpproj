@@ -29,12 +29,16 @@
     <Content Include="0.1.0\SardineFish.Web.js" />
     <Content Include="0.1.0\SardineFish.Web.UI.js" />
     <Content Include="color.js" />
+    <Content Include="Flight\audio\Explode.mp3" />
+    <Content Include="Flight\audio\Explode.wav" />
     <Content Include="Flight\audio\Shoot.mp3" />
     <Content Include="Flight\audio\Shoot.wav" />
     <Content Include="Flight\FlightFight.html" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.ttf" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.woff" />
     <Content Include="Flight\fonts\MaterialIcons-Regular.woff2" />
+    <Content Include="Flight\img\Arrow-S.png" />
+    <Content Include="Flight\img\Arrow.png" />
     <Content Include="Flight\img\Background.jpg" />
     <Content Include="Flight\img\Cloud-1.png" />
     <Content Include="Flight\img\Cloud-2.png" />

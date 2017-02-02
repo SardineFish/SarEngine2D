@@ -19,6 +19,7 @@
             margin:0px;
             padding:0px;
             background-color: #77b9d8;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .progressBar{
             width: 100%;
@@ -46,6 +47,12 @@
         #lifeBar .progress{
             background-color: rgba(255, 107, 107, 1);
         }
+        #score{
+            text-align: center;
+            font-size: 5em;
+            color: white;
+            text-shadow: 0px 0px 6px rgba(0,0,0,0.4);
+        }
     </style>
 </head>
 <body>
@@ -54,6 +61,7 @@
             <div id="lifeBar" class="progressBar">
                 <div class="progress"></div>
             </div>
+            <div id="score">0</div>
         </div>
         <div id="output"></div>
     </div>
@@ -78,6 +86,8 @@
             var shootCD = 50;//ms
             var bulletLifeTime = 150;
             var flightLife = 100;
+            var playerLife = 200;
+            var aiLife = 80;
             var bulletDamage = 10;
             var cloudCount = 50;
             var cloudLayerCount = 3;
@@ -85,6 +95,9 @@
             var friendGroup = new CollideGroup();
             var backgroundLayer = new Background();
             var shootSound;
+            var explodeSound;
+            var arrowImage;
+            var score = 0;
 
             var cloudLayers = SarEngine.ArrayList();
             var flightLayer = new Layer();
@@ -128,7 +141,13 @@
 
             function initAudios()
             {
+            }
+
+            function loadResources()
+            {
                 shootSound = new SarEngine.Audio("audio/Shoot.mp3");
+                explodeSound = new SarEngine.Audio("audio/Explode.mp3");
+                arrowImage = SarEngine.Image.fromUrl("img/Arrow-S.png");
             }
 
             function createFlight(group)
@@ -145,8 +164,10 @@
                 flight.life = flightLife;
                 flight.onCollide = flightCollide;
                 flight.name = "flight";
+                flight.power = bulletDamage;
                 flight.onDestroy = null;
                 flight.onDamage = null;
+                flight.onKilling = null;
                 flight.action = null;
                 flight.control = null;
                 flight.onUpdate = function (e)
@@ -165,7 +186,7 @@
                 {
                     if (e.target.name == "bullet")
                     {
-                        Damage(flight, e.target.owner);
+                        Damage(flight, e.target.owner, e.target.damage);
                     }
                 }
                 return flight;
@@ -258,6 +279,9 @@
                 bulletLeft.name = "bullet";
                 bulletRight.name = "bullet";
 
+                bulletLeft.damage = flight.power;
+                bulletRight.damage = flight.power;
+
                 bulletLeft.onUpdate = checkLifeTime;
                 bulletRight.onUpdate = checkLifeTime;
 
@@ -274,7 +298,7 @@
                 }
                 function checkLifeTime(obj_)
                 {
-                    if (obj_.lifeTime > bulletLifeTime)
+                    if (obj_.lifeTime >= bulletLifeTime)
                     {
                         scene.removeGameObject(obj_.id);
                     }
@@ -285,9 +309,9 @@
                 scene.addGameObject(flight, flightLayer, group);
                 flight.active = true;
             }
-            function Damage(flight, attacker)
+            function Damage(flight, attacker, damage)
             {
-                flight.life -= bulletDamage;
+                flight.life -= damage;
                 if (flight.onDamage)
                     flight.onDamage(attacker);
                 if (flight.life <= 0)
@@ -298,9 +322,12 @@
             }
             function Destroy(flight, killer)
             {
+                output.playNewAudio(explodeSound);
+                scene.removeGameObject(flight.id);
+                if (killer.onKilling)
+                    killer.onKilling(flight);
                 if (flight.onDestroy)
                     flight.onDestroy(killer);
-                scene.removeGameObject(flight.id);
             }
 
             function PlayOffline()
@@ -323,9 +350,9 @@
                     camera = scene.cameraList[0];
                     engine.start();
                     output = camera.outputList[0];
-                    camera.zoomTo(0.8);
+                    camera.zoomTo(0.6);
 
-                    initAudios();
+                    loadResources();
 
                     scene.addLayer(flightLayer, 100);
                     scene.addLayer(bulletLayer, 10);
@@ -345,7 +372,7 @@
                         }
                     }
 
-                    Coordinate.Default.axis.visible = true;
+                    //Coordinate.Default.axis.visible = true;
 
                     /*var triangle = new Polygon([new Point(0, 20), new Point(40, -20), new Point(-40, -20)]);
                     triangle.strokeStyle = "black";
@@ -358,12 +385,12 @@
                     flightImg = SarEngine.Image.fromUrl("img/Flight.png", 64, 64);
 
                     bullet = new Line(new Point(0, -20), new Point(0, 20));
-                    bullet.strokeStyle = Color.fromString("#ff756e");
-                    bullet.strokeWidth = 2;
+                    bullet.strokeStyle = Color.fromString("#ff3737");
+                    bullet.strokeWidth = 3;
 
                     initPlayer();
 
-                    for (var i = 0; i < 5; i++)
+                    for (var i = 0; i < 6; i++)
                     {
                         var x = -2000 + Math.random() * 4000;
                         var y = -2000 + Math.random() * 4000;
@@ -383,26 +410,54 @@
                             if (objPos.x < -halfWidth || objPos.x > halfWidth || objPos.y < -halfHeight || objPos.y > halfHeight) {
                                 var angle = Math.atan2(objPos.y, objPos.x);
                                 var distance = 0;
+                                /*
                                 if (Math.abs(angle) == 90 / Math.PI * 180) {
                                     distance = objPos.y;
                                 } else {
                                     distance = Math.abs(objPos.x * (1 / Math.cos(angle)));
                                 }
+                                */
+
+                                // d = sqrt[(x-x0)^2+(y-y0)^2]
+                                distance = Math.sqrt(objPos.x * objPos.x + objPos.y * objPos.y);
+
                                 var size = 1000 / (distance + 500) + 0.1;
                                 if (size > 1) size = 1;
-                                image = SarEngine.Image.fromUrl("img/Arrow.png", 256 * size, 256 * size);
-                                image.setCoordinate(camera.viewCoordinate);
-                                if (objPos.y != 0) {
-                                    if (Math.abs(objPos.x) / Math.abs(objPos.y) > halfWidth / halfHeight) {
-                                        image.setPosition(objPos.x > 0 ? halfWidth : -halfWidth, objPos.y * (halfWidth / objPos.x));
-                                    } else {
-                                        image.setPosition(objPos.x * (halfHeight / objPos.y), objPos.y > 0 ? halfHeight : -halfHeight);
+                                //arrowImage.moveTo()
+                                //image = SarEngine.Image.fromUrl("img/Arrow.png", 256 * size, 256 * size);
+                                arrowImage.center.x = 0;
+                                arrowImage.center.y = 0;
+                                arrowImage.setPosition(0, 0);
+                                arrowImage.setCoordinate(camera.viewCoordinate);
+                                arrowImage.width = 64 * size;
+                                arrowImage.height = 64 * size;
+                                halfWidth *= 0.9;
+                                halfHeight *= 0.9;
+                                if (objPos.x != 0)
+                                {
+                                    if (Math.abs(objPos.y / objPos.x) < halfHeight / halfWidth)
+                                    {
+                                        var x = objPos.x > 0 ? halfWidth : -halfWidth;
+                                        var y = halfWidth * Math.abs(objPos.y / objPos.x);
+                                        y = objPos.y > 0 ? y : -y;
+                                        arrowImage.moveTo(x, y);
+                                        //arrowImage.moveTo(objPos.x > 0 ? halfWidth : -halfWidth, objPos.y * (halfWidth / objPos.x));
                                     }
-                                } else {
-                                    image.setPosition(objPos.x > 0 ? halfWidth : -halfWidth, 0);
+                                    else
+                                    {
+                                        var y = objPos.y > 0 ? halfHeight: -halfHeight;
+                                        var x = halfHeight * Math.abs(objPos.x / objPos.y);
+                                        x = objPos.x > 0 ? x : -x;
+                                        arrowImage.moveTo(x, y);
+                                        //arrowImage.moveTo(objPos.x * (halfHeight / objPos.y), objPos.y > 0 ? halfHeight : -halfHeight);
+                                    }
+                                } else
+                                {
+                                    arrowImage.moveTo(0, objPos.y > 0 ? halfHeight - 128 : -halfHeight + 128);
                                 }
-                                image.rotation = angle;
-                                image.render(output.getLayer(2));
+                                arrowImage.changeCoordinate(Coordinate.Default);
+                                arrowImage.rotation = -angle + camera.rotation;
+                                arrowImage.render(output.getLayer(2));
                             }
                         }
                     };
@@ -410,7 +465,7 @@
                 function initAI(x, y, friend)
                 {
                     var flight = createFlight();
-
+                    flight.life = aiLife;
                     flight.moveTo(x, y);
                     if (!friend) {
                         scene.addGameObject(flight, flightLayer, enemyGroup);
@@ -440,7 +495,10 @@
                     }
                     function onDestroy()
                     {
-                        enemies.remove(flight);
+                        $("#score").text(++score);
+                        flight.life = aiLife;
+                        Summon(flight, enemyGroup);
+                        flight.moveTo(x, y);
                     }
                     function AIBehaviour()
                     {
@@ -460,7 +518,7 @@
                             control = flyFoward;
                             behaviour = null;
                         }
-                        if (cosAng > 0.86)
+                        if (cosAng > 0.87 && v.mod() < 1500)
                         {
                             behaviour = Shoot;
                         }
@@ -474,7 +532,7 @@
                             control = turnLeft;
                             behaviour = null;
                         }
-                        setTimeout(AIBehaviour, 500);
+                        setTimeout(AIBehaviour, 1000);
                     }
                     AIBehaviour();
                 }
@@ -482,6 +540,7 @@
                 function initPlayer()
                 {
                     var flight = createFlight();
+                    flight.life = playerLife;
                     player = flight;
                     var lifeBar = $("#lifeBar .progress");
                     lifeBar.stop();
@@ -496,7 +555,7 @@
                     flight.onDamage = function (attacker)
                     {
                         lifeBar.stop();
-                        lifeBar.animate({ width: (flight.life / flightLife) * 100 + "%" }, 100);
+                        lifeBar.animate({ width: (flight.life / playerLife) * 100 + "%" }, 100);
                         if (flight.life <= 0)
                         {
                             flight.life = 0;
@@ -508,6 +567,15 @@
                         initPlayer();
                     }
 
+                    flight.onKilling = function ()
+                    {
+                        flight.life += 10;
+                        if (flight.life > playerLife)
+                            flight.life = playerLife;
+                        lifeBar.stop();
+                        lifeBar.animate({ width: (flight.life / playerLife) * 100 + "%" }, 100);
+                    }
+                    $("#score").text(score = parseInt(score / 2));
                     Summon(player, friendGroup);
                 }
                 function sceneUpdate(e)

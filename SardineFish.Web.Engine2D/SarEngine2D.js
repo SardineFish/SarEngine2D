@@ -676,11 +676,11 @@
 
 
 
-        if (scene.GUI)
+        /*if (scene.GUI)
         {
             scene.camera.resetTransform();
             scene.GUI.render(scene.camera.graphics);
-        }
+        }*/
         // if (scene.background)
         // {
         //     scene.camera.resetTransform();
@@ -1393,7 +1393,7 @@
                 var cos = Math.cos(-rotation);
                 var sin = Math.sin(-rotation);
                 var dx = x - originX;
-                var dy = x - originY;
+                var dy = y - originY;
                 return {
                     x: (dx * cos - dy * sin) / unitX,
                     y: (dy * cos + dx * sin) / unitY
@@ -1588,8 +1588,8 @@
             return this.pFrom(x, y);
         if (this == coordinate.Default)
             return coordinate.pFrom(x, y);
-        var p = coordinate.pFrom(x, y);
-        return this.pTo(x, y);
+        var p = this.pFrom(x, y);
+        return coordinate.pTo(p.x, p.y);
     }
     Coordinate.prototype.vectorMapTo = function (coordinate, x, y)
     {
@@ -2459,7 +2459,13 @@
         {
             var track = new AudioTrack(audio);
             this.addAudioTrack(track);
+            var output = this;
+            track.onEnd = function ()
+            {
+                output.removeAudioTrack(track);
+            }
             track.play();
+            
         }
         else
         {
@@ -2888,6 +2894,8 @@
         this.output = null;
         this.audioElement = null;
         var audioTrack = this;
+        this.onEnd = null;
+        
         Object.defineProperty(this, "audio", {
             get: function ()
             {
@@ -2927,6 +2935,10 @@
         function onEnded(e)
         {
             audioTrack.playing = false;
+            if (audioTrack.onEnd)
+            {
+                audioTrack.onEnd();
+            }
         }
     }
     AudioTrack.prototype.play = function ()
