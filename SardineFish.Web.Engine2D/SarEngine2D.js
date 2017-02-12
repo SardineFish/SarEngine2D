@@ -27,8 +27,9 @@
             },
             set: function (value)
             {
+                if (scene)
+                    scene.engine = null;
                 scene = value;
-                scene.initEvents(scene.eventSource);
                 scene.engine = engine;
             }
         }
@@ -40,11 +41,11 @@
         var engine = new Engine();
         var output = new Output(canvas, width, height);
         var scene = new Scene();
-        scene.eventSource = output;
         engine.scene = scene;
         var camera = new Camera(0, 0, 0, 0, 1);
         camera.addOutput(output);
         scene.addCamera(camera);
+        scene.addInput(output);
         return engine;
     }
     Engine.createInNode = function (node, width, height)
@@ -52,11 +53,11 @@
         var engine = new Engine();
         var output = new Output(node, width, height);
         var scene = new Scene();
-        scene.eventSource = output;
         engine.scene = scene;
         var camera = new Camera(0, 0, 0, 0, 1);
         camera.addOutput(output);
         scene.addCamera(camera);
+        scene.addInput(output);
         return engine;
     }
     Engine.prototype.start = function ()
@@ -244,11 +245,11 @@
         this.GUI = null;
         this.background = new BackgroundCollection(this);
         this.device = new Device();
+        this.eventSources = ArrayList();
         this.doubleClickDelay = 200;
         this.onUpdate = null;
         this.onRender = null;
         this.onEndRender = null;
-        this.eventSource = null;
         this.onMouseMove = null;
         this.onMouseOver = null;
         this.onMouseOut = null;
@@ -541,6 +542,35 @@
             var obj1 = this.collideGroups.defaultGroup.objectList[i];
             if (!obj1.collider)
                 continue;
+            for (var j = i + 1; j < this.collideGroups.defaultGroup.objectList.length; j++)
+            {
+                var obj2 = this.collideGroups.defaultGroup.objectList[j];
+                if (obj1 == obj2)
+                    continue;
+                if (obj1.layer.coordinate != obj2.layer.coordinate)
+                    continue;
+                if (obj1.id < 0 || obj2.id < 0)
+                    continue;
+                if (this.collideTable[obj1.id][obj2.id] == this.runtime)
+                    continue;
+                if (!obj2.collider)
+                    continue;
+                this.collideTable[obj1.id][obj2.id] = this.collideTable[obj2.id][obj1.id] = this.runtime;
+                if (obj1.collider.isCollideWith(obj2.collider, obj1.v, obj2.v, dt))
+                {
+                    if (obj1.onCollide)
+                    {
+                        var args = { target: obj2 };
+                        obj1.onCollide(args);
+                    }
+                    if (obj2.onCollide)
+                    {
+                        var args = { target: obj1 };
+                        obj2.onCollide(args);
+                    }
+                    obj1.collider.collide(obj1, obj2, dt);
+                }
+            }
             for (var group2 = 0; group2 < this.collideGroups.length; group2++)
             {
                 for (var j = 0; j < this.collideGroups[group2].objectList.length; j++)
@@ -704,6 +734,14 @@
                     return;
             }
             //dt=0.016;
+            // Handle camera animation
+            for (var i = 0; i < this.cameraList.length; i++)
+            {
+                for (var j = 0; j < this.cameraList[i].animationCallbackList.length; j++)
+                {
+                    this.cameraList[i].animationCallbackList[j](dt);
+                }
+            }
             for (var i = 0; i < this.objectList.length; i++)
             {
                 var obj = this.objectList[i];
@@ -724,12 +762,77 @@
             //this.render(dt);
         /*} catch (ex) { alert(whileRender + ex.message); }*/
     }
-    Scene.prototype.initEvents = function (output)
+    Scene.prototype.addInput = function (input)
+    {
+        if (!this.eventSources.contain(input))
+        {
+            this.eventSources.add(input);
+            this.initEvents(input);
+        }
+    }
+    Scene.prototype.removeInput = function (input)
+    {
+        var index = this.eventSources.indexOf(input);
+        if (index < 0)
+            return;
+        this.eventSources.removeAt(index);
+        input.removeSceneEvent();
+    }
+    Scene.prototype.initEvents = function (input, output)
     {
         var clickTime = 0;
         var scene = this;
+
+        var dom = input;
+        if (input instanceof Output)
+        {
+            dom = input.outputDOM;
+            output = input;
+        }
+        else if (input instanceof window.Element)
+        {
+            dom = input;
+            if (!output)
+                throw new Error("Output required.");
+        }
+
+        input.removeSceneEvent = function ()
+        {
+            dom.removeEventListener("mouseenter", mouseEnterCallback);
+            dom.removeEventListener("mouseout", mouseOutCallback);
+            dom.removeEventListener("mousemove", mouseMoveCallback);
+            dom.removeEventListener("mouseover", mouseOverCallback);
+            dom.removeEventListener("mouseout", mouseOutCallback);
+            dom.removeEventListener("mousedown", mouseDownCallback);
+            dom.removeEventListener("mouseup", mouseUpCallback);
+            dom.removeEventListener("mousewheel", mouseWheelCallback);
+            dom.removeEventListener("click", clickCallback);
+            window.removeEventListener("keydown", keyDownCallback);
+            window.removeEventListener("keyup", KeyUpCallback);
+            window.removeEventListener("keypress", keyPressCallback);
+            dom.removeEventListener("touchstart", touchStartCallback);
+            dom.removeEventListener("touchmove", touchMoveCallback);
+            dom.removeEventListener("touchend", touchEndCallback);
+        }
+
+        //var asdf = 0;
+        function mouseEnterCallback(e)
+        {
+            //console.log("enter" + asdf++);
+            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
+            scene.device.mouse.dx = 0;
+            scene.device.mouse.dy = 0;
+            scene.device.mouse.x = mapTo.x;
+            scene.device.mouse.y = mapTo.y;
+            var x = 0;
+        }
+        function mouseOutCallback(e)
+        {
+            //console.log("out" + asdf++);
+        }
         function mouseMoveCallback(e)
         {
+            //console.log("move" + asdf++);
             var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
@@ -743,6 +846,8 @@
             args.handled = false;
             args.x = e.pageX;
             args.y = e.pageY;
+            args.dx = scene.device.mouse.dx;
+            args.dy = scene.device.mouse.dy;
             if (scene.GUI)
                 scene.GUI.mouseMoveCallback(e);
             if (args.handled)
@@ -1133,19 +1238,22 @@
                     scene.onTouchEnd(args);
             }
         }
-        output.outputDOM.addEventListener("mousemove",mouseMoveCallback);
-        output.outputDOM.addEventListener("mouseover", mouseOverCallback);
-        output.outputDOM.addEventListener("mouseout", mouseOutCallback);
-        output.outputDOM.addEventListener("mousedown", mouseDownCallback);
-        output.outputDOM.addEventListener("mouseup", mouseUpCallback);
-        output.outputDOM.addEventListener("mousewheel", mouseWheelCallback);
-        output.outputDOM.addEventListener("click", clickCallback);
+
+        dom.addEventListener("mouseenter", mouseEnterCallback);
+        dom.addEventListener("mouseout", mouseOutCallback);
+        dom.addEventListener("mousemove",mouseMoveCallback);
+        dom.addEventListener("mouseover", mouseOverCallback);
+        dom.addEventListener("mouseout", mouseOutCallback);
+        dom.addEventListener("mousedown", mouseDownCallback);
+        dom.addEventListener("mouseup", mouseUpCallback);
+        dom.addEventListener("mousewheel", mouseWheelCallback);
+        dom.addEventListener("click", clickCallback);
         window.addEventListener("keydown", keyDownCallback);
         window.addEventListener("keyup", KeyUpCallback);
         window.addEventListener("keypress", keyPressCallback);
-        output.outputDOM.addEventListener("touchstart", touchStartCallback);
-        output.outputDOM.addEventListener("touchmove", touchMoveCallback);
-        output.outputDOM.addEventListener("touchend", touchEndCallback);
+        dom.addEventListener("touchstart", touchStartCallback);
+        dom.addEventListener("touchmove", touchMoveCallback);
+        dom.addEventListener("touchend", touchEndCallback);
     }
     Scene.prototype.addGameObject = function (obj, layer, collideGroup)
     {
@@ -2363,6 +2471,10 @@
                 obj = p;
             }
         }
+        if (obj instanceof Particle)
+        {
+            obj = new Point(obj.center.x, obj.center.y);
+        }
         if (obj instanceof Engine.Image)
         {
             var rect = new Rectangle(obj.width, obj.height);
@@ -2374,7 +2486,7 @@
         }
         if (obj instanceof Point)
         {
-            var p = obj.coordinate.pointMapTo(this.viewArea.coordinate,obj.x,obj.y);
+            var p = obj.coordinate.pointMapTo(this.viewArea.coordinate, obj.x, obj.y);
             return !this.viewArea.isCollideWith(new Point(p.x, p.y));
         }
         else if (obj instanceof Polygon)
@@ -2512,6 +2624,7 @@
         this.graphics = null;
         this.outputList = ArrayList();
         this.scene = null;
+        this.animationCallbackList = ArrayList();
         var camera = this;
         var zoom = 1;
         var rotation = 0;
@@ -2553,6 +2666,62 @@
         var c = new Camera(this.x, this.y, this.width, this.height, this.zoom);
         c.graphics = this.graphics;
         return c;
+    }
+    Camera.prototype.animate = function (properties, time, callback)
+    {
+        var camera = this;
+        for (var key in properties)
+        {
+            var keys = key.split(".");
+            var lastKey = keys[keys.length - 1];
+            var obj = this;
+            for (var i = 0; i < keys.length - 1; i++)
+            {
+                obj = obj[keys[i]];
+            }
+            (function (obj, key, from, to, time, callback)
+            {
+                var delta = (to - from) / time;
+                var t = 0;
+                var animeCallback = function (dt)
+                {
+                    t += dt;
+                    obj[key] += delta * dt;
+                    if (delta < 0 && obj[key] <= to)
+                    {
+                        obj[key] = to;
+                        camera.animationCallbackList.remove(animeCallback);
+                        if (callback)
+                        {
+                            callback();
+                        }
+                    }
+                    else if (delta > 0 && obj[key] >= to)
+                    {
+                        obj[key] = to;
+                        camera.animationCallbackList.remove(animeCallback);
+                        if (callback)
+                        {
+                            callback();
+                        }
+                    }
+                    else if (t >= time)
+                    {
+                        obj[key] = to;
+                        camera.animationCallbackList.remove(animeCallback);
+                        if (callback)
+                        {
+                            callback();
+                        }
+                    }
+                };
+                camera.animationCallbackList.add(animeCallback);
+            })(obj, lastKey, obj[lastKey], properties[key], time, callback);
+        }
+    }
+    Camera.prototype.stop = function ()
+    {
+        this.animationCallbackList.length = 0;
     }
     Camera.prototype.setCenter = function (x, y, align)
     {

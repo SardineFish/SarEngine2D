@@ -1510,10 +1510,10 @@
             (function (obj, key, from, to, time, callback)
             {
                 var delta = (to - from) / time;
-                if (delta == 0)
-                    return;
+                var t = 0;
                 var animeCallback = function (dt)
                 {
+                    t += dt;
                     obj[key] += delta * dt;
                     if (delta < 0 && obj[key] <= to)
                     {
@@ -1525,6 +1525,15 @@
                         }
                     }
                     else if (delta > 0 && obj[key] >= to)
+                    {
+                        obj[key] = to;
+                        gameObject.animationCallbackList.remove(animeCallback);
+                        if (callback)
+                        {
+                            callback();
+                        }
+                    }
+                    else if (t >= time)
                     {
                         obj[key] = to;
                         gameObject.animationCallbackList.remove(animeCallback);
@@ -1866,7 +1875,7 @@
     {
         var circle = new Circle(this.r);
         circle.setCenter(this.position.x, this.position.y);
-        circle.angV = this.angV.copy();
+        circle.angV = this.angV;
         circle.rotation = this.rotation;
         circle.coordinate = this.coordinate;
         circle.rigidBody = this.rigidBody;
@@ -1875,7 +1884,7 @@
         circle.dff = this.dff;
         circle.static = this.static;
         circle.soft = this.soft;
-        circle.strokeWidththis.strokeWidth;
+        circle.strokeWidth=this.strokeWidth;
         if (this.strokeStyle instanceof Color)
             circle.strokeStyle = this.strokeStyle.copy();
         else
@@ -3215,6 +3224,7 @@
     {
         var rect = new Rectangle(this.width, this.height);
         rect.o = this.o.copy();
+        rect.center = this.center.copy();
         rect.position = this.position.copy();
         rect.coordinate = this.coordinate;
         rect.rigidBody = this.rigidBody;
