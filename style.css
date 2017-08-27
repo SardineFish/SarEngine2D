@@ -1,0 +1,113 @@
+﻿
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: "Roboto",Microsoft YaHei,Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+.topBarButton {
+    display: inline-block;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 16pt;
+}
+.topBarButton a {
+    display: inline-block;
+    margin: 0px;
+    vertical-align: middle;
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+.topBarButton a:hover{
+    color: rgb(51, 153, 255);
+}
+#root{
+    min-width: 1024px;
+    position: relative;
+}
+#topArea {
+    position: absolute;
+    width: 100%;
+    z-index: 100000000;
+}
+#topBar {
+    max-width: 1440px;
+    min-width: 800PX;
+    margin: auto;
+}
+#logoImg {
+    display: inline-block;
+    width: 50px;
+    vertical-align: middle;
+}
+#mainArea{
+    position: relative;
+}
+#welcomeContent {
+    position: absolute;
+    top: 30%;
+    width: 100%;
+    text-align: center;
+}
+#mainText {
+    font-size: 48pt;
+    margin-bottom: 0.5em;
+}
+#learnMore {
+    font-size: 24pt;
+    position: absolute;
+    width: 100%;
+    bottom: 10%;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.3);
+}
+#introduction{
+}
+#introduction .item {
+    text-align: center;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    width: 100%;
+}
+#introduction .item .bgImg {
+    display: inline-block;
+    vertical-align: middle;
+}
+#introduction .item .text {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16pt;
+    min-width: 300px;
+    max-width: 500px;
+    color: rgba(0, 0, 0, 0.7);
+}
+#introduction .title{
+    font-size: 36pt;
+}
+#introduction .item .text p {
+    margin: 0px;
+}
+#introduction {
+    margin-top: 200px;
+}
+#physicsFrame{
+    position: absolute;
+    width: 100%;
+    height: 600px;
+    border: none;
+    padding: 0px;
+    margin: 0px;
+    left: 0px;
+}
+#physics{
+    padding: 0px;
+    height: 600px;
+    background-color: #beefff;
+}
+#physics .text{
+    margin-top: 200px;
+    z-index: 1000000;
+}

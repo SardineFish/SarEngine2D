@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>SarEngine2D</title>
+    <link href="/SarEngine2D/favicon.png" rel="icon" type="image/png">
+    <script src="/lib/SarEngine2D/1.0.1/SarEngine2D.min.js"></script>
+    <script src="/lib/jQuery/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <style>
+        @font-face{
+            font-family: "Roboto";
+            src:url("/fonts/Roboto/Roboto-Regular.ttf");
+        }
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url("/fonts/material-design-icons-3.0.1/MaterialIcons-Regular.eot"); /* For IE6-8 */
+            src: local('Material Icons'),
+                 local('MaterialIcons-Regular'),
+                 url("/fonts/material-design-icons-3.0.1/MaterialIcons-Regular.woff2") format('woff2'),
+                 url("/fonts/material-design-icons-3.0.1/MaterialIcons-Regular.woff") format('woff'),
+                 url("/fonts/material-design-icons-3.0.1/MaterialIcons-Regular.ttf") format('truetype');
+        }
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px; /* Preferred icon size */
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            /* Support for all WebKit browsers. */
+            -webkit-font-smoothing: antialiased;
+            /* Support for Safari and Chrome. */
+            text-rendering: optimizeLegibility;
+            /* Support for Firefox. */
+            -moz-osx-font-smoothing: grayscale;
+            /* Support for IE. */
+            font-feature-settings: 'liga';
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div id="topArea">
+            <div id="topBar">
+                <div class="topBarButton" id="logo">
+                    <img id="logoImg" src="img/logo-50.png">
+                    <a>SarEngine2D</a>
+                </div>
+                <div class="topBarButton" id="code">
+                    <a href="https://github.com/SardineFish/SarEngine2D">Source Code</a>
+                </div>
+                <div class="topBarButton" id="doc">
+                    <a href="/doc/SarEngine2D">Document</a>
+                </div>
+                <div class="topBarButton" id="download">
+                    <a href="https://github.com/SardineFish/SarEngine2D/releases">Downloads</a>
+                </div>
+            </div>
+        </div>
+        <div id="mainArea">
+            <div id="welcomeBG">
+
+            </div>
+            <div id="welcomeContent">
+                <p id="mainText">
+                    Build your game on Web page
+                </p>
+                <div style="font-size:20pt">
+                    support almost all the devices with Web browser.
+                </div>
+            </div>
+            <div id="learnMore">
+                <div>Learn more</div>
+                <i class="material-icons">keyboard_arrow_down</i>
+            </div>
+        </div>
+        <div id="introduction">
+            <div id="about" class="item" style="background-color:rgba(0,0,0,0.05)">
+                <img class="bgImg" src="img/Browser.png"/>
+                <div class="text" style="white-space:nowrap">
+                    <p class="title">SarEngine2D</p>
+                    <p>is a game engine based on HTML Canvas. </p>
+                    <p>It can run on almost all the latest Browsers.</p>
+                </div>
+            </div>
+            <div id="platform" class="item">
+                <div class="text" style="white-space:nowrap">
+                    <p class="title">Cross-Platform</p>
+                    <div style="text-align:left;margin-left:2em;">
+                        <p>Windows</p>
+                        <p>Android</p>
+                        <p>IOS</p>
+                        <p>PC</p>
+                        <p>Phone</p>
+                        <p>Pad</p>
+                        <p>...</p>
+                        <p style="font-size:20pt;">All surpported.</p>
+                    </div>
+                </div>
+                <img class="bgImg" src="img/Device.png" />
+            </div>
+            <div id="physics" class="item" style="padding:0px;">
+                <iframe id="physicsFrame" src="physics.html"></iframe>
+                <div class="text" style="white-space:nowrap; margin-right:400px;">
+                    <p class="title">Physics</p>
+                    <p>Physical simulation makes your game more real.</p>
+                </div>
+            </div>
+            <div id="light" class="item" style="background-color: rgba(59, 69, 89, 1);">
+                <img class="bgImg" src="img/Code.png" />
+                <div class="text" style="white-space:nowrap;color:white;">
+                    <p class="title">Light</p>
+                    <p style="margin-left:3em;margin-top:1em;">Use less code to get perfect performance. </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var Width = window.innerWidth;
+        var Height = window.innerHeight;
+        var engine = SarEngine.createInNode(welcomeBG, Width, Height);
+        $("#welcomeBG").css("height", Height + "px");
+        var scene = engine.scene;
+        var camera = scene.cameraList[0];
+        var output = camera.outputList[0];
+        var pList = SarEngine.ArrayList();
+        //var bgLayer = SarEngine.ArrayList();
+        engine.start();
+        scene.removeInput(output);
+        scene.initEvents($("#mainArea").get(0), output);
+        scene.onMouseMove = function (e)
+        {
+            camera.stop();
+            var d = Math.sqrt(e.dx * e.dx + e.dy * e.dy);
+            var p = Coordinate.Default.pointMapTo(camera.viewCoordinate, e.x, e.y);
+            p.x /= 10;
+            p.y /= -10;
+            //console.log(d);
+            camera.animate({
+                "position.x": p.x
+                , "position.y": p.y
+            }, 0.1);
+        }
+        function iniParticle()
+        {
+            var p = new Particle();
+            var size = 3 + 7 * Math.random();
+            var c = 10 * Math.random();
+            p.color = new Color(235 + c, 235 + c, 235 + c, 1);
+            var obj = new GameObject();
+            obj.graphic = p;
+            var x = (Width * Math.random()) - (Width / 2);
+            var y = (Height * Math.random()) - (Height / 2);
+            obj.moveTo(x, y);
+            scene.addGameObject(obj);
+            pList.add(obj);
+            obj.animate({ "graphic.size": size }, 1.5);
+            obj.cList = SarEngine.ArrayList();
+            obj.lineList = SarEngine.ArrayList();
+            function move()
+            {
+                if (output.outScreen(obj))
+                {
+                    var t = 10 * Math.random();
+                    var dst = new Point((Width * Math.random()) - (Width / 2), (Height * Math.random()) - (Height / 2));
+                    var v = new Vector2(dst.x / 30, dst.y / 30);
+                    v.minus(obj.v);
+                    var a = Vector2.multi(v, 1 / t);
+                    var f = new Force(a.x * obj.mass, a.y * obj.mass);
+                    obj.constantForce = f;
+                    setTimeout(move, 5);
+                    return;
+                }
+                var t = 10 * Math.random();
+                var dst = new Point((Width * Math.random()) - (Width / 2), (Height * Math.random()) - (Height / 2));
+                var v = new Vector2(dst.x / 20, dst.y / 20);
+                v.minus(obj.v);
+                var a = Vector2.multi(v, 1 / t);
+                var f = new Force(a.x * obj.mass, a.y * obj.mass);
+                obj.constantForce = f;
+                setTimeout(move, t * 1000);
+            }
+            function connect()
+            {
+                var t = 2 * Math.random();
+                var index = parseInt(pList.length * Math.random());
+                var target = pList[index];
+                /*for (var i = 0; i < pList.length; i++)
+                {
+                    if (pList[i] == obj)
+                        continue;
+                    if (Point.Distance(obj.position, target.position) < 300)
+                    {
+                        target = pList[i];
+                    }
+                }*/
+                if (obj.cList.length > 3 || target.cList.length > 6)
+                {
+                    setTimeout(connect, t * 1000);
+                    return;
+                }
+                if (obj.cList.contain(target))
+                {
+                    setTimeout(connect, t * 1000);
+                    return;
+                }
+                var line = new Line(obj.graphic.center, target.graphic.center);
+                if (Point.Distance(line.p1, line.p2) > 400)
+                {
+                    setTimeout(connect, t * 1000);
+                    return;
+                }
+                var c = 10 * Math.random();
+                line.strokeStyle = new Color(235 + c, 235 + c, 235 + c, 0);
+                var lineObj = new GameObject();
+                lineObj.graphic = line;
+                scene.addGameObject(lineObj);
+                lineObj.animate({ "graphic.strokeStyle.alpha": 1 }, 1);
+                obj.lineList.add(lineObj);
+                target.lineList.add(lineObj);
+                obj.cList.add(target);
+                target.cList.add(obj);
+                setTimeout(connect, t * 1000);
+            }
+            function disconnect()
+            {
+                var t = 3 + 15 * Math.random();
+                if (obj.cList.length <= 0)
+                {
+                    setTimeout(disconnect, t * 1000);
+                    return;
+                }
+                var index = parseInt(obj.cList.length * Math.random());
+                var target = obj.cList[index];
+                var line = obj.lineList[index];
+                line.stop();
+                obj.cList.remove(target);
+                target.cList.remove(obj);
+                obj.lineList.remove(line);
+                target.lineList.remove(line);
+                //console.log("Begin remove " + line.id);
+                setTimeout(function ()
+                {
+                    if (line.id > 0)
+                        scene.removeGameObject(line.id);
+                }, 2000);
+                line.animate({ "graphic.strokeStyle.alpha": 0 }, 1, function ()
+                {
+                    //console.log("End remove " + line.id);
+                    scene.removeGameObject(line.id);
+                });
+                setTimeout(disconnect, t * 1000);
+            }
+            connect();
+            move();
+            disconnect();
+        }
+        for (var i = 0; i < 30; i++)
+        {
+            iniParticle();
+        }
+    </script>
+</body>
+</html>

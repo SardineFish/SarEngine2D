@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="/lib/SarEngine2D/1.0.1/SarEngine2D.js"></script>
+    <script src="/lib/jQuery/jquery.min.js"></script>
+    <style>
+        html{
+            overflow: hidden;
+        }
+        body{
+            padding: 0px;
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        var Width = window.innerWidth;
+        var Height = window.innerHeight;
+        var engine = SarEngine.createByCanvas($("#canvas").get(0),Width,Height);
+        var scene = engine.scene;
+        var camera = scene.cameraList[0];
+        var output = camera.outputList[0];
+        engine.start();
+
+        camera.moveTo(-400, 100);
+
+        scene.physics.g = new Vector2(0, -500);
+        var ground = new Rectangle(Width * 5, Height);
+        ground.strokeStyle = new Color(255, 255, 255, 0);
+        ground.fillStyle = new Color(127, 113, 95, 1);
+        ground.rigidBody = true;
+        ground.static = true;
+        ground.soft = true;
+        var groundObj = new GameObject();
+        groundObj.graphic = ground;
+        groundObj.collider = ground;
+        groundObj.gravity = false;
+        groundObj.moveTo(0, -Height / 2);
+        scene.addGameObject(groundObj);
+
+        var polygon = new Polygon();
+        polygon.beginInit();
+        polygon.addPoint(new Point(-100, 200));
+        polygon.addPoint(new Point(100, 0));
+        polygon.addPoint(new Point(-200, 0));
+        polygon.endInit();
+        polygon.strokeStyle = strokeStyle = new Color(255, 255, 255, 0);
+        polygon.fillStyle = new Color(114, 134, 138, 1);
+        polygon.rigidBody = true;
+        polygon.static = true;
+        polygon.soft = true;
+        var pol2 = new Polygon();
+        pol2.beginInit();
+        pol2.addPoint(new Point(-100, 200));
+        pol2.addPoint(new Point(100, 0));
+        pol2.addPoint(new Point(50, 0));
+        pol2.strokeStyle = strokeStyle = new Color(255, 255, 255, 0);
+        pol2.fillStyle = new Color(91, 121, 127, 1);
+        var comb = new Combination();
+        comb.addObject(polygon.copy());
+        comb.addObject(pol2.copy());
+
+        var wallLeft = new GameObject();
+        wallLeft.graphic = comb;
+        wallLeft.collider = polygon.copy();
+        wallLeft.gravity = false;
+        wallLeft.moveTo(-200,0);
+        scene.addGameObject(wallLeft);
+
+        var wall = new Rectangle(50, 200);
+        wall.strokeStyle = new Color(255, 255, 255, 0);
+        wall.fillStyle = new Color(95, 128, 106, 1);
+        wall.rigidBody = true;
+        wall.static = true;
+        wall.soft = true;
+        var wallDark = new Rectangle(20, 200);
+        wallDark.strokeStyle = new Color(255, 255, 255, 0);
+        wallDark.fillStyle = new Color(75, 105, 95, 1);
+        wallDark.moveTo(20, 0);
+        var comb = new Combination();
+        comb.addObject(wall.copy());
+        comb.addObject(wallDark.copy());
+        var wallRight = new GameObject();
+        wallRight.graphic = comb;
+        wallRight.collider = wall.copy();
+        wallRight.gravity = false;
+        wallRight.moveTo(200, 100);
+        scene.addGameObject(wallRight);
+
+        var circle = new Circle(40);
+        circle.strokeStyle = new Color(255, 255, 255, 0);
+        circle.fillStyle = Color.fromString("#c55050");
+        circle.rigidBody = true;
+        circle.soft = true;
+        var ball = new GameObject();
+        ball.graphic = circle;
+        ball.collider = circle;
+        ball.gravity = true;
+        ball.moveTo(0, 300);
+        ball.v.x = 200;
+        ball.onUpdate = function ()
+        {
+            if (output.outScreen(ball))
+            {
+                for (var i = 0; i < 10; i++)
+                {
+                    var newBall = new GameObject();
+                    newBall.graphic = circle.copy();
+                    newBall.collider = newBall.graphic;
+                    newBall.collider.e = 0.8;
+                    newBall.gravity = true;
+                    newBall.collider.soft = false;
+                    newBall.moveTo(Math.random() * Width - (Width / 2), Height + Math.random() * 100);
+                    scene.addGameObject(newBall);
+                }
+                scene.removeGameObject(ball);
+            }
+        }
+        scene.addGameObject(ball);
+    </script>
+</body>
+</html>
