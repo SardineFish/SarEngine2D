@@ -1,27 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.13
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SardineFish.Web.Engine2D", "SardineFish.Web.Engine2D\", "{5BAC59C0-64B3-42C2-84E4-BFC03193245E}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "SarEngine2D", ".", "{A8264FC6-545A-4CB5-A652-06B5B364B3A9}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_1125"
-		Debug.AspNetCompiler.PhysicalPath = "SardineFish.Web.Engine2D\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_1125\"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_11762"
+		Debug.AspNetCompiler.PhysicalPath = "..\SarEngine2D\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_11762\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_1125"
-		Release.AspNetCompiler.PhysicalPath = "SardineFish.Web.Engine2D\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_1125\"
+		Release.AspNetCompiler.VirtualPath = "/localhost_11762"
+		Release.AspNetCompiler.PhysicalPath = "..\SarEngine2D\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_11762\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "1125"
-		SlnRelativePath = "SardineFish.Web.Engine2D\"
+		VWDPort = "11762"
+		SlnRelativePath = "..\SarEngine2D\"
 	EndProjectSection
 EndProject
 Global
@@ -29,10 +29,13 @@ Global
 		Debug|Any CPU = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5BAC59C0-64B3-42C2-84E4-BFC03193245E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5BAC59C0-64B3-42C2-84E4-BFC03193245E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8264FC6-545A-4CB5-A652-06B5B364B3A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8264FC6-545A-4CB5-A652-06B5B364B3A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {668D26A5-F311-431A-AC29-B06DE01713A7}
 	EndGlobalSection
 EndGlobal
