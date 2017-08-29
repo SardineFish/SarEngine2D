@@ -1,0 +1,342 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>SarEngine2D</title>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="/lib/syntaxHighlighter/styles/shCoreDefault.css" />
+    <link type="text/css" rel="stylesheet" href="../style/doc.css" /><link rel="icon" type="image/png" href="/favicon.png"/>
+    <style title=""></style>
+</head>
+<body>
+    <div id="topArea">
+        <div id="topCenter">
+            <img id="logo" src="http://img.sardinefish.com/423">
+            <div id="logoText">
+                <p id="logoText1">SarEngine2D</p>
+                <p id="logoText2">Document</p>
+            </div>
+        </div>
+    </div>
+    <div id="main">
+        <div id="pos">
+            <a class="posLink" href="../index.html">SarEngine2D</a>
+            <a class="posLink" href="GameObject.html">GameObject</a>
+        </div>
+        <div>
+            <p id="name">GameObject</p>
+        </div>
+        <div id="mainContent">
+            <div id="left">
+                <div id="outline">
+                    <a class="item" href="Align.html">Align</a>
+                    <a class="item" href="Arc.html">Arc</a>
+                    <a class="item" href="ArrayList.html">ArrayList</a>
+                    <a class="item" href="Audio.html">Audio</a>
+                    <a class="item" href="AudioTrack.html">AudioTrack</a>
+                    <a class="item" href="Background.html">Background</a>
+                    <a class="item" href="Block.html">Block</a>
+                    <a class="item" href="Button.html">Button</a>
+                    <a class="item" href="Camera.html">Camera</a>
+                    <a class="item" href="Circle.html">Circle</a>
+                    <a class="item" href="CollideGroup.html">CollideGroup</a>
+                    <a class="item" href="Colliders.html">Colliders</a>
+                    <a class="item" href="Color.html">Color</a>
+                    <a class="item" href="Combination.html">Combination</a>
+                    <a class="item" href="Coordinate.html">Coordinate</a>
+                    <a class="item" href="Device.html">Device</a>
+                    <a class="item" href="Font.html">Font</a>
+                    <a class="item" href="FontStyle.html">FontStyle</a>
+                    <a class="item" href="FontVariant.html">FontVariant</a>
+                    <a class="item" href="FontWeight.html">FontWeight</a>
+                    <a class="item" href="Force.html">Force</a>
+                    <a class="item" href="GameObject.html">GameObject</a>
+                    <a class="item" href="Graphics.html">Graphics</a>
+                    <a class="item" href="Ground.html">Ground</a>
+                    <a class="item" href="GUI.html">GUI</a>
+                    <a class="item" href="Image.html">Image</a>
+                    <a class="item" href="ImageAnimation.html">ImageAnimation</a>
+                    <a class="item" href="Joystick.html">Joystick</a>
+                    <a class="item" href="Keyboard.html">Keyboard</a>
+                    <a class="item" href="KeyEventArgs.html">KeyEventArgs</a>
+                    <a class="item" href="Layer.html">Layer</a>
+                    <a class="item" href="Line.html">Line</a>
+                    <a class="item" href="LinkList.html">LinkList</a>
+                    <a class="item" href="Matrix.html">Matrix</a>
+                    <a class="item" href="Mouse.html">Mouse</a>
+                    <a class="item" href="MouseEventArgs.html">MouseEventArgs</a>
+                    <a class="item" href="OneWayGround.html">OneWayGround</a>
+                    <a class="item" href="Output.html">Output</a>
+                    <a class="item" href="Particle.html">Particle</a>
+                    <a class="item" href="Path.html">Path</a>
+                    <a class="item" href="Point.html">Point</a>
+                    <a class="item" href="Polygon.html">Polygon</a>
+                    <a class="item" href="Position.html">Position</a>
+                    <a class="item" href="Rectangle.html">Rectangle</a>
+                    <a class="item" href="../SarEngine.html">SarEngine</a>
+                    <a class="item" href="Scene.html">Scene</a>
+                    <a class="item" href="Text.html">Text</a>
+                    <a class="item" href="TextAlign.html">TextAlign</a>
+                    <a class="item" href="TextBaseline.html">TextBaseline</a>
+                    <a class="item" href="Thickness.html">Thickness</a>
+                    <a class="item" href="Touch.html">Touch</a>
+                    <a class="item" href="TouchEventArgs.html">TouchEventArgs</a>
+                    <a class="item" href="Vector2.html">Vector2</a>
+                    <a class="item" href="Wall.html">Wall</a>
+                </div>
+            </div>
+            <div id="center">
+                <div id="description" class="part">
+                    GameObject是游戏中的基础对象在游戏中呈现图像和参与相互作用。GameObject可以具有图像，还可以拥有碰撞模型，前者用于图像渲染，后者参与碰撞检测计算和物理碰撞模拟。
+                </div>
+                <div id="syntax" class="part">
+                    <p class="title">Syntax</p>
+                    <div class="content">
+                        <pre class="brush: js;">
+//from global
+var gameObject = new GameObject();
+//from SarEngine
+var gameObject = new SarEngine.GameObject();
+</pre>
+                    </div>
+                </div>
+                <div id="member">
+                    <div id="class" class="part">
+                        <p class="title">Classes</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="GameObject/CollideEventArgs.html">CollideEventArgs</a>
+                                <div class="description">碰撞事件参数类。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="property" class="part">
+                        <p class="title">Properties</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="GameObject/a.html">a</a>
+                                <div class="description">Vector2 该游戏对象的加速度矢量。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/angV.html">angV</a>
+                                <div class="description">Number 该游戏对象绕center旋转的角速度，单位rad/s。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/animationCallbackList.html">animationCallbackList</a>
+                                <div class="description">Array 属性值动画帧回掉函数集合，该对象由内部使用。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/center.html">center</a>
+                                <div class="description">Position 该游戏对象的中心坐标。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/collideGroups.html">collideGroups</a>
+                                <div class="description">Array 该游戏对象所在的碰撞组的集合。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/collider.html">collider</a>
+                                <div class="description">Ojbect 该游戏对象的碰撞模型，必须是可参与碰撞计算的对象，例如Circle、Rectangle、Polygon等。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/constanceForce.html">constanceForce</a>
+                                <div class="description">Force 作用在该游戏对象上的恒力，除非手动移除，该力将持续作用于该游戏对象。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/coordinate.html">coordinate</a>
+                                <div class="description">Coordinate 该游戏对象所在的坐标系。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/F.html">F</a>
+                                <div class="description">Force 作用在该游戏对象上的瞬时力。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/graphic.html">graphic</a>
+                                <div class="description">Object 该游戏对象的图像，必须是可渲染的对象。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/gravity.html">gravity</a>
+                                <div class="description">Boolean 表示该游戏对象是否受重力，重力加速度的大小和方向在场景中设定，该游戏对象最终所受重力受游戏对象的质量和所受重力加速度影响。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/hitTest.html">hitTest</a>
+                                <div class="description">Boolean 表示该游戏对象是否启用点击测试，启用点击测试的游戏对象必须拥有碰撞体模型，启用后在用户点击到该游戏对象的碰撞体上时将触发相应的事件。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/id.html">id</a>
+                                <div class="description">Number 表示该游戏对象在场景中的唯一身份标识码，默认为-1表示未被添加到任何场景，在添加到场景时被设置为一个≥0的整数，在从场景中移除时被重置为-1，此外不可以在其它任何地方更改。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/layer.html">layer</a>
+                                <div class="description">Layer 表示该游戏对象所处的图层。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/lifeTime.html">lifeTime</a>
+                                <div class="description">Number 表示该游戏在场景中的生存时间，单位为ms。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/links.html">links</a>
+                                <div class="description">Array 链接到该游戏对象的所有对象的集合。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/mass.html">mass</a>
+                                <div class="description">Number 该游戏对象的质量。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/name.html">name</a>
+                                <div class="description">String 该游戏对象的名称，可自定义。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/position.html">position</a>
+                                <div class="description">Position 该游戏对象的位置坐标。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/rotation.html">rotation</a>
+                                <div class="description">Number 该游戏对象的旋转弧度。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/v.html">v</a>
+                                <div class="description">Vector2 该游戏对象的速度。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/zIndex.html">zIndex</a>
+                                <div class="description">Number 该游戏对象的z序。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="method" class="part">
+                        <p class="title">Methods</p>
+                        <div class="content">
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/addMomenta.html">addMomenta</a>(momenta)</div>
+                                <div class="description">将一个向量表示的动量传递给该游戏对象。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/animate.html">animate</a>(properties, time, callback)</div>
+                                <div class="description">执行属性值动画。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/changeCoordinate.html">changeCoordinate</a>(coordinate)</div>
+                                <div class="description">改变该游戏对象所在的坐标系，并将相关数值映射到新的坐标系。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/copy.html">copy</a>()</div>
+                                <div class="description">复制一个相同的游戏对象，新的游戏对象的id将被置为-1。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/force.html">force</a>(a, b, c)</div>
+                                <div class="description">将指定的力施加到该游戏对象，力的作用时间仅限于两次物理模拟的时间间隔，即可视为瞬时作用。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/linkTo.html">linkTo</a>(linkableObject)</div>
+                                <div class="description">将该游戏对象链接到指定的可链接对象上，链接后该游戏对象将跟随目标的移动和旋转。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/moveTo.html">moveTo</a>(x, y)</div>
+                                <div class="description">将该游戏对象移动到指定的位置坐标。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/render.html">render</a>(graphics, x, y, r, dt)</div>
+                                <div class="description">以指定的曝光时间将该游戏对象渲染到指定的绘图接口。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/resetConstantForce.html">resetConstantForce</a>()</div>
+                                <div class="description">重置施加在该游戏对象上的恒力。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/resetForce.html">resetForce</a>()</div>
+                                <div class="description">重置施加在该游戏对象上的瞬时力。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/rotate.html">rotate</a>(rad, x, y)</div>
+                                <div class="description">将该游戏对象绕定点旋转到指定的弧度，若未指定x和y，将默认绕center旋转。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/setCenter.html">setCenter</a>(x, y)</div>
+                                <div class="description">设置该游戏对象的中心坐标，该游戏对象的实际位置不变。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/setCoordinate.html">setCoordinate</a>(coordinate)</div>
+                                <div class="description">在保持相关数值不变的前提下，设置该游戏对象所在的坐标系。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/setPosition.html">setPosition</a>(x, y)</div>
+                                <div class="description">设置用于描述游戏对象位置的点的位置坐标。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/stop.html">stop</a>()</div>
+                                <div class="description">停止该游戏对象的所有属性值动画。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="GameObject/unLink.html">unLink</a>(linkableObject)</div>
+                                <div class="description">断开该游戏对象与目标的链接。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="event" class="part">
+                        <p class="title">Events</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="GameObject/onClick.html">onClick</a>
+                                <div class="description">在该游戏对象受到用户点击时触发，当且仅当该游戏对象的hitTest为true时才可能触发该事件。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/onCollide.html">onCollide</a>
+                                <div class="description">在该游戏对象与另一游戏对象发生碰撞时触发，触发该事件时双方的碰撞体发生了接触。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/onCollideSimulate.html">onCollideSimulate</a>
+                                <div class="description">在该游戏对象与另一游戏对象开始物理碰撞模拟计算时触发，可以通过该事件的参数设置此次碰撞的相关物理参数。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/onDoubleClick.html">onDoubleClick</a>
+                                <div class="description">在该游戏对象受到用户的双击时触发，当且仅当该游戏对象的hitTest为true时才可能触发该事件。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/onMouseDown.html">onMouseDown</a>
+                                <div class="description">在该游戏对象被用户按下时触发，当且仅当该游戏对象的hitTest为true时才可能触发该事件。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/onMouseUp.html">onMouseUp</a>
+                                <div class="description">在该游戏对象被用户释放时触发，当且仅当该游戏对象的hitTest为true时才可能触发该事件。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/onRender.html">onRender</a>
+                                <div class="description">在该游戏对象被渲染时触发，可通过事件参数获取或设置相关渲染参数，或跳过此次渲染。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="GameObject/onUpdate.html">onUpdate</a>
+                                <div class="description">在进行游戏对象的物理模拟时触发。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="right">
+                <div id="guide">
+                    <div style="font-size: 16pt;">Guide</div>
+                    <div class="content">
+                        <a class="item" href="../Guide/Engine.html">从零开始创建一个引擎实例</a>
+                        <a class="item" href="../Guide/Scene.html">布置场景</a>
+                        <a class="item" href="../Guide/Camera.html">管理摄像机</a>
+                        <a class="item" href="../Guide/Move.html">让它动起来！</a>
+                        <a class="item" href="../Guide/Interact.html">响应用户的操作</a>
+                        <a class="item" href="../Guide/Layer.html">创建图层</a>
+                        <a class="item" href="../Guide/Background.html">添加背景</a>
+                        <a class="item" href="../Guide/GUI.html">添加GUI</a>
+                        <a class="item" href="../Guide/Output.html">使用多个输出视图</a>
+                        <a class="item" href="../Guide/Audio.html">来点声音？</a>
+                        <a class="item" href="../Guide/Collide.html">使用物理碰撞模拟</a>
+                        <a class="item" href="../Guide/CollideGroup.html">利用碰撞组优化碰撞模拟</a>
+                        <a class="item" href="../Guide/Coordinate.html">采用不同的坐标系</a>
+                        <a class="item" href="../Guide/Extension.html">自定义扩展</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>SyntaxHighlighter.all();</script>
+</body>
+</html>

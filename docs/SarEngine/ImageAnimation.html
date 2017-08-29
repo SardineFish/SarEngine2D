@@ -1,0 +1,289 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>SarEngine2D</title>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="/lib/syntaxHighlighter/styles/shCoreDefault.css" />
+    <link type="text/css" rel="stylesheet" href="../style/doc.css" /><link rel="icon" type="image/png" href="/favicon.png"/>
+    <style title=""></style>
+</head>
+<body>
+    <div id="topArea">
+        <div id="topCenter">
+            <img id="logo" src="http://img.sardinefish.com/423">
+            <div id="logoText">
+                <p id="logoText1">SarEngine2D</p>
+                <p id="logoText2">Document</p>
+            </div>
+        </div>
+    </div>
+    <div id="main">
+        <div id="pos">
+            <a class="posLink" href="../index.html">SarEngine2D</a>
+            <a class="posLink" href="ImageAnimation.html">ImageAnimation</a>
+        </div>
+        <div>
+            <p id="name">ImageAnimation</p>
+        </div>
+        <div id="mainContent">
+            <div id="left">
+                <div id="outline">
+                    <a class="item" href="Align.html">Align</a>
+                    <a class="item" href="Arc.html">Arc</a>
+                    <a class="item" href="ArrayList.html">ArrayList</a>
+                    <a class="item" href="Audio.html">Audio</a>
+                    <a class="item" href="AudioTrack.html">AudioTrack</a>
+                    <a class="item" href="Background.html">Background</a>
+                    <a class="item" href="Block.html">Block</a>
+                    <a class="item" href="Button.html">Button</a>
+                    <a class="item" href="Camera.html">Camera</a>
+                    <a class="item" href="Circle.html">Circle</a>
+                    <a class="item" href="CollideGroup.html">CollideGroup</a>
+                    <a class="item" href="Colliders.html">Colliders</a>
+                    <a class="item" href="Color.html">Color</a>
+                    <a class="item" href="Combination.html">Combination</a>
+                    <a class="item" href="Coordinate.html">Coordinate</a>
+                    <a class="item" href="Device.html">Device</a>
+                    <a class="item" href="Font.html">Font</a>
+                    <a class="item" href="FontStyle.html">FontStyle</a>
+                    <a class="item" href="FontVariant.html">FontVariant</a>
+                    <a class="item" href="FontWeight.html">FontWeight</a>
+                    <a class="item" href="Force.html">Force</a>
+                    <a class="item" href="GameObject.html">GameObject</a>
+                    <a class="item" href="Graphics.html">Graphics</a>
+                    <a class="item" href="Ground.html">Ground</a>
+                    <a class="item" href="GUI.html">GUI</a>
+                    <a class="item" href="Image.html">Image</a>
+                    <a class="item" href="ImageAnimation.html">ImageAnimation</a>
+                    <a class="item" href="Joystick.html">Joystick</a>
+                    <a class="item" href="Keyboard.html">Keyboard</a>
+                    <a class="item" href="KeyEventArgs.html">KeyEventArgs</a>
+                    <a class="item" href="Layer.html">Layer</a>
+                    <a class="item" href="Line.html">Line</a>
+                    <a class="item" href="LinkList.html">LinkList</a>
+                    <a class="item" href="Matrix.html">Matrix</a>
+                    <a class="item" href="Mouse.html">Mouse</a>
+                    <a class="item" href="MouseEventArgs.html">MouseEventArgs</a>
+                    <a class="item" href="OneWayGround.html">OneWayGround</a>
+                    <a class="item" href="Output.html">Output</a>
+                    <a class="item" href="Particle.html">Particle</a>
+                    <a class="item" href="Path.html">Path</a>
+                    <a class="item" href="Point.html">Point</a>
+                    <a class="item" href="Polygon.html">Polygon</a>
+                    <a class="item" href="Position.html">Position</a>
+                    <a class="item" href="Rectangle.html">Rectangle</a>
+                    <a class="item" href="../SarEngine.html">SarEngine</a>
+                    <a class="item" href="Scene.html">Scene</a>
+                    <a class="item" href="Text.html">Text</a>
+                    <a class="item" href="TextAlign.html">TextAlign</a>
+                    <a class="item" href="TextBaseline.html">TextBaseline</a>
+                    <a class="item" href="Thickness.html">Thickness</a>
+                    <a class="item" href="Touch.html">Touch</a>
+                    <a class="item" href="TouchEventArgs.html">TouchEventArgs</a>
+                    <a class="item" href="Vector2.html">Vector2</a>
+                    <a class="item" href="Wall.html">Wall</a>
+                </div>
+            </div>
+            <div id="center">
+                <div id="description" class="part">
+                    可渲染的贴图动画，将一张图片上面平铺的一系列动画帧渲染为动画。
+                </div>
+                <div id="syntax" class="part">
+                    <p class="title">Syntax</p>
+                    <div class="content">
+                        <pre class="brush: js;">
+//from global
+var imageAnimation = new ImageAnimation();
+//from SarEngine
+var imageAnimation = new SarEngine.ImageAnimation();
+</pre>
+                    </div>
+                </div>
+                <div id="member">
+                    <div id="class" class="part">
+                        <p class="title">Classes</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/Loop.html">Loop</a>
+                                <div class="description">贴图动画的循环参数类。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="property" class="part">
+                        <p class="title">Properties</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/center.html">center</a>
+                                <div class="description">Point 该贴图动画的中心坐标。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/clipX.html">clipX</a>
+                                <div class="description">Number 从素材图片上裁剪动画帧的起始左上角横坐标。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/clipY.html">clipY</a>
+                                <div class="description">Number 从素材图片上裁剪动画帧的起始左上角纵坐标。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/coordinate.html">coordinate</a>
+                                <div class="description">Coordinate 该贴图动画所在的坐标系。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/fCount.html">fCount</a>
+                                <div class="description">Number 该贴图动画的帧的总数。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/fHeight.html">fHeight</a>
+                                <div class="description">Number 素材图片上的动画帧的高度。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/fps.html">fps</a>
+                                <div class="description">Number 渲染该贴图动画时的帧速率。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/frame.html">frame</a>
+                                <div class="description">Number 该贴图动画当前播放到的动画帧的序号。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/fWidth.html">fWidth</a>
+                                <div class="description">Number 素材图片上的动画帧的高度。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/height.html">height</a>
+                                <div class="description">Number 该贴图动画的最终呈现高度。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/img.html">img</a>
+                                <div class="description">Image 素材图片的HTML Image对象，渲染时将从该图片上裁剪出动画帧进行渲染。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/loop.html">loop</a>
+                                <div class="description">ImageAnimation.Loop 表示该贴图动画将如何循环播放。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/playing.html">playing</a>
+                                <div class="description">Boolean 表示该贴图动画是否处于播放状态。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/position.html">position</a>
+                                <div class="description">Point 描述该贴图动画的位置坐标。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/reverse.html">reverse</a>
+                                <div class="description">Boolean 表示该贴图动画是否为倒序播放。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/time.html">time</a>
+                                <div class="description">Number 表示该贴图动画自开始播放以来经过的世界， 单位为秒。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/width.html">width</a>
+                                <div class="description">Number 该贴图动画的最终呈现宽度。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="method" class="part">
+                        <p class="title">Methods</p>
+                        <div class="content">
+                            <div class="item">
+                                <div class="name static"><a class="funcName" href="ImageAnimation/create.html">create</a>(width, height, fCount, fps)</div>
+                                <div class="description">静态函数。通过指定最终呈现尺寸、帧数目和帧速率，创建一个贴图动画。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name static"><a class="funcName" href="ImageAnimation/loadFromUrl.html">loadFromUrl</a>(url, clipX, clipY, fWidth, fHeight, width, height, fCount, fps, callback)</div>
+                                <div class="description">静态函数。通过指定素材图片的url、动画帧的源裁剪位置、裁剪尺寸、最终呈现尺寸、帧数目创建一个贴图动画实例，并在图片加载完成后调用回掉函数。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/begin.html">begin</a>()</div>
+                                <div class="description">从头开始播放该贴图动画。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/changeCoordinate.html">changeCoordinate</a>(coordinate)</div>
+                                <div class="description">改变该贴图动画所在的坐标系，并将相关数值映射到新的坐标系。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/clipFrame.html">clipFrame</a>(clipX, clipY, fWidth, fHeight, fCount)</div>
+                                <div class="description">通过指定裁剪位置、裁剪尺寸和动画帧数目裁剪动画帧。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/copy.html">copy</a>()</div>
+                                <div class="description">复制一个相同的动画帧实例。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/end.html">end</a>()</div>
+                                <div class="description">结束该贴图动画的播放。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/moveTo.html">moveTo</a>(x, y)</div>
+                                <div class="description">将该贴图动画移动到指定的位置。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/play.html">play</a>()</div>
+                                <div class="description">播放该贴图动画。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/preload.html">preload</a>(graphics)</div>
+                                <div class="description">预加载贴图动画，需要提供一个绘图接口。由于部分设备在初次渲染时才正式载入图片数据，故通过该方式实现预加载，避免卡顿。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/render.html">render</a>(graphics, x, y, r, dy)</div>
+                                <div class="description">以指定的曝光时间将该贴图动画渲染到指定的绘图接口。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/setCenter.html">setCenter</a>(x, y, align)</div>
+                                <div class="description">重设该贴图动画中心的坐标。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="ImageAnimation/setCoordinate.html">setCoordinate</a>(coordinate)</div>
+                                <div class="description">在保持各种数值不变的前提下，设置该贴图动画所在的坐标系。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="event" class="part">
+                        <p class="title">Events</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/onBegine.html">onBegine</a>
+                                <div class="description">在该贴图动画开始播放时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/onEnd.html">onEnd</a>
+                                <div class="description">在该贴图动画结束播放时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="ImageAnimation/onFrameUpdate.html">onFrameUpdate</a>
+                                <div class="description">在该贴图动画的动画帧改变时触发。</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="right">
+                <div id="guide">
+                    <div style="font-size: 16pt;">Guide</div>
+                    <div class="content">
+                        <a class="item" href="../Guide/Engine.html">从零开始创建一个引擎实例</a>
+                        <a class="item" href="../Guide/Scene.html">布置场景</a>
+                        <a class="item" href="../Guide/Camera.html">管理摄像机</a>
+                        <a class="item" href="../Guide/Move.html">让它动起来！</a>
+                        <a class="item" href="../Guide/Interact.html">响应用户的操作</a>
+                        <a class="item" href="../Guide/Layer.html">创建图层</a>
+                        <a class="item" href="../Guide/Background.html">添加背景</a>
+                        <a class="item" href="../Guide/GUI.html">添加GUI</a>
+                        <a class="item" href="../Guide/Output.html">使用多个输出视图</a>
+                        <a class="item" href="../Guide/Audio.html">来点声音？</a>
+                        <a class="item" href="../Guide/Collide.html">使用物理碰撞模拟</a>
+                        <a class="item" href="../Guide/CollideGroup.html">利用碰撞组优化碰撞模拟</a>
+                        <a class="item" href="../Guide/Coordinate.html">采用不同的坐标系</a>
+                        <a class="item" href="../Guide/Extension.html">自定义扩展</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>SyntaxHighlighter.all();</script>
+</body>
+</html>

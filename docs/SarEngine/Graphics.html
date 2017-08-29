@@ -1,0 +1,380 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>SarEngine2D</title>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="/lib/syntaxHighlighter/styles/shCoreDefault.css" />
+    <link type="text/css" rel="stylesheet" href="../style/doc.css" /><link rel="icon" type="image/png" href="/favicon.png"/>
+    <style title=""></style>
+</head>
+<body>
+    <div id="topArea">
+        <div id="topCenter">
+            <img id="logo" src="http://img.sardinefish.com/423">
+            <div id="logoText">
+                <p id="logoText1">SarEngine2D</p>
+                <p id="logoText2">Document</p>
+            </div>
+        </div>
+    </div>
+    <div id="main">
+        <div id="pos">
+            <a class="posLink" href="../index.html">SarEngine2D</a>
+            <a class="posLink" href="Graphics.html">Graphics</a>
+        </div>
+        <div>
+            <p id="name">Graphics</p>
+        </div>
+        <div id="mainContent">
+            <div id="left">
+                <div id="outline">
+                    <a class="item" href="Align.html">Align</a>
+                    <a class="item" href="Arc.html">Arc</a>
+                    <a class="item" href="ArrayList.html">ArrayList</a>
+                    <a class="item" href="Audio.html">Audio</a>
+                    <a class="item" href="AudioTrack.html">AudioTrack</a>
+                    <a class="item" href="Background.html">Background</a>
+                    <a class="item" href="Block.html">Block</a>
+                    <a class="item" href="Button.html">Button</a>
+                    <a class="item" href="Camera.html">Camera</a>
+                    <a class="item" href="Circle.html">Circle</a>
+                    <a class="item" href="CollideGroup.html">CollideGroup</a>
+                    <a class="item" href="Colliders.html">Colliders</a>
+                    <a class="item" href="Color.html">Color</a>
+                    <a class="item" href="Combination.html">Combination</a>
+                    <a class="item" href="Coordinate.html">Coordinate</a>
+                    <a class="item" href="Device.html">Device</a>
+                    <a class="item" href="Font.html">Font</a>
+                    <a class="item" href="FontStyle.html">FontStyle</a>
+                    <a class="item" href="FontVariant.html">FontVariant</a>
+                    <a class="item" href="FontWeight.html">FontWeight</a>
+                    <a class="item" href="Force.html">Force</a>
+                    <a class="item" href="GameObject.html">GameObject</a>
+                    <a class="item" href="Graphics.html">Graphics</a>
+                    <a class="item" href="Ground.html">Ground</a>
+                    <a class="item" href="GUI.html">GUI</a>
+                    <a class="item" href="Image.html">Image</a>
+                    <a class="item" href="ImageAnimation.html">ImageAnimation</a>
+                    <a class="item" href="Joystick.html">Joystick</a>
+                    <a class="item" href="Keyboard.html">Keyboard</a>
+                    <a class="item" href="KeyEventArgs.html">KeyEventArgs</a>
+                    <a class="item" href="Layer.html">Layer</a>
+                    <a class="item" href="Line.html">Line</a>
+                    <a class="item" href="LinkList.html">LinkList</a>
+                    <a class="item" href="Matrix.html">Matrix</a>
+                    <a class="item" href="Mouse.html">Mouse</a>
+                    <a class="item" href="MouseEventArgs.html">MouseEventArgs</a>
+                    <a class="item" href="OneWayGround.html">OneWayGround</a>
+                    <a class="item" href="Output.html">Output</a>
+                    <a class="item" href="Particle.html">Particle</a>
+                    <a class="item" href="Path.html">Path</a>
+                    <a class="item" href="Point.html">Point</a>
+                    <a class="item" href="Polygon.html">Polygon</a>
+                    <a class="item" href="Position.html">Position</a>
+                    <a class="item" href="Rectangle.html">Rectangle</a>
+                    <a class="item" href="../SarEngine.html">SarEngine</a>
+                    <a class="item" href="Scene.html">Scene</a>
+                    <a class="item" href="Text.html">Text</a>
+                    <a class="item" href="TextAlign.html">TextAlign</a>
+                    <a class="item" href="TextBaseline.html">TextBaseline</a>
+                    <a class="item" href="Thickness.html">Thickness</a>
+                    <a class="item" href="Touch.html">Touch</a>
+                    <a class="item" href="TouchEventArgs.html">TouchEventArgs</a>
+                    <a class="item" href="Vector2.html">Vector2</a>
+                    <a class="item" href="Wall.html">Wall</a>
+                </div>
+            </div>
+            <div id="center">
+                <div id="description" class="part">
+                    绘图接口。封装自封装自Canvas的CanvasRenderingContext2D，在引擎中作为底层绘图接口。
+                    <p>
+                        <i style="color:rgba(0,0,0,0.6)">由于高度封装自CanvasRenderingContext2D，该页面上的文档大部分内容直接复制自<a href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D" target="_blank">MDN</a>。</i>
+                    </p>
+                </div>
+                <div id="syntax" class="part">
+                    <p class="title">Syntax</p>
+                    <div class="content">
+                        <pre class="brush: js;">
+//from global 
+var graphics = new Graphics(canvas);
+//from SarEngine
+var graphics = new SarEngine.Graphics(canvas);
+</pre>
+                    </div>
+                </div>
+                <div id="param" class="part">
+                    <p class="title">Parameters</p>
+                    <div class="content">
+                        <div class="item">
+                            <div class="name"><a class="type">CanvasElement</a> canvas</div>
+                            <div class="description">用于承载图像的HTML CanvasElement元素。</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="member">
+                    <div id="class" class="part">
+                        <p class="title">Classes</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="Graphics/CompositeOperation.html">CompositeOperation</a>
+                                <div class="description">表示如何在已经存在的位图上绘制图形和图像的枚举类。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/LineCap.html">LineCap</a>
+                                <div class="description">线末端的枚举类。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/LineJoin.html">LineJoin</a>
+                                <div class="description">定义两线相交拐点的枚举类。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="property" class="part">
+                        <p class="title">Properties</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="Graphics/canvas.html">canvas</a>
+                                <div class="description">CanvasElement 用于承载图像的HTML Canvas画布。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/ctx.html">ctx</a>
+                                <div class="description">CanvasRenderingContext2D 用于承载图像的HTML Canvas画布的2D渲染接口。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/fillStyle.html">fillStyle</a>
+                                <div class="description">图形内部的颜色和样式。 默认 #000 (黑色)。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/font.html">font</a>
+                                <div class="description">字体设置。 默认值 10px sans-serif。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/globalAlpha.html">globalAlpha</a>
+                                <div class="description">在合成到画布之前，设置图形和图像透明度的值。默认 1.0 (不透明)。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/globalCompositeOperation.html">globalCompositeOperation</a>
+                                <div class="description">通过 globalAlpha 应用，设置如何在已经存在的位图上绘制图形和图像。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/height.html">height</a>
+                                <div class="description">渲染可视区域的高度，单位为像素。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/kh.html">kh</a>
+                                <div class="description">在调用底层绘图函数时与一切高度 height 相乘的系数。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/kw.html">kw</a>
+                                <div class="description">在调用底层绘图函数时与一切宽度 width 相乘的系数。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/kx.html">kx</a>
+                                <div class="description">在调用底层绘图函数时与一切横坐标 x 相乘的系数。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/ky.html">ky</a>
+                                <div class="description">在调用底层绘图函数时与一切纵坐标 y 相乘的系数。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/lineCap.html">lineCap</a>
+                                <div class="description">线末端的类型。 允许的值： butt (默认), round, square。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/lineJoin.html">lineJoin</a>
+                                <div class="description">定义两线相交拐点的类型。允许的值：round, bevel, miter(默认)。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/miterLimit.html">miterLimit</a>
+                                <div class="description">斜接面限制比例。默认 10。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/shadowBlur.html">shadowBlur</a>
+                                <div class="description">描述模糊效果。 默认 0。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/shadowColor.html">shadowColor</a>
+                                <div class="description">阴影的颜色。 默认fully-transparent black。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/shadowOffsetX.html">shadowOffsetX</a>
+                                <div class="description">阴影水平方向的偏移量。 默认 0。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/shadowOffsetY.html">shadowOffsetY</a>
+                                <div class="description">阴影垂直方向的偏移量。 默认 0。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/strokeStyle.html">strokeStyle</a>
+                                <div class="description">图形边线的颜色和样式。 默认 #000 (黑色)。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/strokeWidth.html">strokeWidth</a>
+                                <div class="description">线的宽度。默认 1.0。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/textAlign.html">textAlign</a>
+                                <div class="description">文本对齐设置。 允许的值： start (默认), end, left, right 或 center。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/textBaseline.html">textBaseline</a>
+                                <div class="description">基线对齐设置。 允许的值： top, hanging, middle, alphabetic (默认),ideographic, bottom。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Graphics/width.html">width</a>
+                                <div class="description">渲染可视区域的宽度。单位为像素。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="method" class="part">
+                        <p class="title">Methods</p>
+                        <div class="content">
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/arc.html">arc</a>(x, y, r, sAngle, eAngle, antiCW)</div>
+                                <div class="description">绘制一段圆弧路径， 圆弧路径的圆心在 (x, y) 位置，半径为 r ，根据antiCW （默认为顺时针）指定的方向从 sAngle 开始绘制，到 eAngle 结束。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/arcTo.html">arcTo</a>(x1, y1, x2, y2, r)</div>
+                                <div class="description">根据控制点和半径绘制圆弧路径，使用直线连接前一个点。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/beginPath.html">beginPath</a>()</div>
+                                <div class="description">清空子路径列表开始一个新的路径。当你想创建一个新的路径时，调用此方法。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/bezierCurveTo.html">bezierCurveTo</a>(cp1x, cp1y, cp2x, cp2y, x, y)</div>
+                                <div class="description">添加一个3次贝赛尔曲线路径。该方法需要三个点。 第一、第二个点是控制点，第三个点是结束点。起始点是当前路径的最后一个点，绘制贝赛尔曲线前，可以通过调用 moveTo() 进行修改。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/clearRect.html">clearRect</a>(x, y, width, height)</div>
+                                <div class="description">设置指定矩形区域内（以 点 (x, y) 为起点，范围是(width, height) ）所有像素变成透明，并擦除之前绘制的所有内容。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/clip.html">clip</a>()</div>
+                                <div class="description">从当前路径创建一个剪切路径。在  clip() 调用之后，绘制的所有信息只会出现在剪切路径内部。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/closePath.html">closePath</a>()</div>
+                                <div class="description">使笔点返回到当前子路径的起始点。它尝试从当前点到起始点绘制一条直线。如果图形已经是封闭的或者只有一个点，那么此方法不会做任何操作。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/drawImage.html">drawImage</a>(img, sx, sy, swidth, sheight, x, y, width, height)</div>
+                                <div class="description">绘制指定的图片。该方法有多种格式，提供了很大的使用灵活性。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/drawLine.html">drawLine</a>(x1, y1, x2, y2)</div>
+                                <div class="description">通过指定两个端点的坐标，使用当前样式绘制一条直线段。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/fill.html">fill</a>()</div>
+                                <div class="description">使用当前的样式填充子路径。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/fillRect.html">fillRect</a>(x, y, width, height)</div>
+                                <div class="description">绘制填充矩形，矩形的起点在 (x, y) 位置，矩形的尺寸是 width 和 height 。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/fillRoundRect.html">fillRoundRect</a>(x, y, width, height, r)</div>
+                                <div class="description">绘制填充圆角矩形，矩形的起点在 (x, y) 位置，矩形的尺寸是 width 和 height ，圆角半径为 r 。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/fillText.html">fillText</a>(text, x, y, maxWidth)</div>
+                                <div class="description">在(x,y)位置填充文本。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/isPointInPath.html">isPointInPath</a>(x, y)</div>
+                                <div class="description">判断当前路径是否包含检测点。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/lineTo.html">lineTo</a>(x, y)</div>
+                                <div class="description">使用直线连接子路径的最后的点到x,y坐标。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/measureText.html">measureText</a>(text)</div>
+                                <div class="description">获取指定文本的相关测量值。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/moveTo.html">moveTo</a>(x, y)</div>
+                                <div class="description">将一个新的子路径的起始点移动到(x，y)坐标。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/quadraticCurveTo.html">quadraticCurveTo</a>(cpx, cpy, x, y)</div>
+                                <div class="description">添加一个2次贝赛尔曲线路径。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/rect.html">rect</a>(x, y, width, height)</div>
+                                <div class="description">创建一个矩形路径，矩形的起点位置是 (x, y) ，尺寸为 width 和 height。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/rotate.html">rotate</a>(rad, x, y)</div>
+                                <div class="description">绕定点旋转画布，若未指定x和y，默认绕原点旋转。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/roundRect.html">roundRect</a>(x, y, width, height, r)</div>
+                                <div class="description">创建一个圆角矩形路径，矩形的起点位置是 (x, y) ，尺寸为 width 和 height，圆角半径为 r 。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/scale.html">scale</a>(scaleWidth, scaleHeight)</div>
+                                <div class="description">根据 x 水平方向和 y 垂直方向，为画布单位添加缩放变换。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/setTransform.html">setTransform</a>(a, b, c, d, e, f)</div>
+                                <div class="description">重新设置当前的变换为指定的矩阵。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/stroke.html">stroke</a>()</div>
+                                <div class="description">使用当前的样式描边子路径。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/strokeRect.html">strokeRect</a>(x, y, width, height)</div>
+                                <div class="description">使用当前的绘画样式，描绘一个起点在 (x, y) 、宽度为 width 、高度为 height 的矩形。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/strokeRoundRect.html">strokeRoundRect</a>(x, y, width, height, r)</div>
+                                <div class="description">使用当前的绘画样式，描绘一个起点在 (x, y) 、宽度为 width 、高度为 height 、圆角半径为 r 的矩形。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/strokeText.html">strokeText</a>(text, x, y, maxWidth)</div>
+                                <div class="description">在(x,y)位置描边文本。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/transform.html">transform</a>(a, b, c, d, e, f)</div>
+                                <div class="description">使用方法参数描述的矩阵与当前的变换矩阵相乘。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Graphics/translate.html">translate</a>(x, y)</div>
+                                <div class="description">通过在网格中移动画布和画布原点 x 水平方向、原点 y 垂直方向，添加平移变换。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="right">
+                <div id="guide">
+                    <div style="font-size: 16pt;">Guide</div>
+                    <div class="content">
+                        <a class="item" href="../Guide/Engine.html">从零开始创建一个引擎实例</a>
+                        <a class="item" href="../Guide/Scene.html">布置场景</a>
+                        <a class="item" href="../Guide/Camera.html">管理摄像机</a>
+                        <a class="item" href="../Guide/Move.html">让它动起来！</a>
+                        <a class="item" href="../Guide/Interact.html">响应用户的操作</a>
+                        <a class="item" href="../Guide/Layer.html">创建图层</a>
+                        <a class="item" href="../Guide/Background.html">添加背景</a>
+                        <a class="item" href="../Guide/GUI.html">添加GUI</a>
+                        <a class="item" href="../Guide/Output.html">使用多个输出视图</a>
+                        <a class="item" href="../Guide/Audio.html">来点声音？</a>
+                        <a class="item" href="../Guide/Collide.html">使用物理碰撞模拟</a>
+                        <a class="item" href="../Guide/CollideGroup.html">利用碰撞组优化碰撞模拟</a>
+                        <a class="item" href="../Guide/Coordinate.html">采用不同的坐标系</a>
+                        <a class="item" href="../Guide/Extension.html">自定义扩展</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>SyntaxHighlighter.all();</script>
+</body>
+</html>

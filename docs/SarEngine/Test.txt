@@ -1,0 +1,4 @@
+﻿copy
+render
+rotate
+setCoordinate

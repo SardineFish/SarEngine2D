@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>SarEngine2D</title>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="/lib/syntaxHighlighter/styles/shCoreDefault.css" />
+    <link type="text/css" rel="stylesheet" href="../style/doc.css" /><link rel="icon" type="image/png" href="/favicon.png"/>
+    <style title=""></style>
+</head>
+<body>
+    <div id="topArea">
+        <div id="topCenter">
+            <img id="logo" src="http://img.sardinefish.com/423">
+            <div id="logoText">
+                <p id="logoText1">SarEngine2D</p>
+                <p id="logoText2">Document</p>
+            </div>
+        </div>
+    </div>
+    <div id="main">
+        <div id="pos">
+            <a class="posLink" href="../index.html">SarEngine2D</a>
+            <a class="posLink" href="Scene.html">Scene</a>
+        </div>
+        <div>
+            <p id="name">Scene</p>
+        </div>
+        <div id="mainContent">
+            <div id="left">
+                <div id="outline">
+                    <a class="item" href="Align.html">Align</a>
+                    <a class="item" href="Arc.html">Arc</a>
+                    <a class="item" href="ArrayList.html">ArrayList</a>
+                    <a class="item" href="Audio.html">Audio</a>
+                    <a class="item" href="AudioTrack.html">AudioTrack</a>
+                    <a class="item" href="Background.html">Background</a>
+                    <a class="item" href="Block.html">Block</a>
+                    <a class="item" href="Button.html">Button</a>
+                    <a class="item" href="Camera.html">Camera</a>
+                    <a class="item" href="Circle.html">Circle</a>
+                    <a class="item" href="CollideGroup.html">CollideGroup</a>
+                    <a class="item" href="Colliders.html">Colliders</a>
+                    <a class="item" href="Color.html">Color</a>
+                    <a class="item" href="Combination.html">Combination</a>
+                    <a class="item" href="Coordinate.html">Coordinate</a>
+                    <a class="item" href="Device.html">Device</a>
+                    <a class="item" href="Font.html">Font</a>
+                    <a class="item" href="FontStyle.html">FontStyle</a>
+                    <a class="item" href="FontVariant.html">FontVariant</a>
+                    <a class="item" href="FontWeight.html">FontWeight</a>
+                    <a class="item" href="Force.html">Force</a>
+                    <a class="item" href="GameObject.html">GameObject</a>
+                    <a class="item" href="Graphics.html">Graphics</a>
+                    <a class="item" href="Ground.html">Ground</a>
+                    <a class="item" href="GUI.html">GUI</a>
+                    <a class="item" href="Image.html">Image</a>
+                    <a class="item" href="ImageAnimation.html">ImageAnimation</a>
+                    <a class="item" href="Joystick.html">Joystick</a>
+                    <a class="item" href="Keyboard.html">Keyboard</a>
+                    <a class="item" href="KeyEventArgs.html">KeyEventArgs</a>
+                    <a class="item" href="Layer.html">Layer</a>
+                    <a class="item" href="Line.html">Line</a>
+                    <a class="item" href="LinkList.html">LinkList</a>
+                    <a class="item" href="Matrix.html">Matrix</a>
+                    <a class="item" href="Mouse.html">Mouse</a>
+                    <a class="item" href="MouseEventArgs.html">MouseEventArgs</a>
+                    <a class="item" href="OneWayGround.html">OneWayGround</a>
+                    <a class="item" href="Output.html">Output</a>
+                    <a class="item" href="Particle.html">Particle</a>
+                    <a class="item" href="Path.html">Path</a>
+                    <a class="item" href="Point.html">Point</a>
+                    <a class="item" href="Polygon.html">Polygon</a>
+                    <a class="item" href="Position.html">Position</a>
+                    <a class="item" href="Rectangle.html">Rectangle</a>
+                    <a class="item" href="../SarEngine.html">SarEngine</a>
+                    <a class="item" href="Scene.html">Scene</a>
+                    <a class="item" href="Text.html">Text</a>
+                    <a class="item" href="TextAlign.html">TextAlign</a>
+                    <a class="item" href="TextBaseline.html">TextBaseline</a>
+                    <a class="item" href="Thickness.html">Thickness</a>
+                    <a class="item" href="Touch.html">Touch</a>
+                    <a class="item" href="TouchEventArgs.html">TouchEventArgs</a>
+                    <a class="item" href="Vector2.html">Vector2</a>
+                    <a class="item" href="Wall.html">Wall</a>
+                </div>
+            </div>
+            <div id="center">
+                <div id="description" class="part">
+                    场景，是承载和维护各种游戏对象和相互作用的一个空间，具有一个主坐标系，并且可以通过设置图层在场景中使用不同的坐标系。
+                </div>
+                <div id="syntax" class="part">
+                    <p class="title">Syntax</p>
+                    <div class="content">
+                        <pre class="brush: js;">
+//from global
+var scene = new Scene();
+//from SarEngine
+var scene = new SarEngine.Scene();
+</pre>
+                    </div>
+                </div>
+                <div id="member">
+                    <div id="class" class="part">
+                        <p class="title">Classes</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="Scene/Physics.html">Physics</a>
+                                <div class="description">应用于场景中的各种全局物理量的类。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/BackgroundCollection.html">BackgroundCollection</a>
+                                <div class="description">维护场景中的背景集合类。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/LayerCollection.html">LayerCollection</a>
+                                <div class="description">维护场景中的图层集合类。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="property" class="part">
+                        <p class="title">Properties</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="Scene/background.html">background</a>
+                                <div class="description">Scene.BackgroundCollection 场景中的背景的集合。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/cameraList.html">cameraList</a>
+                                <div class="description">Array 场景中的摄像机的集合。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/collideGroups.html">collideGroups</a>
+                                <div class="description">Array 场景中的碰撞组的集合。该集合内有两个特殊的碰撞组，defaultGroup和ignoreGroup。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/device.html">device</a>
+                                <div class="description">Device 用户输入设备。包含鼠标、键盘和触屏上的触点的状态。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/doubleClickDelay.html">doubleClickDelay</a>
+                                <div class="description">Number 用户触发双击事件的两次点击的时间间隔。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/engine.html">engine</a>
+                                <div class="description">SarEngine 拥有该场景的引擎。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/eventSource.html">eventSource</a>
+                                <div class="description">HTMLElement 用于捕获作为场景中各种输入事件的底层HTMLElement元素。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/GUI.html">GUI</a>
+                                <div class="description">GUI 用户图形界面。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/layers.html">layers</a>
+                                <div class="description">Scene.LayerCollection 维护场景内的所有图层的集合。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/objectList.html">objectList</a>
+                                <div class="description">Array 在该场景内的所有GameObject的集合。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/physics.html">physics</a>
+                                <div class="description">Scene.Physics 该场景内的全局物理量。例如全局阻力、重力加速度等。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/runtime.html">runtime</a>
+                                <div class="description">Number 场景的运行事件，从引擎启动时开始计时，单位为ms。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="method" class="part">
+                        <p class="title">Methods</p>
+                        <div class="content">
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/addBackground.html">addBackground</a>(background, zIndex)</div>
+                                <div class="description">将指定的背景添加到场景中，并设置为指定的z序。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/addCamera.html">addCamera</a>(camera)</div>
+                                <div class="description">将指定的摄像机添加到该场景中。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/addCollideGroup.html">addCollideGroup</a>(group)</div>
+                                <div class="description">将指定的碰撞组添加到该场景中。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/addGameObject.html">addGameObject</a>(obj, layer, colliderGroup)</div>
+                                <div class="description">将指定的游戏对象添加到该场景中，可以指定其图层和碰撞组。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/addLayer.html">addLayer</a>(layer, depth)</div>
+                                <div class="description">将指定的图层添加到该场景中，并处于指定的层次深度，depth的取值可以是0以外的任意整数，depth低的图层将被优先渲染，即depth高的图层将覆盖在depth低的图层之上。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/initEvent.html">initEvent</a>(output)</div>
+                                <div class="description">在指定的输出接口初始化用户输入事件的捕获。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/physicalSimulate.html">physicalSimulate</a>(dt)</div>
+                                <div class="description">通过指定模拟时长进行场景内的物理模拟计算。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/removeBackground.html">removeBackground</a>(background)</div>
+                                <div class="description">将指定的背景从场景中移除。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/removeCamera.html">removeCamera</a>(camera)</div>
+                                <div class="description">将指定的摄像机从场景中移除。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/removeGameObject.html">removeGameObject</a>(id)</div>
+                                <div class="description">从场景中移除指定ID的游戏对象。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/removeLayer.html">removeLayer</a>(depth)</div>
+                                <div class="description">从场景中移除指定层次的图层。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/render.html">render</a>(dt)</div>
+                                <div class="description">以指定的曝光时间渲染该场景。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/reset.html">reset</a>()</div>
+                                <div class="description">重置该场景，调用此函数将清空场景中的一切，包括游戏对象、图层、背景和碰撞组等。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Scene/updateFrame.html">updateFrame</a>(delay)</div>
+                                <div class="description">游戏帧更新，由内部调用。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="event" class="part">
+                        <p class="title">Events</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="Scene/onClick.html">onClick</a>
+                                <div class="description">在场景受到用户点击时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onEndRender.html">onEndRender</a>
+                                <div class="description">在场景结束所有渲染时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onKeyDown.html">onKeyDown</a>
+                                <div class="description">在用户键盘按下时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onKeyPress.html">onKeyPress</a>
+                                <div class="description">在用户按下并释放一个键盘按键时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onKeyUp.html">onKeyUp</a>
+                                <div class="description">在用户释放键盘按键时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onMouseDown.html">onMouseDown</a>
+                                <div class="description">在鼠标按下时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onMouseMove.html">onMouseMove</a>
+                                <div class="description">在鼠标移动时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onMouseOut.html">onMouseOut</a>
+                                <div class="description">在鼠标离开场景时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onMouseUp.html">onMouseUp</a>
+                                <div class="description">在鼠标按键释放时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onMouseWheel.html">onMouseWheel</a>
+                                <div class="description">在鼠标滚轮滚动时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onRender.html">onRender</a>
+                                <div class="description">在场景开始渲染时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onTouchEnd.html">onTouchEnd</a>
+                                <div class="description">在用户释放一个触点时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onTouchMove.html">onTouchMove</a>
+                                <div class="description">在用户触摸屏上一个触点移动时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onTouchStart.html">onTouchStart</a>
+                                <div class="description">在用户触摸到触屏时触发。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Scene/onUpdate.html">onUpdate</a>
+                                <div class="description">在场景开始更新游戏帧时触发。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="right">
+                <div id="guide">
+                    <div style="font-size: 16pt;">Guide</div>
+                    <div class="content">
+                        <a class="item" href="../Guide/Engine.html">从零开始创建一个引擎实例</a>
+                        <a class="item" href="../Guide/Scene.html">布置场景</a>
+                        <a class="item" href="../Guide/Camera.html">管理摄像机</a>
+                        <a class="item" href="../Guide/Move.html">让它动起来！</a>
+                        <a class="item" href="../Guide/Interact.html">响应用户的操作</a>
+                        <a class="item" href="../Guide/Layer.html">创建图层</a>
+                        <a class="item" href="../Guide/Background.html">添加背景</a>
+                        <a class="item" href="../Guide/GUI.html">添加GUI</a>
+                        <a class="item" href="../Guide/Output.html">使用多个输出视图</a>
+                        <a class="item" href="../Guide/Audio.html">来点声音？</a>
+                        <a class="item" href="../Guide/Collide.html">使用物理碰撞模拟</a>
+                        <a class="item" href="../Guide/CollideGroup.html">利用碰撞组优化碰撞模拟</a>
+                        <a class="item" href="../Guide/Coordinate.html">采用不同的坐标系</a>
+                        <a class="item" href="../Guide/Extension.html">自定义扩展</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>SyntaxHighlighter.all();</script>
+</body>
+</html>

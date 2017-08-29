@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>SarEngine2D</title>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="/lib/syntaxHighlighter/scripts/shBrushJScript.js"></script>
+    <link type="text/css" rel="stylesheet" href="/lib/syntaxHighlighter/styles/shCoreDefault.css" />
+    <link type="text/css" rel="stylesheet" href="../style/doc.css" /><link rel="icon" type="image/png" href="/favicon.png"/>
+    <style title=""></style>
+</head>
+<body>
+    <div id="topArea">
+        <div id="topCenter">
+            <img id="logo" src="http://img.sardinefish.com/423">
+            <div id="logoText">
+                <p id="logoText1">SarEngine2D</p>
+                <p id="logoText2">Document</p>
+            </div>
+        </div>
+    </div>
+    <div id="main">
+        <div id="pos">
+            <a class="posLink" href="../index.html">SarEngine2D</a>
+            <a class="posLink" href="Camera.html">Camera</a>
+        </div>
+        <div>
+            <p id="name">Camera</p>
+        </div>
+        <div id="mainContent">
+            <div id="left">
+                <div id="outline">
+                    <a class="item" href="Align.html">Align</a>
+                    <a class="item" href="Arc.html">Arc</a>
+                    <a class="item" href="ArrayList.html">ArrayList</a>
+                    <a class="item" href="Audio.html">Audio</a>
+                    <a class="item" href="AudioTrack.html">AudioTrack</a>
+                    <a class="item" href="Background.html">Background</a>
+                    <a class="item" href="Block.html">Block</a>
+                    <a class="item" href="Button.html">Button</a>
+                    <a class="item" href="Camera.html">Camera</a>
+                    <a class="item" href="Circle.html">Circle</a>
+                    <a class="item" href="CollideGroup.html">CollideGroup</a>
+                    <a class="item" href="Colliders.html">Colliders</a>
+                    <a class="item" href="Color.html">Color</a>
+                    <a class="item" href="Combination.html">Combination</a>
+                    <a class="item" href="Coordinate.html">Coordinate</a>
+                    <a class="item" href="Device.html">Device</a>
+                    <a class="item" href="Font.html">Font</a>
+                    <a class="item" href="FontStyle.html">FontStyle</a>
+                    <a class="item" href="FontVariant.html">FontVariant</a>
+                    <a class="item" href="FontWeight.html">FontWeight</a>
+                    <a class="item" href="Force.html">Force</a>
+                    <a class="item" href="GameObject.html">GameObject</a>
+                    <a class="item" href="Graphics.html">Graphics</a>
+                    <a class="item" href="Ground.html">Ground</a>
+                    <a class="item" href="GUI.html">GUI</a>
+                    <a class="item" href="Image.html">Image</a>
+                    <a class="item" href="ImageAnimation.html">ImageAnimation</a>
+                    <a class="item" href="Joystick.html">Joystick</a>
+                    <a class="item" href="Keyboard.html">Keyboard</a>
+                    <a class="item" href="KeyEventArgs.html">KeyEventArgs</a>
+                    <a class="item" href="Layer.html">Layer</a>
+                    <a class="item" href="Line.html">Line</a>
+                    <a class="item" href="LinkList.html">LinkList</a>
+                    <a class="item" href="Matrix.html">Matrix</a>
+                    <a class="item" href="Mouse.html">Mouse</a>
+                    <a class="item" href="MouseEventArgs.html">MouseEventArgs</a>
+                    <a class="item" href="OneWayGround.html">OneWayGround</a>
+                    <a class="item" href="Output.html">Output</a>
+                    <a class="item" href="Particle.html">Particle</a>
+                    <a class="item" href="Path.html">Path</a>
+                    <a class="item" href="Point.html">Point</a>
+                    <a class="item" href="Polygon.html">Polygon</a>
+                    <a class="item" href="Position.html">Position</a>
+                    <a class="item" href="Rectangle.html">Rectangle</a>
+                    <a class="item" href="../SarEngine.html">SarEngine</a>
+                    <a class="item" href="Scene.html">Scene</a>
+                    <a class="item" href="Text.html">Text</a>
+                    <a class="item" href="TextAlign.html">TextAlign</a>
+                    <a class="item" href="TextBaseline.html">TextBaseline</a>
+                    <a class="item" href="Thickness.html">Thickness</a>
+                    <a class="item" href="Touch.html">Touch</a>
+                    <a class="item" href="TouchEventArgs.html">TouchEventArgs</a>
+                    <a class="item" href="Vector2.html">Vector2</a>
+                    <a class="item" href="Wall.html">Wall</a>
+                </div>
+            </div>
+            <div id="center">
+                <div id="description" class="part">
+                    摄像机，用于捕获场景内一定范围内的图像并渲染到指定的输出接口。一个场景内至少应该有一个摄像机，可以在一个场景中添加多个摄像机，一个摄像机可以输出到多个输出接口，但一个输出接口只能与一个摄像机连接。
+                </div>
+                <div id="syntax" class="part">
+                    <p class="title">Syntax</p>
+                    <div class="content">
+                        <pre class="brush: js;">
+//from global
+var camera = new Camera(x, y);
+//from SarEngine
+var camera = new SarEngine.Camera(x, y);
+</pre>
+                    </div>
+                </div>
+                <div id="param" class="part">
+                    <p class="title">Parameters</p>
+                    <div class="content">
+                        <div class="item">
+                            <div class="name"><a class="type">Number</a> x</div>
+                            <div class="description">摄像机初始位置的横坐标。</div>
+                        </div>
+                        <div class="item">
+                            <div class="name"><a class="type">Number</a> y</div>
+                            <div class="description">摄像机初始位置的纵坐标</div>
+                        </div>
+
+                    </div>
+                </div>
+                <div id="member">
+                    <div id="property" class="part">
+                        <p class="title">Properties</p>
+                        <div class="content">
+                            <div class="item">
+                                <a class="name" href="Camera/center.html">center</a>
+                                <div class="description">Position 表示该摄像机的中心所在的位置。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Camera/coordinate.html">coordinate</a>
+                                <div class="description">Coordinate 表示该摄像机所在的坐标系。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Camera/outputList.html">outputList</a>
+                                <div class="description">Array 连接到该摄像机的输出接口的集合</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Camera/position.html">position</a>
+                                <div class="description">Position 表示该摄像机的位置坐标。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Camera/rotation.html">rotation</a>
+                                <div class="description">Number 表示该摄像机的旋转弧度。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Camera/scene.html">scene</a>
+                                <div class="description">Scene 表示该摄像机所在的场景。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Camera/viewCoordinate.html">viewCoordinate</a>
+                                <div class="description">Coordinate 表示该摄像机输出视图的坐标系，该坐标系相对屏幕静止，以输出屏幕的中心为原点，向右为x轴正方向，向下为y轴正方向，1单位对应1像素。</div>
+                            </div>
+                            <div class="item">
+                                <a class="name" href="Camera/zoom.html">zoom</a>
+                                <div class="description">Number 表示该摄像机的缩放倍率。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div id="method" class="part">
+                        <p class="title">Methods</p>
+                        <div class="content">
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/addOutput.html">addOutput</a>(output)</div>
+                                <div class="description">向该摄像机添加输出接口。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/applyTransform.html">applyTransform</a>(graphics)</div>
+                                <div class="description">将摄像机视图变换应用到指定的Graphics绘图接口，以确保使用默认坐标系坐标进行绘图时呈现正确的位置。该函数由Scene在渲染前自动调用，如果需要手动强制渲染，必须在渲染到指定的绘图接口以前应用摄像机视图变换。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/clear.html">clear</a>(bgColor)</div>
+                                <div class="description">清空摄像机的所有输出画面，并填充以指定的背景颜色。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/copy.html">copy</a>()</div>
+                                <div class="description">复制一个相同的摄像机实例。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/linkTo.html">linkTo</a>(linkableObject)</div>
+                                <div class="description">将摄像机连接到一个对象，这个对象可以是一个GameObject，也可以是另一个摄像机，链接后该摄像机将跟随目标移动和旋转。如果需要让摄像机盯着某个对象的话，这是个不错的方法。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/map.html">map</a>(x, y, output, coordinate)</div>
+                                <div class="description">将指定的输出视图上的点的坐标映射到指定的坐标系。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/moveTo.html">moveTo</a>(x, y)</div>
+                                <div class="description">将摄像机移动至指定的位置。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/removeOutput.html">removeOutput</a>(output)</div>
+                                <div class="description">将指定的输出接口从该摄像机移除。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/render.html">render</a>(dt)</div>
+                                <div class="description">指定曝光时间捕获图像并渲染输出到该摄像机的所有输出接口。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/renderTo.html">renderTo</a>(output, dt)</div>
+                                <div class="description">指定曝光时间捕获图像并渲染输出到指定的输出接口，该输出接口可以未连接到该摄像机。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/resetTranform.html">resetTranform</a>(graphics)</div>
+                                <div class="description">重设指定Graphics绘图接口的变换，等效于graphics.resetTransform()。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/rotrate.html">rotrate</a>(rad, x, y)</div>
+                                <div class="description">将该摄像机绕定点旋转指定的弧度，若指定x和y，将默认绕中心旋转。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/rotateTo.html">rotateTo</a>(rotation, x, y)</div>
+                                <div class="description">将该摄像机绕定点旋转到指定的弧度，若指定x和y，将默认绕中心旋转。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/unLink.html">unLink</a>(linkableObject)</div>
+                                <div class="description">断开摄像机与指定对象之间的连接，在这之前，该摄像机必须曾调用linkTo连接到该指定的对象。</div>
+                            </div>
+                            <div class="item">
+                                <div class="name"><a class="funcName" href="Camera/zoomTo.html">zoomTo</a>(zoom, x, y)</div>
+                                <div class="description">将摄像机沿指定的缩放中心缩放到指定的倍率，若未指定x和y，将默认沿中心缩放。</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="right">
+                <div id="guide">
+                    <div style="font-size: 16pt;">Guide</div>
+                    <div class="content">
+                        <a class="item" href="../Guide/Engine.html">从零开始创建一个引擎实例</a>
+                        <a class="item" href="../Guide/Scene.html">布置场景</a>
+                        <a class="item" href="../Guide/Camera.html">管理摄像机</a>
+                        <a class="item" href="../Guide/Move.html">让它动起来！</a>
+                        <a class="item" href="../Guide/Interact.html">响应用户的操作</a>
+                        <a class="item" href="../Guide/Layer.html">创建图层</a>
+                        <a class="item" href="../Guide/Background.html">添加背景</a>
+                        <a class="item" href="../Guide/GUI.html">添加GUI</a>
+                        <a class="item" href="../Guide/Output.html">使用多个输出视图</a>
+                        <a class="item" href="../Guide/Audio.html">来点声音？</a>
+                        <a class="item" href="../Guide/Collide.html">使用物理碰撞模拟</a>
+                        <a class="item" href="../Guide/CollideGroup.html">利用碰撞组优化碰撞模拟</a>
+                        <a class="item" href="../Guide/Coordinate.html">采用不同的坐标系</a>
+                        <a class="item" href="../Guide/Extension.html">自定义扩展</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>SyntaxHighlighter.all();</script>
+</body>
+</html>
