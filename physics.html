@@ -17,6 +17,7 @@
 <body>
     <canvas id="canvas"></canvas>
     <script>
+        // Init engine
         var Width = window.innerWidth;
         var Height = window.innerHeight;
         var engine = SarEngine.createByCanvas($("#canvas").get(0),Width,Height);
@@ -24,10 +25,12 @@
         var camera = scene.cameraList[0];
         var output = camera.outputList[0];
         engine.start();
-
+        
         camera.moveTo(-400, 100);
 
         scene.physics.g = new Vector2(0, -500);
+
+        // Init ground
         var ground = new Rectangle(Width * 5, Height);
         ground.strokeStyle = new Color(255, 255, 255, 0);
         ground.fillStyle = new Color(127, 113, 95, 1);
@@ -41,6 +44,7 @@
         groundObj.moveTo(0, -Height / 2);
         scene.addGameObject(groundObj);
 
+        // Init hill
         var polygon = new Polygon();
         polygon.beginInit();
         polygon.addPoint(new Point(-100, 200));
@@ -70,6 +74,7 @@
         wallLeft.moveTo(-200,0);
         scene.addGameObject(wallLeft);
 
+        // Init wall
         var wall = new Rectangle(50, 200);
         wall.strokeStyle = new Color(255, 255, 255, 0);
         wall.fillStyle = new Color(95, 128, 106, 1);
@@ -90,6 +95,38 @@
         wallRight.moveTo(200, 100);
         scene.addGameObject(wallRight);
 
+        // Init cursor
+        var polCursor = new Polygon();
+        polCursor.beginInit();
+        polCursor.addPoint(new Point(0, 0));
+        polCursor.addPoint(new Point(12, -12));
+        polCursor.addPoint(new Point(9, -18));
+        polCursor.addPoint(new Point(0, -16));
+        polCursor.endInit();
+        polCursor.position = new Point(0, 0);
+        polCursor.setCenter(0, 0);
+        polCursor.strokeStyle = new Color(0, 0, 0, 1.0);
+        polCursor.fillStyle = new Color(255, 255, 255, 1.0);
+        polCursor.soft = true;
+        //polCursor.static = true;
+        polCursor.rigidBody = true;
+        var cursor = new GameObject();
+        //cursor.graphic = polCursor;
+        cursor.collider = polCursor;
+        var lastPos = new Point(0, 0);
+        cursor.onUpdate = function (obj,dt)
+        {
+            cursor.moveTo(lastPos.x, lastPos.y);
+            cursor.v = new Vector2((scene.device.mouse.x - lastPos.x) / dt, (scene.device.mouse.y - lastPos.y) / dt);
+            lastPos = new Point(scene.device.mouse.x, scene.device.mouse.y);
+        }
+        scene.onMouseMove = function (e)
+        {
+            //cursor.moveTo(e.x, e.y);
+        }
+        scene.addGameObject(cursor);
+
+        // Init ball
         var circle = new Circle(40);
         circle.strokeStyle = new Color(255, 255, 255, 0);
         circle.fillStyle = Color.fromString("#c55050");
@@ -99,8 +136,9 @@
         ball.graphic = circle;
         ball.collider = circle;
         ball.gravity = true;
-        ball.moveTo(0, 300);
+        ball.moveTo(0, 246);
         ball.v.x = 200;
+        // Detect if the ball is out screen
         ball.onUpdate = function ()
         {
             if (output.outScreen(ball))
@@ -113,7 +151,7 @@
                     newBall.collider.e = 0.8;
                     newBall.gravity = true;
                     newBall.collider.soft = false;
-                    newBall.moveTo(Math.random() * Width - (Width / 2), Height + Math.random() * 100);
+                    newBall.moveTo(Math.random() * Width - (Width / 2), Height + Math.random() * 500);
                     scene.addGameObject(newBall);
                 }
                 scene.removeGameObject(ball);

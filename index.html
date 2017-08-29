@@ -47,7 +47,7 @@
 </head>
 <body>
     <div id="root">
-        <div id="topArea">
+        <div id="topArea" onselectstart="return false;" style="cursor:default">
             <div id="topBar">
                 <div class="topBarButton" id="logo">
                     <img id="logoImg" src="img/logo-50.png">
@@ -64,7 +64,7 @@
                 </div>
             </div>
         </div>
-        <div id="mainArea">
+        <div id="mainArea" onselectstart="return false;" style="cursor:default">
             <div id="welcomeBG">
 
             </div>
@@ -148,6 +148,7 @@
                 , "position.y": p.y
             }, 0.1);
         }
+        // Init the particle animation on background
         function iniParticle()
         {
             var p = new Particle();
