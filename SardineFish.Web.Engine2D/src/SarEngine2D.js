@@ -39,25 +39,25 @@
     Engine.createByCanvas = function (canvas, width, height)
     {
         var engine = new Engine();
-        var output = new Display(canvas, width, height);
+        var display = new Display(canvas, width, height);
         var scene = new Scene();
         engine.scene = scene;
         var camera = new Camera(0, 0, 0, 0, 1);
-        camera.addDisplay(output);
+        camera.addDisplay(display);
         scene.addCamera(camera);
-        scene.addInput(output);
+        scene.addInput(display);
         return engine;
     }
     Engine.createInNode = function (node, width, height)
     {
         var engine = new Engine();
-        var output = new Display(node, width, height);
+        var display = new Display(node, width, height);
         var scene = new Scene();
         engine.scene = scene;
         var camera = new Camera(0, 0, 0, 0, 1);
-        camera.addDisplay(output);
+        camera.addDisplay(display);
         scene.addCamera(camera);
-        scene.addInput(output);
+        scene.addInput(display);
         return engine;
     }
     Engine.prototype.start = function ()
@@ -333,9 +333,9 @@
         for (var i = 0; i < this.scene.cameraList.length; i++)
         {
             var camera = this.scene.cameraList[i];
-            for (var j = 0; j < camera.outputList.length ; j++)
+            for (var j = 0; j < camera.displayList.length ; j++)
             {
-                camera.outputList[j].setLayer(this.count + this.scene.background.count);
+                camera.displayList[j].setLayer(this.count + this.scene.background.count);
             }
         }
     }
@@ -364,9 +364,9 @@
         }
 
         var camera = this.scene.cameraList[i];
-        for (var j = 0; j < camera.outputList.length ; j++)
+        for (var j = 0; j < camera.displayList.length ; j++)
         {
-            camera.outputList[j].setLayer(this.count + this.scene.background.count);
+            camera.displayList[j].setLayer(this.count + this.scene.background.count);
         }
         return layer;
     }
@@ -405,10 +405,10 @@
         this.bgList.insert(bg, zIndex);
         for (var i = 0; i < this.scene.cameraList; i++)
         {
-            for (var j = 0; j < this.scene.cameraList[i].outputList.length; j++)
+            for (var j = 0; j < this.scene.cameraList[i].displayList.length; j++)
             {
-                var output = this.scene.cameraList[i].outputList[j];
-                output.setLayer(this.count + this.scene.layers.count);
+                var display = this.scene.cameraList[i].displayList[j];
+                display.setLayer(this.count + this.scene.layers.count);
             }
         }
         var bgCollection = this;
@@ -439,10 +439,10 @@
         this.bgList.removeAt(index);
         for (var i = 0; i < this.scene.cameraList; i++)
         {
-            for (var j = 0; j < this.scene.cameraList[i].outputList.length; j++)
+            for (var j = 0; j < this.scene.cameraList[i].displayList.length; j++)
             {
-                var output = this.scene.cameraList[i].outputList[j];
-                output.setLayer(this.count + this.scene.layers.count);
+                var display = this.scene.cameraList[i].displayList[j];
+                display.setLayer(this.count + this.scene.layers.count);
             }
         }
         delete this[this.count];
@@ -667,7 +667,7 @@
 
         for (var i = 0; i < this.cameraList.length; i++)
         {
-            this.cameraList[i].clear();
+            this.cameraList[i].clear(new Color(0,0,0,1.0));
             this.cameraList[i].render(dt);
         }
 
@@ -779,7 +779,7 @@
         this.eventSources.removeAt(index);
         input.removeSceneEvent();
     }
-    Scene.prototype.initEvents = function (input, output)
+    Scene.prototype.initEvents = function (input, display)
     {
         var clickTime = 0;
         var scene = this;
@@ -807,8 +807,8 @@
             if (args.handled)
                 return;
 
-            /*args.x = (e.pageX / output.camera.zoom) + (output.camera.center.x - output.camera.width / 2);
-            args.y = (output.camera.height - e.pageY / output.camera.zoom) + (output.camera.center.y - output.camera.height / 2);*/
+            /*args.x = (e.pageX / display.camera.zoom) + (display.camera.center.x - display.camera.width / 2);
+            args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
             args.x = mapTo.x;
             args.y = mapTo.y;
 
@@ -871,13 +871,13 @@
         var dom = input;
         if (input instanceof Display)
         {
-            dom = input.outputDOM;
-            output = input;
+            dom = input.displayDOM;
+            display = input;
         }
         else if (input instanceof window.Element)
         {
             dom = input;
-            if (!output)
+            if (!display)
                 throw new Error("Display required.");
         }
 
@@ -904,7 +904,7 @@
         function mouseEnterCallback(e)
         {
             //console.log("enter" + asdf++);
-            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
+            var mapTo = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default);
             scene.device.mouse.dx = 0;
             scene.device.mouse.dy = 0;
             scene.device.mouse.x = mapTo.x;
@@ -918,7 +918,7 @@
         function mouseMoveCallback(e)
         {
             //console.log("move" + asdf++);
-            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
+            var mapTo = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -938,8 +938,8 @@
             if (args.handled)
                 return;
 
-            /*args.x = (e.pageX / output.camera.zoom) + (output.camera.center.x - output.camera.width / 2);
-            args.y = (output.camera.height - e.pageY / output.camera.zoom) + (output.camera.center.y - output.camera.height / 2);*/
+            /*args.x = (e.pageX / display.camera.zoom) + (display.camera.center.x - display.camera.width / 2);
+            args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
             args.x = mapTo.x;
             args.y = mapTo.y;
 
@@ -949,8 +949,8 @@
         function mouseOverCallback(e)
         {
             var args = new MouseEventArgs();
-            args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
-            args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
+            args.x = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).x;
+            args.y = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).y;
             args.button = e.button;
             args.buttonState = Mouse.ButtonState.None;
             args.handled = false;
@@ -960,8 +960,8 @@
         function mouseOutCallback(e)
         {
             var args = new MouseEventArgs();
-            args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
-            args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
+            args.x = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).x;
+            args.y = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).y;
             args.button = e.button;
             args.buttonState = Mouse.ButtonState.None;
             args.handled = false;
@@ -970,7 +970,7 @@
         }
         function mouseDownCallback(e)
         {
-            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
+            var mapTo = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -1022,7 +1022,7 @@
         }
         function mouseUpCallback(e)
         {
-            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
+            var mapTo = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -1075,7 +1075,7 @@
         }
         function mouseWheelCallback(e)
         {
-            var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
+            var mapTo = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default);
             scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
             scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
             scene.device.mouse.x = mapTo.x;
@@ -1129,8 +1129,8 @@
                 if (args.handled)
                     return;
 
-                args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
-                args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
+                args.x = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).x;
+                args.y = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).y;
 
                 clickTime = 0;
                 for (var i = 0; i < scene.objectList.length; i++)
@@ -1161,8 +1161,8 @@
                 if (args.handled)
                     return;
 
-                args.x = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).x;
-                args.y = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default).y;
+                args.x = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).x;
+                args.y = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default).y;
 
                 clickTime = t;
                 for (var i = 0; i < scene.objectList.length; i++)
@@ -1238,8 +1238,8 @@
             for (var i = 0; i < e.changedTouches.length ; i++)
             {
                 var t = new Touch(e.changedTouches[i].identifier);
-                t.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                t.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                t.x = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                t.y = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
                 t.type = Touch.Types.Start;
                 scene.device.touches.add(t);
 
@@ -1250,8 +1250,8 @@
                 argsGUI.y = e.changedTouches[i].pageY;
 
                 var args = argsGUI.copy();
-                args.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                args.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                args.x = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                args.y = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
 
                 if (scene.GUI)
                     scene.GUI.touchStartCallback(argsGUI);
@@ -1265,7 +1265,7 @@
         {
             for (var i = 0; i < e.changedTouches.length ; i++)
             {
-                var mapTo = output.camera.map(e.pageX, e.pageY, output, Coordinate.Default);
+                var mapTo = display.camera.map(e.pageX, e.pageY, display, Coordinate.Default);
                 var id = e.changedTouches[i].identifier;
                 var t = scene.device.touches.id(id);
                 t.dx = mapTo.x - scene.device.mouse.x;
@@ -1283,8 +1283,8 @@
 
                 var args = argsGUI.copy();
                 args.type = Touch.Types.Move;
-                args.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                args.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                args.x = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                args.y = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
 
                 if (scene.GUI)
                     scene.GUI.touchMoveCallback(argsGUI);
@@ -1312,8 +1312,8 @@
                 var args = argsGUI.copy();
                 args.type = Touch.Types.End;
                 args.touches = touchList.toArray();
-                args.x = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
-                args.y = output.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
+                args.x = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).x;
+                args.y = display.camera.map(e.changedTouches[i].pageX, e.changedTouches[i].pageY).y;
 
                 if (scene.GUI)
                     scene.GUI.touchEndCallback(argsGUI);
@@ -1431,9 +1431,9 @@
         for (var i = 0; i < this.cameraList.length; i++)
         {
             var camera = this.cameraList[i];
-            for (var j = 0; j < camera.outputList.length ; j++)
+            for (var j = 0; j < camera.displayList.length ; j++)
             {
-                camera.outputList[j].setLayer(this.layers.count);
+                camera.displayList[j].setLayer(this.layers.count);
             }
         }
     }
@@ -1453,9 +1453,9 @@
         }
         camera.scene = this;
         this.cameraList.add(camera);
-        for (var i = 0; i < camera.outputList.length ; i++)
+        for (var i = 0; i < camera.displayList.length ; i++)
         {
-            camera.outputList[i].setLayer(this.layers.count);
+            camera.displayList[i].setLayer(this.layers.count);
         }
     }
     Scene.prototype.removeCamera = function (camera)
@@ -2289,7 +2289,7 @@
     {
         if (!(node instanceof Node))
         {
-            throw new Error("Cannot create a output by this object.");
+            throw new Error("Cannot create a display by this object.");
         }
 
         this.type = Display.DisplayTypes.None;
@@ -2298,11 +2298,17 @@
         this.camera = null;
         this.layers = ArrayList();
         this.audioTracks = ArrayList();
-        this.outputDOM = null;
+        this.displayDOM = null;
         this.viewArea = null;
         this.GUI = null;
         this.viewCoordinate = null;
-        var outputDom = null;
+
+        var input = new Input(node);
+        Object.defineProperty(this, "input", {
+            get: function () { return input; }
+        });
+
+        var displayDom = null;
         var graphics = null;
         var width = 0;
         var height = 0;
@@ -2312,8 +2318,8 @@
 
         if (node.nodeName == "CANVAS")
         {
-            outputDom = node;
-            this.outputDOM = node;
+            displayDom = node;
+            this.displayDOM = node;
             this.type = Display.DisplayTypes.Single;
             graphics = new Graphics(node);
             this.layers[0] = graphics;
@@ -2406,11 +2412,11 @@
         else
         {
             node.innerHTML = "";
-            outputDom = node;
-            this.outputDOM = node;
-            if (getComputedStyle(outputDom).position == "static")
+            displayDom = node;
+            this.displayDOM = node;
+            if (getComputedStyle(displayDom).position == "static")
             {
-                outputDom.style.position = "relative";
+                displayDom.style.position = "relative";
             }
             this.type = Display.DisplayTypes.MultiLayer;
             graphics = ArrayList();
@@ -2450,7 +2456,7 @@
                         canvas.style.left = "0px";
                         canvas.style.top = "0px";
                         canvas.style.backgroundColor = "transparent";
-                        outputDom.appendChild(canvas);
+                        displayDom.appendChild(canvas);
                         var i = graphics.add(new Graphics(canvas));
                         canvas.style.zIndex = i;
                     }
@@ -2525,9 +2531,8 @@
             });
             function applySize()
             {
-                var node = document.createElement("div");
-                node.style.width = width;
-                node.style.height = height;
+                node.style.width = width + "px";
+                node.style.height = height + "px";
                 for (var i = 0; i < graphics.length; i++)
                 {
                     graphics[i].canvas.style.width = width + "px";
@@ -2627,12 +2632,20 @@
         camera.addDisplay(this);
 
     }
+    Display.prototype.getInput = function ()
+    {
+        return this.input;
+    }
+    Display.prototype.setCoordinate = function (coordinate)
+    {
+        this.viewCoordinate = coordinate;
+    }
     Display.prototype.addAudioTrack = function (audioTrack)
     {
         if (!this.audioTracks.contain(audioTrack))
         {
             var index = this.audioTracks.add(audioTrack);
-            audioTrack.output = this;
+            audioTrack.display = this;
             return index;
         }
     }
@@ -2642,7 +2655,7 @@
         if (index < 0)
             return -1;
         this.audioTracks.removeAt(index);
-        audioTrack.output = null;
+        audioTrack.display = null;
     }
     Display.prototype.playAudio = function (audio)
     {
@@ -2662,10 +2675,10 @@
         {
             var track = new AudioTrack(audio);
             this.addAudioTrack(track);
-            var output = this;
+            var display = this;
             track.onEnd = function ()
             {
-                output.removeAudioTrack(track);
+                display.removeAudioTrack(track);
             }
             track.play();
             
@@ -2684,14 +2697,14 @@
         {
             throw new Error("A HTML Element is required.");
         }
-        //this.element = element;
-        this.element = document.createElement("div");
+        this.element = element;
+        //this.element = document.createElement("div");
 
         var input = this;
 
         this.ignorePadding = true;
         this.coordinate = null;
-        this.scene.null;
+        this.scene=null;
         this.display = null;
 
         var mouseCapture = true;
@@ -2741,6 +2754,10 @@
         this.onTouchEnd = null;
         this.onTouchMove = null;
 
+        this.initMouseEvent();
+        this.initKeyEvent();
+
+
     }
     Input.prototype.initMouseEvent = function ()
     {
@@ -2749,58 +2766,327 @@
         var lastTime = new Date().getTime();
         function mouseEnterCallback(e)
         {
-            var bound = input.element.getBoundingClientRect();
-            var x = e.clientX - bound.left;
-            var y = e.clientY - bound.top;
-            if (input.ignorePadding)
-            {
-                x -= input.element.style.paddingLeft;
-                y -= input.element.style.paddingTop;
-            }
-            var dx = x - lastPos.x;
-            var dy = y - lastPos.y;
-            var dt = (new Date().getTime() - lastTime) / 1000;
-            lastPos = new Point(x, y);
-            lastTime = new Date().getTime();
-
+            var args = new Args(e);
             if (input.onMouseEnter)
             {
-                var args = {
-                    input: input,
-                    x: x,
-                    y: y,
-                    dx: dx,
-                    dy: dy,
-                    dt: dt,
-                    raw: e,
-                    handled: false,
-                };
-                input.onMouseEnter(args);
+                var argsInput = args.copy();
+                input.onMouseEnter(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var argsGUI = args.copy();
+                input.display.GUI.mouseEnterCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+        }
+        function mouseLeaveCallback(e)
+        {
+            var args = new Args(e);
+            if (input.onMouseLeave) {
+                var argsInput = args.copy();
+                input.onMouseLeave(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI && input.display.GUI.mouseLeaveCallback) {
+                var argsGUI = args.copy();
+                input.display.GUI.mouseLeaveCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+        }
+        function mouseMoveCallback(e)
+        {
+            var args = new Args(e);
+            if (input.onMouseMove) {
+                var argsInput = args.copy();
+                input.onMouseMove(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var argsGUI = args.copy();
+                input.display.GUI.mouseMoveCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+            if (input.scene) {
+                var argsScene = args.copy();
+                input.scene.mouseMoveCallback(argsScene);
+                
+            }
+        }
+        function mouseDownCallback(e)
+        {
+            var args = new Args(e);
+            if (input.onMouseDown) {
+                var argsInput = args.copy();
+                input.onMouseDown(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var argsGUI = args.copy();
+                input.display.GUI.mouseDownCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+            if (input.scene) {
+                var argsScene = args.copy();
+                input.scene.mouseDownCallback(argsScene);
+
+            }
+        }
+        function mouseUpCallback(e)
+        {
+            var args = new Args(e);
+            if (input.onMouseUp) {
+                var argsInput = args.copy();
+                input.onMouseUp(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var argsGUI = args.copy();
+                input.display.GUI.mouseUpCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+            if (input.scene) {
+                var argsScene = args.copy();
+                input.scene.mouseUpCallback(argsScene);
+
+            }
+        }
+        function clickCallback(e)
+        {
+            var args = new Args(e);
+            if (input.onClick) {
+                var argsInput = args.copy();
+                input.onClick(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var argsGUI = args.copy();
+                input.display.GUI.clickCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+            if (input.scene) {
+                var argsScene = args.copy();
+                input.scene.clickCallback(argsScene);
+
+            }
+        }
+        function doubleClickCallback(e)
+        {
+            var args = new Args(e);
+            if (input.onDoubleClick) {
+                var argsInput = args.copy();
+                input.onDoubleClick(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var argsGUI = args.copy();
+                input.display.GUI.doubleClickCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+            if (input.scene) {
+                var argsScene = args.copy();
+                input.scene.doubleClickCallback(argsScene);
+
+            }
+        }
+        function wheelCallback(e)
+        {
+            var args = new Args(e);
+            if (input.onWheel) {
+                var argsInput = args.copy();
+                input.onWheel(argsInput);
+                if (argsInput.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var argsGUI = args.copy();
+                input.display.GUI.wheelCallback(argsGUI);
+                if (argsGUI.handled)
+                    return;
+            }
+            if (input.scene) {
+                var argsScene = args.copy();
+                input.scene.wheelCallback(argsScene);
+
+            }
+        }
+        this.element.addEventListener("mouseenter", mouseEnterCallback);
+        this.element.addEventListener("mouseleave", mouseLeaveCallback);
+        this.element.addEventListener("mousemove", mouseMoveCallback);
+        this.element.addEventListener("mousedown", mouseDownCallback);
+        this.element.addEventListener("mouseup", mouseUpCallback);
+        this.element.addEventListener("click", clickCallback);
+        this.element.addEventListener("dblclick", doubleClickCallback);
+        this.element.addEventListener("wheel", wheelCallback);
+
+        function Args(e)
+        {
+            this.x = 0;
+            this.y = 0;
+            this.dx = 0;
+            this.dy = 0;
+            this.dt = 0;
+            this.button = 0;
+            this.raw = null;
+            this.input = null;
+            this.handled = false;
+            if (!e)
+                return;
+            
+            var bound = input.element.getBoundingClientRect();
+            this.x = e.clientX - bound.left;
+            this.y = e.clientY - bound.top;
+            if (input.ignorePadding) {
+                this.x -= input.element.style.paddingLeft;
+                this.y -= input.element.style.paddingTop;
+            }
+            this.button = e.button;
+            this.dx = this.x - lastPos.x;
+            this.dy = this.y - lastPos.y;
+            this.dt = (new Date().getTime() - lastTime) / 1000;
+            this.handled = false;
+            this.input = input;
+            this.raw = e;
+            lastPos = new Point(this.x, this.y);
+            lastTime = new Date().getTime();
+        }
+        Args.prototype.copy = function ()
+        {
+            var args = new Args();
+            args.x = this.x;
+            args.y = this.y;
+            args.dx = this.dx;
+            args.dy = this.dy;
+            args.dt = this.dt;
+            args.input = this.input;
+            args.button = this.button;
+            
+            args.raw = this.raw;
+            args.handled = false;
+            return args;
+        }
+    }
+    Input.prototype.initKeyEvent = function ()
+    {
+        var input = this;
+        var lastDown = new Date().getTime();
+        var lastUp = new Date().getTime();
+        var lastPress = new Date().getTime();
+        function keyDownCallback(e)
+        {
+            var t = new Date().getTime();
+            var args = new KeyEventArgs();
+            args.key = e.keyCode;
+            args.keyName = Keyboard.Keys.toString(args.key);
+            args.keyState = Keyboard.KeyState.Down;
+            args.ctrl = e.ctrlKey;
+            args.alt = e.altKey;
+            args.shift = e.shiftKey;
+            args.handled = false;
+            args.raw = e;
+            args.input = Input;
+            args.dt = t - lastDown;
+            lastDown = t;
+
+            if (input.onKeyDown) {
+                input.onKeyDown(args);
+                if (args.handled)
+                    return; 
+            }
+            if (input.display && input.display.GUI) {
+                input.display.GUI.keyDownCallback(args);
+                if (args.handled)
+                    return;
+            }
+            if(input.scene)
+            {
+                input.scene.keyDownCallback(args);
+            }
+        }
+        function keyUpCallback(e)
+        {
+            var t = new Date().getTime();
+            var args = new KeyEventArgs();
+            args.key = e.keyCode;
+            args.keyName = Keyboard.Keys.toString(args.key);
+            args.keyState = Keyboard.KeyState.Up;
+            args.ctrl = e.ctrlKey;
+            args.alt = e.altKey;
+            args.shift = e.shiftKey;
+            args.handled = false;
+            args.raw = e;
+            args.input = Input;
+            args.dt = t - lastUp;
+            lastUp = t;
+
+            if (input.onKeyUp) {
+                input.onKeyUp(args);
                 if (args.handled)
                     return;
             }
             if (input.display && input.display.GUI) {
-                var args = {
-                    input: input,
-                    x: x,
-                    y: y,
-                    dx: dx,
-                    dy: dy,
-                    dt: dt,
-                    raw: e,
-                    handled: false,
-                };
-                input.display.GUI.mouseEnterCallback(args);
+                input.display.GUI.keyUpCallback(args);
                 if (args.handled)
                     return;
             }
+            if (input.scene) {
+                input.scene.keyUpCallback(args);
+            }
+            keyPressCallback(e);
         }
-        this.element.addEventListener("mouseenter", mouseEnterCallback);
+        function keyPressCallback(e)
+        {
+            var t = new Date().getTime();
+            var args = new KeyEventArgs();
+            args.key = e.keyCode;
+            args.keyName = Keyboard.Keys.toString(args.key);
+            args.keyState = Keyboard.KeyState.Pressed;
+            args.ctrl = e.ctrlKey;
+            args.alt = e.altKey;
+            args.shift = e.shiftKey;
+            args.handled = false;
+            args.raw = e;
+            args.input = Input;
+            args.dt = t - lastPress;
+            lastPress = t;
+
+            if (input.onKeyPress) {
+                input.onKeyPress(args);
+                if (args.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                input.display.GUI.keyPressCallback(args);
+                if (args.handled)
+                    return;
+            }
+            if (input.scene) {
+                input.scene.keyPressCallback(args);
+            }
+        }
+        
+        this.element.addEventListener("keydown", keyDownCallback);
+        this.element.addEventListener("keyup", keyUpCallback);
     }
     Input.prototype.setCoordinate = function (coordinate,keepVectors)
     {
         this.coordinate = coordinate;
     }
+    Engine.Input = Input;
+    window.Input = Input;
 
     //CollideGroup
     function CollideGroup()
@@ -3109,6 +3395,9 @@
         var h = display.renderHeight / this.zoom;
         var displayCoordinate = Coordinate.createCartesian(this.position.x - w / 2, this.position.y + h / 2, this.zoom, -this.zoom, 0);
         display.setCoordinate(displayCoordinate);
+        if (this.scene) {
+            display.setLayer(this.scene.background.count + this.scene.layers.count);
+        }
     }
     Camera.prototype.removeDisplay = function (display)
     {
@@ -3284,7 +3573,7 @@
         var _audio = null;
         this.time = 0;
         this.playing = false;
-        this.output = null;
+        this.display = null;
         this.audioElement = null;
         var audioTrack = this;
         this.onEnd = null;
@@ -3336,14 +3625,14 @@
     }
     AudioTrack.prototype.play = function ()
     {
-        if (!this.output)
+        if (!this.display)
             throw new Error("The AudioTrack must be add to an Display before playing.");
         this.audioElement.play();
         this.playing = true;
     }
     AudioTrack.prototype.pause = function ()
     {
-        if (!this.output)
+        if (!this.display)
             throw new Error("The AudioTrack must be add to an Display before playing.");
         if (this.audioElement)
             throw new Error("Are you kidding me?");
@@ -3352,24 +3641,24 @@
     }
     AudioTrack.prototype.end = function ()
     {
-        if (!this.output)
+        if (!this.display)
             throw new Error("The AudioTrack must be add to an Display before playing.");
         if (this.audioElement)
             throw new Error("Are you kidding me?");
         this.currentTime = this.duration;
         this.pause();
     }
-    AudioTrack.prototype.addToDisplay = function (output)
+    AudioTrack.prototype.addToDisplay = function (display)
     {
-        if (!(output instanceof Display))
+        if (!(display instanceof Display))
             throw new Error("Display required.");
-        output.addAudioTrack(this);
+        display.addAudioTrack(this);
     }
-    AudioTrack.prototype.removeFromDisplay = function (output)
+    AudioTrack.prototype.removeFromDisplay = function (display)
     {
-        if (!(output instanceof Display))
+        if (!(display instanceof Display))
             throw new Error("Display required.");
-        output.removeAudioTrack(this);
+        display.removeAudioTrack(this);
     }
     Engine.AudioTrack = AudioTrack;
 
@@ -4316,27 +4605,58 @@
         this.right = Mouse.ButtonState.None;
         this.wheel = Mouse.ButtonState.None;
     }
-    Mouse.Buttons = {};
-    Mouse.Buttons.Left = 0;
-    Mouse.Buttons.Wheel = 1;
-    Mouse.Buttons.Right = 2;
-    Mouse.ButtonState = {};
-    Mouse.ButtonState.None = 0;
-    Mouse.ButtonState.Pressed = 1;
-    Mouse.ButtonState.Released = 2;
-    Mouse.ButtonState.Click = 3;
-    Mouse.ButtonState.DoubleClick = 4;
-    Mouse.ButtonState.Rolled = 8;
-    function MouseEventArgs()
+    Mouse.Buttons = { Left: 0, Wheel: 1, Right: 2 };
+    Mouse.ButtonState = { None: 0, Pressed: 1, Released: 2, Click: 3, DoubleClick: 4, Rolled: 8 };
+    function MouseEventArgs(e)
     {
         this.x = 0;
         this.y = 0;
         this.dx = 0;
         this.dy = 0;
+        this.dt = 0;
+        this.raw = null;
+        this.input = null;
         this.wheelDelta = 0;
         this.button = null;
         this.buttonState = Mouse.ButtonState.None;
         this.handled = false;
+        if (e instanceof window.Event)
+        {
+            var bound = e.getBoundingClientRect();
+            this.x = e.clientX - bound.left;
+            this.y = e.clientY - bound.top;
+            this.button = e.button;
+            switch (e.type) 
+            {
+                case "mouseenter":
+                case "mouseleave":
+                case "mousemove":
+                    this.buttonState = Mouse.ButtonState.None;
+                    break;
+                case "mousedown":
+                    this.buttonState = Mouse.ButtonState.Pressed;
+                    break;
+                case "mouseup":
+                    this.buttonState = Mouse.ButtonState.Released;
+                    break;
+            }
+        }
+    }
+    MouseEventArgs.prototype.copy = function ()
+    {
+        var args = new MouseEventArgs();
+        args.x = this.x;
+        args.y = this.y;
+        args.dx = this.dx;
+        args.dy = this.dy;
+        args.dt = this.dt;
+        args.raw = this.raw;
+        args.inpu = this.input;
+        args.wheelDelta = this.wheelDelta;
+        args.button = this.button;
+        args.buttonState = this.buttonState;
+        args.handled = this.handled;
+        return args;
     }
     Mouse.MouseEventArgs = MouseEventArgs;
     Engine.Mouse = Mouse;
@@ -4738,10 +5058,28 @@
         this.key = 0;
         this.keyName = "Unknown";
         this.keyState = Keyboard.KeyState.None;
+        this.dt = 0;
         this.ctrl = false;
         this.alt = false;
         this.shift = false;
+        this.raw = null;
+        this.input = null;
         this.handled = false;
+    }
+    KeyEventArgs.prototype.copy = function ()
+    {
+        var args = new KeyEventArgs();
+        args.key = this.key;
+        args.keyName = this.keyName;
+        args.keyState = this.keyState;
+        args.dt = this.dt;
+        args.ctrl = this.ctrl;
+        args.alt = this.alt;
+        args.shift = this.shift;
+        args.raw = this.raw;
+        args.input = this.input;
+        args.handled = this.handled;
+        return args;
     }
     Keyboard.KeyEventArgs = KeyEventArgs;
     Engine.Keyboard = Keyboard;

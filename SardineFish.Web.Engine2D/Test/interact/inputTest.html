@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Input Test</title>
+    <script src="/src/SarEngine2D.js"></script>
+    <script src="/src/SarEngine2D.Objects.js"></script>
+    <script src="/src/SarEngine2D.GUI.js"></script>
+    <script src="/lib/jQuery/jquery.min.js"></script>
+    <style>
+        #viewGlobal{
+
+        }
+        #viewDisplay{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="viewGlobal">
+
+    </div>
+    <div id="viewDisplay">
+
+    </div>
+    <script>
+        var engine = SarEngine.createInNode(viewGlobal, 800, 480);
+        var scene = engine.scene;
+        var display = new Display(viewDisplay, 600, 300);
+        var camera = new Camera(0, 0);
+        var input = display.getInput();
+        scene.addCamera(camera);
+        display.connectTo(camera);
+        engine.start();
+        Coordinate.Default.axis.visible = true;
+        
+        var displayRange = new GameObject();
+        displayRange.graphic = display.viewArea;
+        scene.addGameObject(displayRange);
+
+        input.onKeyDown = function (e)
+        {
+            switch (e.key) {
+                case Keyboard.Keys.A:
+                    camera.moveTo(camera.position.x - 20, camera.position.y);
+                    break;
+                case Keyboard.Keys.D:
+                    camera.moveTo(camera.position.x + 20, camera.position.y);
+                    break;
+                case Keyboard.Keys.W:
+                    camera.moveTo(camera.position.x, camera.position.y + 20);
+                    break;
+                case Keyboard.Keys.S:
+                    camera.moveTo(camera.position.x, camera.position.y - 20);
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
