@@ -39,11 +39,11 @@
     Engine.createByCanvas = function (canvas, width, height)
     {
         var engine = new Engine();
-        var output = new Output(canvas, width, height);
+        var output = new Display(canvas, width, height);
         var scene = new Scene();
         engine.scene = scene;
         var camera = new Camera(0, 0, 0, 0, 1);
-        camera.addOutput(output);
+        camera.addDisplay(output);
         scene.addCamera(camera);
         scene.addInput(output);
         return engine;
@@ -51,11 +51,11 @@
     Engine.createInNode = function (node, width, height)
     {
         var engine = new Engine();
-        var output = new Output(node, width, height);
+        var output = new Display(node, width, height);
         var scene = new Scene();
         engine.scene = scene;
         var camera = new Camera(0, 0, 0, 0, 1);
-        camera.addOutput(output);
+        camera.addDisplay(output);
         scene.addCamera(camera);
         scene.addInput(output);
         return engine;
@@ -264,6 +264,7 @@
         this.onTouchStart = null;
         this.onTouchMove = null;
         this.onTouchEnd = null;
+
 
         this.layers.scene = this;
         this.layers.add(new Layer(), 0);
@@ -783,8 +784,92 @@
         var clickTime = 0;
         var scene = this;
 
+        // Mouse Events
+        this.mouseMoveCallback = function (e)
+        {
+            var mapTo = e.input.coordinate.pointMapTo(Coordinate.Default, e.x, e.y);
+            scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
+            scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+            scene.device.mouse.x = mapTo.x;
+            scene.device.mouse.y = mapTo.y;
+
+
+            var args = new MouseEventArgs();
+            args.button = e.button;
+            args.buttonState = Mouse.ButtonState.None;
+            args.handled = false;
+            args.x = e.pageX;
+            args.y = e.pageY;
+            args.dx = scene.device.mouse.dx;
+            args.dy = scene.device.mouse.dy;
+            if (scene.GUI)
+                scene.GUI.mouseMoveCallback(e);
+            if (args.handled)
+                return;
+
+            /*args.x = (e.pageX / output.camera.zoom) + (output.camera.center.x - output.camera.width / 2);
+            args.y = (output.camera.height - e.pageY / output.camera.zoom) + (output.camera.center.y - output.camera.height / 2);*/
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+
+            if (scene.onMouseMove)
+                scene.onMouseMove(args);
+        };
+        this.mouseDownCallback = function (e)
+        {
+
+        };
+        this.mouseUpCallback = function (e)
+        {
+
+        };
+        this.clickCallback = function (e)
+        {
+
+        };
+        this.doubleClickCallback = function (e)
+        {
+
+        };
+        this.wheelCallback = function (e)
+        {
+
+        };
+
+        // Key Events
+        this.keyDownCallback = function (e)
+        {
+
+        };
+        this.keyUpCallback = function (e)
+        {
+
+        };
+        this.keyPressCallback = function (e)
+        {
+
+        };
+
+        // Touch Events
+        this.touchStartCallback = function (e)
+        {
+
+        };
+        this.touchEndCallback = function (e)
+        {
+
+        };
+        this.touchMoveCallback = function (e)
+        {
+
+        };
+
+
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------        
+
         var dom = input;
-        if (input instanceof Output)
+        if (input instanceof Display)
         {
             dom = input.outputDOM;
             output = input;
@@ -793,7 +878,7 @@
         {
             dom = input;
             if (!output)
-                throw new Error("Output required.");
+                throw new Error("Display required.");
         }
 
         input.removeSceneEvent = function ()
@@ -2199,15 +2284,15 @@
     Engine.Matrix = Matrix;
     window.Matrix = Matrix;
 
-    //Output
-    function Output(node, w, h)
+    //Display
+    function Display(node, w, h)
     {
         if (!(node instanceof Node))
         {
             throw new Error("Cannot create a output by this object.");
         }
 
-        this.type = Output.OutputTypes.None;
+        this.type = Display.DisplayTypes.None;
         this.getLayer = function (z) { };
         this.setLayer = function (count) { };
         this.camera = null;
@@ -2215,6 +2300,8 @@
         this.audioTracks = ArrayList();
         this.outputDOM = null;
         this.viewArea = null;
+        this.GUI = null;
+        this.viewCoordinate = null;
         var outputDom = null;
         var graphics = null;
         var width = 0;
@@ -2222,11 +2309,12 @@
         var renderWidth = 0;
         var renderHeight = 0;
         var seperateSize = false;
+
         if (node.nodeName == "CANVAS")
         {
             outputDom = node;
             this.outputDOM = node;
-            this.type = Output.OutputTypes.Single;
+            this.type = Display.DisplayTypes.Single;
             graphics = new Graphics(node);
             this.layers[0] = graphics;
             this.getLayer = function (z)
@@ -2324,7 +2412,7 @@
             {
                 outputDom.style.position = "relative";
             }
-            this.type = Output.OutputTypes.MultiLayer;
+            this.type = Display.DisplayTypes.MultiLayer;
             graphics = ArrayList();
             this.layers = graphics;
             this.getLayer = function (z)
@@ -2437,6 +2525,9 @@
             });
             function applySize()
             {
+                var node = document.createElement("div");
+                node.style.width = width;
+                node.style.height = height;
                 for (var i = 0; i < graphics.length; i++)
                 {
                     graphics[i].canvas.style.width = width + "px";
@@ -2455,8 +2546,8 @@
         this._sizeChangeCallback = null;
         this._renderSizeChangeCallback = null;
     }
-    Output.OutputTypes = { None: 0, Single: 1, MultiLayer: 2 };
-    Output.prototype.outScreen = function (obj)
+    Display.DisplayTypes = { None: 0, Single: 1, MultiLayer: 2 };
+    Display.prototype.outScreen = function (obj)
     {
         if (!this.viewArea)
             throw new Error("Are you kidding me?");
@@ -2529,14 +2620,14 @@
             }
         }
     }
-    Output.prototype.connectTo = function (camera)
+    Display.prototype.connectTo = function (camera)
     {
         if (this.camera)
-            this.camera.removeOutput(this);
-        camera.addOutput(this);
+            this.camera.removeDisplay(this);
+        camera.addDisplay(this);
 
     }
-    Output.prototype.addAudioTrack = function (audioTrack)
+    Display.prototype.addAudioTrack = function (audioTrack)
     {
         if (!this.audioTracks.contain(audioTrack))
         {
@@ -2545,7 +2636,7 @@
             return index;
         }
     }
-    Output.prototype.removeAudioTrack = function (audioTrack)
+    Display.prototype.removeAudioTrack = function (audioTrack)
     {
         var index = this.audioTracks.indexOf(audioTrack);
         if (index < 0)
@@ -2553,7 +2644,7 @@
         this.audioTracks.removeAt(index);
         audioTrack.output = null;
     }
-    Output.prototype.playAudio = function (audio)
+    Display.prototype.playAudio = function (audio)
     {
         if (!(audio instanceof Engine.Audio) || !(audio instanceof window.Audio))
         {
@@ -2561,7 +2652,7 @@
         }
         audio.play();
     }
-    Output.prototype.playNewAudio = function (audio)
+    Display.prototype.playNewAudio = function (audio)
     {
         if (audio instanceof window.Audio)
         {
@@ -2584,8 +2675,132 @@
             throw new Error("Audio required.");
         }
     }
-    Engine.Output = Output;
-    window.Output = Output;
+    Engine.Display = Display;
+    window.Display = Display;
+
+    function Input(element)
+    {
+        if (!element || !(element instanceof window.Element))
+        {
+            throw new Error("A HTML Element is required.");
+        }
+        //this.element = element;
+        this.element = document.createElement("div");
+
+        var input = this;
+
+        this.ignorePadding = true;
+        this.coordinate = null;
+        this.scene.null;
+        this.display = null;
+
+        var mouseCapture = true;
+        Object.defineProperty(this, "mouseCapture", {
+            get: function ()
+            {
+                return mouseCapture;
+            },
+            set: function (value)
+            {
+                mouseCapture = value;
+            }
+        });
+
+        var keyCapture = true;
+        Object.defineProperty(this, "keyCapture", {
+            get: function () { return keyCapture; },
+            set: function (value)
+            {
+                keyCapture = value;
+            }
+        });
+
+        var touchCapture = true;
+        Object.defineProperty(this, "touchCapture", {
+            get: function () { return touchCapture; },
+            set: function (value)
+            {
+                touchCapture = value;
+            }
+        });
+
+        this.onMouseEnter = null;
+        this.onMouseLeave = null;
+        this.onMouseMove = null;
+        this.onMouseDown = null;
+        this.onMouseUp = null;
+        this.onClick = null;
+        this.onDoubleClick = null;
+        this.onWheel = null;
+
+        this.onKeyDown = null;
+        this.onKeyUp = null;
+        this.onKeyPress = null;
+
+        this.onTouchStart = null;
+        this.onTouchEnd = null;
+        this.onTouchMove = null;
+
+    }
+    Input.prototype.initMouseEvent = function ()
+    {
+        var input = this;
+        var lastPos = new Point(0, 0);
+        var lastTime = new Date().getTime();
+        function mouseEnterCallback(e)
+        {
+            var bound = input.element.getBoundingClientRect();
+            var x = e.clientX - bound.left;
+            var y = e.clientY - bound.top;
+            if (input.ignorePadding)
+            {
+                x -= input.element.style.paddingLeft;
+                y -= input.element.style.paddingTop;
+            }
+            var dx = x - lastPos.x;
+            var dy = y - lastPos.y;
+            var dt = (new Date().getTime() - lastTime) / 1000;
+            lastPos = new Point(x, y);
+            lastTime = new Date().getTime();
+
+            if (input.onMouseEnter)
+            {
+                var args = {
+                    input: input,
+                    x: x,
+                    y: y,
+                    dx: dx,
+                    dy: dy,
+                    dt: dt,
+                    raw: e,
+                    handled: false,
+                };
+                input.onMouseEnter(args);
+                if (args.handled)
+                    return;
+            }
+            if (input.display && input.display.GUI) {
+                var args = {
+                    input: input,
+                    x: x,
+                    y: y,
+                    dx: dx,
+                    dy: dy,
+                    dt: dt,
+                    raw: e,
+                    handled: false,
+                };
+                input.display.GUI.mouseEnterCallback(args);
+                if (args.handled)
+                    return;
+            }
+        }
+        this.element.addEventListener("mouseenter", mouseEnterCallback);
+    }
+    Input.prototype.setCoordinate = function (coordinate,keepVectors)
+    {
+        this.coordinate = coordinate;
+    }
 
     //CollideGroup
     function CollideGroup()
@@ -2618,11 +2833,11 @@
         this.center = new Engine.Position(x, y);
         this.position = new Engine.Position(x, y);
         this.coordinate = Coordinate.Default;
-        this.viewCoordinate = Coordinate.createCartesian(x, y, 1, -1, 0);
+        this.viewCoordinate = Coordinate.createCartesian(x, y, 1, 1, 0);
         this.width = 0;
         this.height = 0;
         this.graphics = null;
-        this.outputList = ArrayList();
+        this.displayList = ArrayList();
         this.scene = null;
         this.animationCallbackList = ArrayList();
         var camera = this;
@@ -2736,6 +2951,9 @@
     {
         this.position.x = x;
         this.position.y = y;
+        this.viewCoordinate.originX = x;
+        this.viewCoordinate.originY = y;
+
     }
     Camera.prototype.zoomTo = function (z, x, y)
     {
@@ -2749,6 +2967,8 @@
             this.moveTo(ox, oy);
         }
         this.zoom = z;
+        this.viewCoordinate.unitX = z;
+        this.viewCoordinate.unitY = z;
     }
     Camera.prototype.rotate = function (angle, x, y)
     {
@@ -2780,12 +3000,12 @@
     }
     Camera.prototype.clear = function (bgColor)
     {
-        for (var i = 0; i < this.outputList.length; i++)
+        for (var i = 0; i < this.displayList.length; i++)
         {
-            var output = this.outputList[i];
-            if (output.type == Output.OutputTypes.Single)
+            var display = this.displayList[i];
+            if (display.type == Display.DisplayTypes.Single)
             {
-                var graphics = output.layers[0];
+                var graphics = display.layers[0];
                 this.resetTransform(graphics);
                 graphics.ctx.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
                 if (bgColor)
@@ -2795,11 +3015,11 @@
                 }
                 this.applyTransform();
             }
-            else if (output.type == Output.OutputTypes.MultiLayer)
+            else if (display.type == Display.DisplayTypes.MultiLayer)
             {
-                for (var j = 0; j < output.layers.length ; j++)
+                for (var j = 0; j < display.layers.length ; j++)
                 {
-                    var graphics = output.layers[j];
+                    var graphics = display.layers[j];
                     this.resetTransform(graphics);
                     graphics.ctx.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
                     if (bgColor)
@@ -2833,10 +3053,10 @@
 
         graphics.ky = -1;
     }
-    Camera.prototype.map = function (x, y, output, coordinate)
+    Camera.prototype.map = function (x, y, display, coordinate)
     {
-        var x0 = x - (output.renderWidth / 2);
-        var y0 = y - (output.renderHeight / 2);
+        var x0 = x - (display.renderWidth / 2);
+        var y0 = y - (display.renderHeight / 2);
         var p = this.viewCoordinate.pointMapTo(coordinate, x0, y0);
         return p;
         return new Point((x / this.zoom) + (this.center.x - this.width / 2), (this.height - y / this.zoom) + (this.center.y - this.height / 2));
@@ -2871,30 +3091,34 @@
             return false;
         target.links.removeAt(index);
     }
-    Camera.prototype.addOutput = function (output)
+    Camera.prototype.addDisplay = function (display)
     {
-        if (!(output instanceof Output))
+        if (!(display instanceof Display))
         {
-            throw new Error("Invalid Output.");
+            throw new Error("Invalid Display.");
         }
-        if (output.camera)
+        if (display.camera)
         {
-            throw new Error("This output has linked to another camera.");
+            throw new Error("This display has linked to another camera.");
         }
-        output.camera = this;
-        this.outputList.add(output);
-        output.viewArea = new Rectangle(output.renderWidth, output.renderHeight);
-        output.viewArea.setCoordinate(this.viewCoordinate);
+        display.camera = this;
+        this.displayList.add(display);
+        display.viewArea = new Rectangle(display.renderWidth, display.renderHeight);
+        display.viewArea.setCoordinate(this.viewCoordinate);
+        var w = display.renderWidth / this.zoom;
+        var h = display.renderHeight / this.zoom;
+        var displayCoordinate = Coordinate.createCartesian(this.position.x - w / 2, this.position.y + h / 2, this.zoom, -this.zoom, 0);
+        display.setCoordinate(displayCoordinate);
     }
-    Camera.prototype.removeOutput = function (output)
+    Camera.prototype.removeDisplay = function (display)
     {
-        var index = this.outputList.indexOf(output);
+        var index = this.displayList.indexOf(display);
         if (index < 1)
         {
             throw new Error("Not found.");
         }
-        this.outputList.removeAt(index);
-        output.camera = null;
+        this.displayList.removeAt(index);
+        display.camera = null;
     }
     Camera.prototype.render = function (dt)
     {
@@ -2905,9 +3129,9 @@
         for (var i = 0; i < this.scene.background.count; i++)
         {
             var layer = this.scene.background[i];
-            for (var j = 0; j < this.outputList.length; j++)
+            for (var j = 0; j < this.displayList.length; j++)
             {
-                var graphics = this.outputList[j].getLayer(i);
+                var graphics = this.displayList[j].getLayer(i);
                 this.resetTransform(graphics);
                 this.applyTransform(graphics);
                 layer.render(graphics, dt, this);
@@ -2917,16 +3141,16 @@
         for (var i = 0; i < this.scene.layers.depthList.length; i++)
         {
             var layer = this.scene.layers[this.scene.layers.depthList[i]];
-            for (var j = 0; j < this.outputList.length; j++)
+            for (var j = 0; j < this.displayList.length; j++)
             {
-                var graphics = this.outputList[j].getLayer(bgCount + i);
+                var graphics = this.displayList[j].getLayer(bgCount + i);
                 this.resetTransform(graphics);
                 this.applyTransform(graphics);
                 layer.render(graphics, dt);
             }
         }
     }
-    Camera.prototype.renderTo = function (output, dt)
+    Camera.prototype.renderTo = function (display, dt)
     {
 
     }
@@ -3113,14 +3337,14 @@
     AudioTrack.prototype.play = function ()
     {
         if (!this.output)
-            throw new Error("The AudioTrack must be add to an Output before playing.");
+            throw new Error("The AudioTrack must be add to an Display before playing.");
         this.audioElement.play();
         this.playing = true;
     }
     AudioTrack.prototype.pause = function ()
     {
         if (!this.output)
-            throw new Error("The AudioTrack must be add to an Output before playing.");
+            throw new Error("The AudioTrack must be add to an Display before playing.");
         if (this.audioElement)
             throw new Error("Are you kidding me?");
         this.audioElement.pause();
@@ -3129,22 +3353,22 @@
     AudioTrack.prototype.end = function ()
     {
         if (!this.output)
-            throw new Error("The AudioTrack must be add to an Output before playing.");
+            throw new Error("The AudioTrack must be add to an Display before playing.");
         if (this.audioElement)
             throw new Error("Are you kidding me?");
         this.currentTime = this.duration;
         this.pause();
     }
-    AudioTrack.prototype.addToOutput = function (output)
+    AudioTrack.prototype.addToDisplay = function (output)
     {
-        if (!(output instanceof Output))
-            throw new Error("Output required.");
+        if (!(output instanceof Display))
+            throw new Error("Display required.");
         output.addAudioTrack(this);
     }
-    AudioTrack.prototype.removeFromOutput = function (output)
+    AudioTrack.prototype.removeFromDisplay = function (output)
     {
-        if (!(output instanceof Output))
-            throw new Error("Output required.");
+        if (!(output instanceof Display))
+            throw new Error("Display required.");
         output.removeAudioTrack(this);
     }
     Engine.AudioTrack = AudioTrack;

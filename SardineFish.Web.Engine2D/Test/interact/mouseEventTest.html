@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Mouse Evnet test</title>
+    <script src="jquery.min.js"></script>
+    <style>
+        body{
+            position: relative;
+            background-color:cornflowerblue;
+            height: 1920px;
+            width: 5200px;
+        }
+        #wrap{
+            position: relative;
+            margin: 50px;
+            padding: 50px;
+            top: 50px;
+            left: 50px;
+        }
+        #testPanel{
+            width: 500px;
+            height: 400px;
+            position: relative;
+            margin-left:100px;
+            margin-top:30px;
+            left:20px;
+            top:20px;
+            padding:10px;
+            background-color:salmon
+        }
+        #inner{
+            background-color:aquamarine;
+        }
+    </style>
+</head>
+<body>
+    <div style="position:fixed">
+        <p >screen:<span id="screen"></span></p>
+        <p>page:<span id="page"></span></p>
+        <p>client:<span id="client"></span></p>
+        <p><span id="emmmm"></span></p>
+        <p>offset:<span id="offset"></span></p>
+        <p>movement:<span id="movement"></span></p>
+
+    </div>
+    <div id="wrap">
+
+    </div>
+    <div id="testPanel">
+        <canvas id="inner" width="100" height="50">
+
+        </canvas>
+    </div>
+    <script>
+        var ctx = inner.getContext("2d");
+        ctx.fillRect(0, 0, inner.width, inner.height);
+        testPanel.addEventListener("mousemove", function (e)
+        {
+            var bound = testPanel.getBoundingClientRect();
+            $("#screen").text(e.screenX + "," + e.screenY);
+            $(page).text(e.pageX + "," + e.pageY);
+            $(client).text(e.clientX + "," + e.clientY);
+            $(emmmm).text((e.clientX - bound.left) + "," + (e.clientY - bound.top));
+            $(offset).text(e.offsetX + "," + e.offsetY);
+            $("#movement").text(e.movementX + "," + e.movementY);
+        });
+    </script>
+</body>
+</html>
