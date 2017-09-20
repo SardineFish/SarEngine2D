@@ -667,7 +667,7 @@
 
         for (var i = 0; i < this.cameraList.length; i++)
         {
-            this.cameraList[i].clear();
+            this.cameraList[i].clear("black");
             this.cameraList[i].render(dt);
         }
 
