@@ -3,11 +3,11 @@
 <head>
     <title>Flight Fight</title>
     <script src="lib/jquery.min.js"></script>
-    <script src="../SardineFish.Web.js"></script>
-    <script src="../SardineFish.Web.UI.js"></script>
-    <script src="../SarEngine2D.js"></script>
-    <script src="../SarEngine2D.Objects.js"></script>
-    <script src="../SarEngine2D.GUI.js"></script>
+    <script src="../lib/SardineFish/SardineFish.Web.js"></script>
+    <script src="../lib/SardineFish/SardineFish.Web.UI.js"></script>
+    <script src="../src/SarEngine2D.js"></script>
+    <script src="../src/SarEngine2D.Objects.js"></script>
+    <script src="../src/SarEngine2D.GUI.js"></script>
     <script src="http://www.sardinefish.com/api/SardineFish.API.js"></script>
     <script src="lib/FFClient.js"></script>
     <style >
@@ -36,7 +36,7 @@
             width: 100%;
             z-index: 100000;
         }
-        #output{
+        #display{
             position: absolute;
             top: 0px;
             left: 0px;
@@ -63,14 +63,14 @@
             </div>
             <div id="score">0</div>
         </div>
-        <div id="output"></div>
+        <div id="display"></div>
     </div>
     <script>
         (function ()
         {
             var Width = window.innerWidth;
             var Height = window.innerHeight;
-            var engine, scene, camera, output;
+            var engine, scene, camera, display;
             var flightImg;
             var bullet;
             var player;
@@ -176,7 +176,7 @@
                         flight.action(flight, group);
                     if (flight.control)
                         flight.control(flight, group);
-                    if (output.outScreen(flight))
+                    if (display.outScreen(flight))
                     {
 
 
@@ -286,7 +286,7 @@
                 bulletRight.onUpdate = checkLifeTime;
 
                 if (flight == player)
-                    output.playNewAudio(shootSound);
+                    display.playNewAudio(shootSound);
 
                 bulletLeft.onCollide = function ()
                 {
@@ -322,7 +322,7 @@
             }
             function Destroy(flight, killer)
             {
-                output.playNewAudio(explodeSound);
+                display.playNewAudio(explodeSound);
                 scene.removeGameObject(flight.id);
                 if (killer.onKilling)
                     killer.onKilling(flight);
@@ -345,11 +345,11 @@
                     flightLayer = new Layer();
                     bulletLayer = new Layer();
                     controlStack = Stack.createAsArray();
-                    engine = SarEngine.createInNode($("#output").get(0), Width, Height);
+                    engine = SarEngine.createInNode($("#display").get(0), Width, Height);
                     scene = engine.scene;
                     camera = scene.cameraList[0];
                     engine.start();
-                    output = camera.outputList[0];
+                    display = camera.displayList[0];
                     camera.zoomTo(0.6);
 
                     loadResources();
@@ -406,7 +406,7 @@
                                 enemy.position.x,
                                 enemy.position.y
                             );
-                            var halfWidth = output.renderWidth / 2, halfHeight = output.renderHeight / 2;
+                            var halfWidth = display.renderWidth / 2, halfHeight = display.renderHeight / 2;
                             if (objPos.x < -halfWidth || objPos.x > halfWidth || objPos.y < -halfHeight || objPos.y > halfHeight) {
                                 var angle = Math.atan2(objPos.y, objPos.x);
                                 var distance = 0;
@@ -457,7 +457,7 @@
                                 }
                                 arrowImage.changeCoordinate(Coordinate.Default);
                                 arrowImage.rotation = -angle + camera.rotation;
-                                arrowImage.render(output.getLayer(2));
+                                arrowImage.render(display.getLayer(2));
                             }
                         }
                     };
@@ -483,7 +483,7 @@
                             behaviour(flight, enemyGroup);
                         if (control)
                             control(flight, enemyGroup);
-                        if (output.outScreen(flight))
+                        if (display.outScreen(flight))
                         {
                             var p = flight.position.coordinate.pointMapTo(camera.viewCoordinate, flight.position.x, flight.position.y);
                             var x = 0;
@@ -700,10 +700,10 @@
                     flightLayer = new Layer();
                     bulletLayer = new Layer();
                     controlStack = Stack.createAsArray();
-                    engine = SarEngine.createInNode($("#output").get(0), Width, Height);
+                    engine = SarEngine.createInNode($("#display").get(0), Width, Height);
                     scene = engine.scene;
                     camera = scene.cameraList[0];
-                    output = camera.outputList[0];
+                    display = camera.displayList[0];
                     engine.start();
 
                     camera.zoomTo(0.8);
