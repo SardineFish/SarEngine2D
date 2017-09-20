@@ -3318,7 +3318,7 @@
             }
         }
     }
-    Camera.prototype.applyTransform = function (graphics)
+    Camera.protothype.applyTransform = function (graphics)
     {
         if (!graphics || !graphics.ctx)
             return;
@@ -3684,7 +3684,7 @@
         this.fillStyle = "#000000";
         this.strokeStyle = "#000000";
         this.shadowColor = "#000000";
-        this.shadowBlur = "#000000";
+        this.shadowBlur = 0;
         this.shadowOffsetX = 0;
         this.shadowOffsetY = 0;
         this.lineCap = "butt";
