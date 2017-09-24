@@ -3371,7 +3371,6 @@
     //Graphics
     function Graphics(canvas)
     {
-        var _graphics = this;
         if (!canvas)
             throw new Error("paramter error.");
         if (!canvas.getContext)
@@ -3387,46 +3386,10 @@
         this.kh = 1;
         this.fillStyle = "#000000";
         this.strokeStyle = "#000000";
-        Object.defineProperty(this, "shadowColor", {
-            get:function() {
-                return _graphics.ctx.shadowColor;
-            },
-            set: function (value)
-            {
-                _graphics.ctx.shadowColor = value.toString();
-            }
-        });
-        Object.defineProperty(this, "shadowBlur", {
-            get: function ()
-            {
-                return _graphics.ctx.shadowBlur;
-            },
-            set: function (value)
-            {
-                _graphics.ctx.shadowBlur = value;
-            }
-        });
-        Object.defineProperty(this, "shadowOffsetX", {
-            get: function ()
-            {
-                return _graphics.ctx.shadowOffsetX;
-            },
-            set: function (value)
-            {
-                _graphics.ctx.shadowOffsetX = value;
-            }
-        });
-        Object.defineProperty(this, "shadowOffsetY", {
-            get: function ()
-            {
-                return _graphics.ctx.shadowOffsetY;
-            },
-            set: function (value)
-            {
-                _graphics.ctx.shadowOffsetY = value;
-            }
-
-        });
+        this.shadowColor = "#000000";
+        this.shadowBlur = "#000000";
+        this.shadowOffsetX = 0;
+        this.shadowOffsetY = 0;
         this.lineCap = "butt";
         this.lineJoin = "miter";
         this.miterLimit = 10;
@@ -3435,6 +3398,7 @@
         this.textBaseline = TextBaseline.Alphabetic;
         this.globalAlpha = 1.0;
         var globalCompositeOperation = "source-over";
+        var _graphics = this;
         var lineWidth = 1;
         Object.defineProperty(this, "width", {
             get: function ()

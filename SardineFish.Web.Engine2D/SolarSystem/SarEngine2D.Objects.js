@@ -521,7 +521,6 @@
     {
         this.o = new Point(0, 0);
         this.position = new Point(0, 0);
-        this.center = new Point(0, 0);
         this.coordinate = Coordinate.Default;
         this.r = r;
         this.start = startAng;
@@ -531,9 +530,6 @@
         this.fillStyle = new Color(255, 255, 255, 0);
         this.strokeWidth = 1;
         this.lineCap = Graphics.LineCap.Square;
-        this.shadowColor = null;
-        this.shadowBlur = null;
-        this.shadowOffset = new Vector2(0, 0);
     }
     Arc.prototype.copy = function ()
     {
@@ -558,32 +554,11 @@
         this.position.changeCoordinate(coordinate);
         this.coordinate = coordinate;
     }
-    Arc.prototype.moveTo = function (x, y)
+    Arc.prototype.rotate = function (ang, o)
     {
-        if (x == this.position.x && y == this.position.y)
-            return;
-        this.o.x = this.o.x - this.position.x + x;
-        this.o.y = this.o.y - this.position.y + y;
-        this.position.x = x;
-        this.position.y = y;
-    }
-    Arc.prototype.setCenter = function (x, y)
-    {
-        this.center.x = x;
-        this.center.y = y;
-    }
-    Arc.prototype.setPosition = function (x, y)
-    {
-        this.o.x += x - this.position.x;
-        this.o.y += y - this.position.y;
-        this.position.x = x;
-        this.position.y = y;
-    }
-    Arc.prototype.rotate = function (rad, x0, y0)
-    {
-        this.o.rotate(rad, x0, y0);
-        this.start += rad;
-        this.end += rad;
+        this.o.rotate(o, ang);
+        this.start += ang;
+        this.end += ang;
     }
     Arc.prototype.render = function (graphics, x, y, r, dt)
     {
@@ -594,15 +569,8 @@
         graphics.strokeWidth = this.strokeWidth;
         graphics.strokeStyle = this.strokeStyle;
         graphics.fillStyle = this.fillStyle;
-        if (this.shadowColor) {
-            graphics.shadowColor = this.shadowColor;
-            graphics.shadowBlur = this.shadowBlur;
-            graphics.shadowOffsetX = this.shadowOffset.x;
-            graphics.shadowOffsetY = this.shadowOffset.y;
-        }
         graphics.fill();
         graphics.stroke();
-        graphics.shadowBlur = 0;
     }
     Engine.Arc = Arc;
     window.Arc = Arc;

@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Solar System!</title>
+    <script src="../src/SarEngine2D.js"></script>
+    <script src="../src/SarEngine2D.Objects.js"></script>
+    <script src="../src/SarEngine2D.GUI.js"></script>
+    <script src="jquery.min.js"></script>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        #star-track {
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+</head>
+<body>
+    <div id="star-track">
+
+    </div>
+    <script>
+        var width = $("#star-track").width();
+        var height = $("#star-track").height();
+        var engine = SarEngine.createInNode($("#star-track").get(0), width, height);
+        var scene = engine.scene;
+        var camera = scene.cameraList[0];
+        camera.moveTo(0, 300);
+        var display = camera.displayList[0];
+        engine.start()
+        
+        
+        var starCount=100;
+        var starList = SarEngine.ArrayList();
+        function drawStar()
+        {
+            var point = new Point(Math.random() * width - (width / 2), Math.random() * height - (height / 2));
+            var r = Math.random() * (width / 2);
+            var startAng = Math.random() * Math.PI * 2;
+            var star = new Arc(r, startAng, startAng, false);
+            star.strokeStyle = new Color(255, 255, 255, 0.0);
+            star.strokeWidth = 4;
+            star.shadowColor = new Color(255, 255, 255, 0.0);
+            star.shadowBlur = 20;
+            var obj = new GameObject();
+            obj.graphic = star;
+            scene.addGameObject(obj);
+            var time = Math.random() * 10 + 5;
+            obj.animate({ "graphic.end": startAng + Math.PI / 2 }, time, function (e)
+            {
+                obj.angV = Math.PI / 2 / time;
+                /*obj.animate({ "graphic.strokeStyle.alpha": 0, "graphic.shadowColor.alpha": 0 }, 0.3, function (e)
+                {
+
+                });*/
+            });
+            obj.animate({ "graphic.strokeStyle.alpha": 1, "graphic.shadowColor.alpha": 1 }, 0.5, function (e)
+            {
+
+            });
+        }
+        for (var i = 0; i < starCount ; i++) {
+            drawStar();
+        }
+    </script>
+</body>
+</html>

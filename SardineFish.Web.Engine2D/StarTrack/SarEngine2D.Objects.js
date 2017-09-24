@@ -602,7 +602,6 @@
         }
         graphics.fill();
         graphics.stroke();
-        graphics.shadowBlur = 0;
     }
     Engine.Arc = Arc;
     window.Arc = Arc;
