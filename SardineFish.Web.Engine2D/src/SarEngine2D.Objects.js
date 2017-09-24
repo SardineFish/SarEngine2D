@@ -95,10 +95,18 @@
     }
     Vector2.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.coordinate = coordinate;
     }
     Vector2.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         var v = this.coordinate.vectorMapTo(coordinate, this.x, this.y);
         this.x = v.x;
         this.y = v.y;
@@ -207,10 +215,18 @@
     }
     Point.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.coordinate = coordinate;
     }
     Point.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         var p = this.coordinate.pointMapTo(coordinate, this.x, this.y);
         this.x = p.x;
         this.y = p.y;
@@ -317,10 +333,18 @@
     }
     Position.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.coordinate = coordinate;
     }
     Position.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         var p = this.coordinate.pointMapTo(coordinate, this.x, this.y);
         this.innerX = p.x;
         this.innerY = p.y;
@@ -381,6 +405,10 @@
     }
     Line.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.coordinate = coordinate;
         this.position.setCoordinate(coordinate);
         this.center.setCoordinate(coordinate);
@@ -389,6 +417,10 @@
     }
     Line.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.p1.changeCoordinate(coordinate);
         this.p2.changeCoordinate(coordinate);
         this.center.changeCoordinate(coordinate);
@@ -544,12 +576,20 @@
     }
     Arc.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.o.setCoordinate(coordinate);
         this.position.setCoordinate(coordinate);
         this.coordinate = coordinate;
     }
     Arc.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.o.changeCoordinate(coordinate);
         this.position.changeCoordinate(coordinate);
         this.coordinate = coordinate;
@@ -674,12 +714,20 @@
     }
     Text.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.position.setCoordinate(coordinate);
         this.center.setCoordinate(coordinate);
         this.coordinate = coordinate;
     }
     Text.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.position.changeCoordinate(coordinate);
         this.center.changeCoordinate(coordinate);
         this.coordinate = coordinate;
@@ -805,6 +853,10 @@
     }
     Image.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.o.setCoordinate(coordinate);
         this.center.setCoordinate(coordinate);
         this.position.setCoordinate(coordinate);
@@ -812,6 +864,10 @@
     }
     Image.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         //this.o.changeCoordinate(coordinate);
         this.position.changeCoordinate(coordinate);
         this.center.changeCoordinate(coordinate);
@@ -946,12 +1002,20 @@
     }
     Path.Point.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.cp1.setCoordinate(coordinate);
         this.cp2.setCoordinate(coordinate);
         this.coordinate = coordinate;
     }
     Path.Point.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.cp1.changeCoordinate(coordinate);
         this.cp2.changeCoordinate(coordinate);
         var p = this.coordinate.pointMapTo(coordinate);
@@ -982,6 +1046,10 @@
     }
     Path.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         for (var i = 0; i < this.pList; i++)
         {
             this.pList[i].setCoordinate(coordinate);
@@ -992,6 +1060,10 @@
     }
     Path.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         for (var i = 0; i < this.pList; i++)
         {
             this.pList[i].changeCoordinate(coordinate);
@@ -1084,6 +1156,10 @@
     }
     Combination.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         for (var i = 0; i < this.objectList.length ; i++)
         {
             if (this.objectList[i].setCoordinate)
@@ -1095,6 +1171,10 @@
     }
     Combination.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         for (var i = 0; i < this.objectList.length ; i++)
         {
             if (this.objectList[i].changeCoordinate)
@@ -1270,12 +1350,20 @@
     }
     ImageAnimation.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.position.setCoordinate(coordinate);
         this.position.setCoordinate(coordinate);
         this.coordinate = coordinate;
     }
     ImageAnimation.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.position.changeCoordinate(coordinate);
         this.position.changeCoordinate(coordinate);
         this.coordinate = coordinate;
@@ -1477,6 +1565,10 @@
     }
     GameObject.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.center.setCoordinate(coordinate);
         this.position.setCoordinate(coordinate);
         if (this.graphic && this.graphic.setCoordinate)
@@ -1487,6 +1579,10 @@
     }
     GameObject.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.center.changeCoordinate(coordinate);
         this.position.changeCoordinate(coordinate);
         if (this.graphic && this.graphic.changeCoordinate)
@@ -1744,6 +1840,10 @@
     }
     Particle.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.coordinate = coordinate;
         this.position.setCoordinate(coordinate);
         this.center.setCoordinate(coordinate);
@@ -1752,6 +1852,10 @@
     }
     Particle.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.coordinate = coordinate;
         this.position.changeCoordinate(coordinate);
         this.center.changeCoordinate(coordinate);
@@ -1897,6 +2001,10 @@
     }
     Circle.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.center.setCoordinate(coordinate);
         this.position.setCoordinate(coordinate);
         this.o.setCoordinate(coordinate);
@@ -1904,6 +2012,10 @@
     }
     Circle.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.center.changeCoordinate(coordinate);
         this.position.changeCoordinate(coordinate);
         this.o.changeCoordinate(coordinate);
@@ -2322,6 +2434,10 @@
     }
     Polygon.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         for (var i = 0; i < this.V.length; i++)
         {
             this.V[i].setCoordinate(coordinate);
@@ -2336,6 +2452,10 @@
     }
     Polygon.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         for (var i = 0; i < this.V.length; i++)
         {
             this.V[i].changeCoordinate(coordinate);
@@ -3246,6 +3366,10 @@
     }
     Rectangle.prototype.setCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         //this.o.setCoordinate(coordinate);
         this.position.setCoordinate(coordinate);
         this.center.setCoordinate(coordinate);
@@ -3253,6 +3377,10 @@
     }
     Rectangle.prototype.changeCoordinate = function (coordinate)
     {
+        if (this.coordinate.const) {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         //this.o.changeCoordinate(coordinate);
         this.position.changeCoordinate(coordinate);
         this.center.changeCoordinate(coordinate);

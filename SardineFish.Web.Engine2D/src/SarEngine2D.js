@@ -1340,6 +1340,12 @@
         dom.addEventListener("touchmove", touchMoveCallback);
         dom.addEventListener("touchend", touchEndCallback);
     }
+    /**
+     * Add a GameObject to this scene. 
+     * @param {GameObject} obj - The GameObject to add.
+     * @param {Layer | Background | Number} [layer] - The instance of a Layer, Background or a number of the layer.
+     * @param {CollideGroup} [collideGroup] - Add this game object to the specific collide group.
+     */
     Scene.prototype.addGameObject = function (obj, layer, collideGroup)
     {
         if (obj.id >= 0)
@@ -1487,6 +1493,7 @@
         this.vTo = vTo;
         this.vFrom = vFrom;
         this.axis = null;
+        this.const = false;
     }
     Coordinate.Axis = function ()
     {
@@ -2301,7 +2308,7 @@
         this.displayDOM = null;
         this.viewArea = null;
         this.GUI = null;
-        this.viewCoordinate = null;
+        this.viewCoordinate = Coordinate.Default;
 
         var input = new Input(node);
         Object.defineProperty(this, "input", {
@@ -2638,6 +2645,11 @@
     }
     Display.prototype.setCoordinate = function (coordinate)
     {
+        if (this.viewCoordinate.const)
+        {
+            Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
+            return;
+        }
         this.viewCoordinate = coordinate;
     }
     Display.prototype.addAudioTrack = function (audioTrack)
@@ -3318,7 +3330,7 @@
             }
         }
     }
-    Camera.protothype.applyTransform = function (graphics)
+    Camera.prototype.applyTransform = function (graphics)
     {
         if (!graphics || !graphics.ctx)
             return;
@@ -3391,10 +3403,12 @@
         this.displayList.add(display);
         display.viewArea = new Rectangle(display.renderWidth, display.renderHeight);
         display.viewArea.setCoordinate(this.viewCoordinate);
+        display.viewArea.coordinate.const = true;
         var w = display.renderWidth / this.zoom;
         var h = display.renderHeight / this.zoom;
         var displayCoordinate = Coordinate.createCartesian(this.position.x - w / 2, this.position.y + h / 2, this.zoom, -this.zoom, 0);
         display.setCoordinate(displayCoordinate);
+        display.viewCoordinate.const = true;
         if (this.scene) {
             display.setLayer(this.scene.background.count + this.scene.layers.count);
         }
@@ -5138,6 +5152,89 @@
             return -1;
         return 0;
     }
+
+
+
+
+    var EventJs = (function ()
+    {
+        function Event()
+        {
+            this.def = null;
+            this.handlers = ArrayList();
+        }
+        Event.prototype.invoke = function (args)
+        {
+            if (!args["handled"])
+                args.handled = false;
+            if (this.def)
+                this.def(args);
+            for (var i = 0; i < this.handlers.length; i++) {
+                if (args.handled)
+                    return;
+                if (this.handlers[i])
+                    this.handlers[i](args);
+            }
+        }
+        Event.prototype.add = function (handler)
+        {
+
+            this.handlers.add(handler);
+        }
+        Event.prototype.remove = function (handler)
+        {
+            if (this.def == handler)
+                this.def = null;
+            this.handlers.remove(handler);
+        }
+
+        function EventManager()
+        {
+            this.events = {};
+            this.eventNames = ArrayList();
+        }
+        EventManager.prototype.register = function (name, event)
+        {
+            if (name == undefined || name == null)
+                throw new Error("A name of the event required.");
+            if (this.eventNames.indexOf(name) > 0)
+                throw new Error("Event existed.");
+            this.events[name] = event;
+            this.eventNames.add(name);
+        }
+        Event.EventManager = EventManager;
+
+        function defineEvent(obj, name, handler)
+        {
+            if (!obj)
+                throw new Error("An object required.");
+            if (name == undefined || name == null)
+                throw new Error("A name of the event required.");
+            if (!obj.eventManager) {
+                obj.eventManager = new EventManager();
+
+            }
+
+            if (obj.eventManager.eventNames.contain(name))
+                throw new Error("Event existed.");
+            var event = new Event();
+            obj.eventManager.register(name);
+            Object.defineProperty(obj, name, {
+                get: function ()
+                {
+                    return event;
+                },
+                set: function (handler)
+                {
+                    event.def = handler;
+                }
+            })
+        }
+        Event.defineEvent = defineEvent;
+        return Event;
+    })();
+
+    EventJs.defineEvent(Engine, "onGlobalError");
 
     //-------------------------Objects
     //--------------------------------

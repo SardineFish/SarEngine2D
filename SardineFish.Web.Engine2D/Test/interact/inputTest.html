@@ -36,7 +36,9 @@
         
         var displayRange = new GameObject();
         displayRange.graphic = display.viewArea;
+        var viewCoordinate = display.viewArea.coordinate;
         scene.addGameObject(displayRange);
+        displayRange.setCoordinate(display.viewCoordinate);
 
         input.onKeyDown = function (e)
         {
