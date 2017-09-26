@@ -992,15 +992,26 @@
         // Key Events
         this.keyDownCallback = function (e)
         {
-
+            if (scene.device.keyboard.keys[e.key] != Keyboard.KeyState.Down) {
+                scene.device.keyboard.keys[e.key] = Keyboard.KeyState.Down;
+                scene.onKeyDown.invoke(e);
+            }
         };
         this.keyUpCallback = function (e)
         {
-
+            if (scene.device.keyboard.keys[e.key] != Keyboard.KeyState.Up) {
+                scene.device.keyboard.keys[e.key] = Keyboard.KeyState.Up;
+                scene.onKeyUp.invoke(e);
+                scene.device.keyboard.keys[e.key] = Keyboard.KeyState.None;
+            }
         };
         this.keyPressCallback = function (e)
         {
-
+            if (scene.device.keyboard.keys[e.key] != Keyboard.KeyState.Pressed) {
+                scene.device.keyboard.keys[e.key] = Keyboard.KeyState.Pressed;
+                scene.onKeyPress.invoke(e);
+                scene.device.keyboard.keys[e.key] = Keyboard.KeyState.None;
+            }
         };
 
         // Touch Events
@@ -2858,7 +2869,7 @@
     }
     Engine.Display = Display;
     window.Display = Display;
-
+        
     function Input(element)
     {
         if (!element || !(element instanceof window.Element))
@@ -2924,9 +2935,9 @@
         EventJs.defineEvent(this, "onDoubleClick");
         EventJs.defineEvent(this, "onWheel");
 
-        this.onKeyDown = null;
-        this.onKeyUp = null;
-        this.onKeyPress = null;
+        EventJs.defineEvent(this, "onKeyDown");
+        EventJs.defineEvent(this, "onKeyUp");
+        EventJs.defineEvent(this, "onKeyPress");
 
         this.onTouchStart = null;
         this.onTouchEnd = null;
@@ -3188,7 +3199,7 @@
             lastDown = t;
 
             if (input.onKeyDown) {
-                input.onKeyDown(args);
+                input.onKeyDown.invoke(args);
                 if (args.handled)
                     return; 
             }
@@ -3219,7 +3230,7 @@
             lastUp = t;
 
             if (input.onKeyUp) {
-                input.onKeyUp(args);
+                input.onKeyUp.invoke(args);
                 if (args.handled)
                     return;
             }
@@ -3250,7 +3261,7 @@
             lastPress = t;
 
             if (input.onKeyPress) {
-                input.onKeyPress(args);
+                input.onKeyPress.invoke(args);
                 if (args.handled)
                     return;
             }
