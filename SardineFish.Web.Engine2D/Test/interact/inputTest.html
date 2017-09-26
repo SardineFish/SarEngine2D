@@ -8,6 +8,10 @@
     <script src="/src/SarEngine2D.GUI.js"></script>
     <script src="/lib/jQuery/jquery.min.js"></script>
     <style>
+        #output{
+            position:   3eetg  gfixed;
+            z-index: 1000;
+        }
         #viewGlobal{
 
         }
@@ -17,6 +21,9 @@
     </style>
 </head>
 <body>
+    <div id="output">
+
+    </div>
     <div id="viewGlobal">
 
     </div>
@@ -29,6 +36,7 @@
         var display = new Display(viewDisplay, 600, 300);
         var camera = new Camera(0, 0);
         var input = display.getInput();
+        scene.addInput(input);
         scene.addCamera(camera);
         display.connectTo(camera);
         engine.start();
@@ -39,7 +47,20 @@
         var viewCoordinate = display.viewArea.coordinate;
         scene.addGameObject(displayRange);
         displayRange.setCoordinate(display.viewCoordinate);
+        scene.onClick = function (e)
+        {
+            
+        }
 
+        input.onWheel = function (e)
+        {
+            if (e.deltaY > 0) {
+                camera.zoomTo(camera.zoom * 0.5);
+            }
+            else if (e.deltaY <0) {
+                camera.zoomTo(camera.zoom * 2);
+            }
+        }
         input.onKeyDown = function (e)
         {
             switch (e.key) {
@@ -55,6 +76,11 @@
                 case Keyboard.Keys.S:
                     camera.moveTo(camera.position.x, camera.position.y - 20);
                     break;
+                case Keyboard.Keys.KPAdd:
+                    camera.zoomTo(camera.zoom * 2);
+                    break;
+                case Keyboard.Keys.KPSubtract:
+                    camera.zoomTo(camera.zoom / 2);
             }
         }
     </script>

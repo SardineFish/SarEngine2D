@@ -3285,8 +3285,10 @@
         this.width = w;
         this.height = h;
         this.o = new Point(-w / 2, -h / 2);
+        
         this.position = new Point(0, 0);
         this.coordinate = Coordinate.Default;
+        this.o.coordinate = this.coordinate;
         this.center = new Point(0, 0);
         this.rigidBody = false;
         this.dff = 0;//dynamic friction factor
@@ -3374,6 +3376,7 @@
         this.position.setCoordinate(coordinate);
         this.center.setCoordinate(coordinate);
         this.coordinate = coordinate;
+        this.o.coordinate = coordinate;
     }
     Rectangle.prototype.changeCoordinate = function (coordinate)
     {
@@ -3385,6 +3388,7 @@
         this.position.changeCoordinate(coordinate);
         this.center.changeCoordinate(coordinate);
         this.coordinate = coordinate;
+        this.o.coordinate = coordinate;
     }
     Rectangle.prototype.setCenterPoint = function (x, y)
     {
@@ -3450,10 +3454,10 @@
         graphic.fillStyle = this.fillStyle;
         graphic.strokeStyle = this.strokeStyle;
         var o = this.center.coordinate.pFrom(this.center.x, this.center.y);
-        o.x += this.o.x;
-        o.y += this.o.y;
-        graphic.fillRect(o.x, o.y + this.height, this.width, this.height);
-        graphic.strokeRect(o.x, o.y + this.height, this.width, this.height);
+        o.x += this.o.coordinate.vFrom(this.o.x, this.o.y).x;
+        o.y += this.o.coordinate.vFrom(this.o.x, this.o.y).y;
+        graphic.fillRect(o.x, o.y + this.height * this.coordinate.unitY, this.width * this.coordinate.unitX, this.height * this.coordinate.unitY);
+        graphic.strokeRect(o.x, o.y + this.height * this.coordinate.unitY, this.width * this.coordinate.unitX, this.height * this.coordinate.unitY);
     }
     Rectangle.prototype.isCollideWith = function (obj, v1,v2,dt)
     {

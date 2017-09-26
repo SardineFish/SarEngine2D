@@ -247,23 +247,22 @@
         this.device = new Device();
         this.eventSources = ArrayList();
         this.doubleClickDelay = 200;
-        this.onUpdate = null;
-        this.onRender = null;
-        this.onEndRender = null;
-        this.onMouseMove = null;
-        this.onMouseOver = null;
-        this.onMouseOut = null;
-        this.onMouseDown = null;
-        this.onMouseUp = null;
-        this.onClick = null;
-        this.onDoubleClick = null;
-        this.onMouseWheel = null;
-        this.onKeyDown = null;
-        this.onKeyUp = null;
-        this.onKeyPress = null;
-        this.onTouchStart = null;
-        this.onTouchMove = null;
-        this.onTouchEnd = null;
+        EventJs.defineEvent(this, "onUpdate");
+        EventJs.defineEvent(this, "onRender");
+        EventJs.defineEvent(this, "onEndRender");
+        EventJs.defineEvent(this, "onMouseMove");
+        EventJs.defineEvent(this, "onMouseDown");
+        EventJs.defineEvent(this, "onMouseUp");
+        EventJs.defineEvent(this, "onClick");
+        EventJs.defineEvent(this, "onDoubleClick");
+        EventJs.defineEvent(this, "onWheel");
+        EventJs.defineEvent(this, "onKeyDown");
+        EventJs.defineEvent(this, "onKeyUp");
+        EventJs.defineEvent(this, "onKeyPress");
+        EventJs.defineEvent(this, "onTouchStart");
+        EventJs.defineEvent(this, "onTouchMove");
+        EventJs.defineEvent(this, "onTouchEnd");
+        
 
 
         this.layers.scene = this;
@@ -657,13 +656,11 @@
         var scene = this;
         if (!this.cameraList.length)
             return;
-        if (scene.onRender)
-        {
-            var args = { dt: dt, cancel: false };
-            scene.onRender(args);
-            if (args.cancel)
-                return;
-        }
+        var args = { dt: dt, cancel: false };
+        scene.onRender.invoke(args);
+        if (args.cancel)
+            return;
+        
 
         for (var i = 0; i < this.cameraList.length; i++)
         {
@@ -717,8 +714,8 @@
         //     scene.camera.resetTransform();
         //     scene.background.render(scene.camera.graphics);
         // }
-        if (this.onEndRender)
-            this.onEndRender();
+        this.onEndRender.invoke();
+        
     }
     Scene.prototype.updateFrame = function (delay)
     {
@@ -727,13 +724,11 @@
             var scene = this;
             this.runtime += delay;
             var dt = delay / 1000;
-            if (scene.onUpdate)
-            {
-                args = { dt: dt, cancle: false };
-                scene.onUpdate(args);
-                if (args.cancle)
-                    return;
-            }
+            var args = { dt: dt, cancel: false };
+            scene.onUpdate.invoke(args);
+            if (args.cancel)
+                return;
+            
             //dt=0.016;
             // Handle camera animation
             for (var i = 0; i < this.cameraList.length; i++)
@@ -770,6 +765,7 @@
             this.eventSources.add(input);
             this.initEvents(input);
         }
+        input.scene = this;
     }
     Scene.prototype.removeInput = function (input)
     {
@@ -779,7 +775,7 @@
         this.eventSources.removeAt(index);
         input.removeSceneEvent();
     }
-    Scene.prototype.initEvents = function (input, display)
+    Scene.prototype.initEvents = function (input)
     {
         var clickTime = 0;
         var scene = this;
@@ -812,28 +808,185 @@
             args.x = mapTo.x;
             args.y = mapTo.y;
 
-            if (scene.onMouseMove)
-                scene.onMouseMove(args);
+            scene.onMouseMove.invoke(args);
         };
         this.mouseDownCallback = function (e)
         {
+            
+            var mapTo = e.input.coordinate.pointMapTo(Coordinate.Default, e.x, e.y);
+            scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
+            scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+            scene.device.mouse.x = mapTo.x;
+            scene.device.mouse.y = mapTo.y;
+            if (e.button == Mouse.Buttons.Left) {
+                scene.device.mouse.left = Mouse.ButtonState.Pressed;
+            }
+            else if (e.button == Mouse.Buttons.Wheel) {
+                scene.device.mouse.wheel = Mouse.ButtonState.Pressed;
+            }
+            else if (e.button == Mouse.Buttons.Right) {
+                scene.device.mouse.right = Mouse.ButtonState.Pressed;
+            }
 
+            var args = new MouseEventArgs();
+            args.button = e.button;
+            args.buttonState = Mouse.ButtonState.Pressed;
+            args.handled = false;
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+            args.dx = scene.device.mouse.dx;
+            args.dy = scene.device.mouse.dy;
+            args.input = e.input;
+            args.raw = e.raw;
+            args.dt = e.dt;
+
+            /*args.x = (e.pageX / display.camera.zoom) + (display.camera.center.x - display.camera.width / 2);
+            args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+
+            scene.onMouseMove.invoke(args);
         };
         this.mouseUpCallback = function (e)
         {
+            var mapTo = e.input.coordinate.pointMapTo(Coordinate.Default, e.x, e.y);
+            scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
+            scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+            scene.device.mouse.x = mapTo.x;
+            scene.device.mouse.y = mapTo.y;
+            if (e.button == Mouse.Buttons.Left) {
+                scene.device.mouse.left = Mouse.ButtonState.Released;
+            }
+            else if (e.button == Mouse.Buttons.Wheel) {
+                scene.device.mouse.wheel = Mouse.ButtonState.Released;
+            }
+            else if (e.button == Mouse.Buttons.Right) {
+                scene.device.mouse.right = Mouse.ButtonState.Released;
+            }
 
+            var args = new MouseEventArgs();
+            args.button = e.button;
+            args.buttonState = Mouse.ButtonState.Released;
+            args.handled = false;
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+            args.dx = scene.device.mouse.dx;
+            args.dy = scene.device.mouse.dy;
+            args.input = e.input;
+            args.raw = e.raw;
+            args.dt = e.dt;
+
+            /*args.x = (e.pageX / display.camera.zoom) + (display.camera.center.x - display.camera.width / 2);
+            args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+
+            scene.onMouseUp.invoke(args);
         };
         this.clickCallback = function (e)
         {
+            var mapTo = e.input.coordinate.pointMapTo(Coordinate.Default, e.x, e.y);
+            scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
+            scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+            scene.device.mouse.x = mapTo.x;
+            scene.device.mouse.y = mapTo.y;
 
+            var args = new MouseEventArgs();
+            args.button = e.button;
+            args.buttonState = Mouse.ButtonState.Click;
+            args.handled = false;
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+            args.dx = scene.device.mouse.dx;
+            args.dy = scene.device.mouse.dy;
+            args.input = e.input;
+            args.raw = e.raw;
+            args.dt = e.dt;
+
+            /*args.x = (e.pageX / display.camera.zoom) + (display.camera.center.x - display.camera.width / 2);
+            args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+
+            scene.onClick.invoke(args);
+
+            if (e.button == Mouse.Buttons.Left) {
+                scene.device.mouse.left = Mouse.ButtonState.None;
+            }
+            else if (e.button == Mouse.Buttons.Wheel) {
+                scene.device.mouse.wheel = Mouse.ButtonState.None;
+            }
+            else if (e.button == Mouse.Buttons.Right) {
+                scene.device.mouse.right = Mouse.ButtonState.None;
+            }
         };
         this.doubleClickCallback = function (e)
         {
+            var mapTo = e.input.coordinate.pointMapTo(Coordinate.Default, e.x, e.y);
+            scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
+            scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+            scene.device.mouse.x = mapTo.x;
+            scene.device.mouse.y = mapTo.y;
 
+
+            var args = new MouseEventArgs();
+            args.button = e.button;
+            args.buttonState = Mouse.ButtonState.DoubleClick;
+            args.handled = false;
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+            args.dx = scene.device.mouse.dx;
+            args.dy = scene.device.mouse.dy;
+            args.input = e.input;
+            args.raw = e.raw;
+            args.dt = e.dt;
+
+            /*args.x = (e.pageX / display.camera.zoom) + (display.camera.center.x - display.camera.width / 2);
+            args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+
+            scene.onDoubleClick.invoke(args);
+
+
+            if (e.button == Mouse.Buttons.Left) {
+                scene.device.mouse.left = Mouse.ButtonState.Released;
+            }
+            else if (e.button == Mouse.Buttons.Wheel) {
+                scene.device.mouse.wheel = Mouse.ButtonState.Released;
+            }
+            else if (e.button == Mouse.Buttons.Right) {
+                scene.device.mouse.right = Mouse.ButtonState.Released;
+            }
         };
         this.wheelCallback = function (e)
         {
+            var mapTo = e.input.coordinate.pointMapTo(Coordinate.Default, e.x, e.y);
+            scene.device.mouse.dx = mapTo.x - scene.device.mouse.x;
+            scene.device.mouse.dy = mapTo.y - scene.device.mouse.y;
+            scene.device.mouse.x = mapTo.x;
+            scene.device.mouse.y = mapTo.y;
 
+
+            var args = new MouseEventArgs();
+            args.button = e.button;
+            args.buttonState = Mouse.ButtonState.Rolled;
+            args.wheelDelta = e.deltaY;
+            args.handled = false;
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+            args.dx = scene.device.mouse.dx;
+            args.dy = scene.device.mouse.dy;
+            args.input = e.input;
+            args.raw = e.raw;
+            args.dt = e.dt;
+
+            /*args.x = (e.pageX / display.camera.zoom) + (display.camera.center.x - display.camera.width / 2);
+            args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
+            args.x = mapTo.x;
+            args.y = mapTo.y;
+
+            scene.onWheel.invoke(args);
         };
 
         // Key Events
@@ -865,7 +1018,7 @@
         };
 
 
-
+        return;
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------        
 
         var dom = input;
@@ -1324,6 +1477,7 @@
             }
         }
 
+        /*
         dom.addEventListener("mouseenter", mouseEnterCallback);
         dom.addEventListener("mouseout", mouseOutCallback);
         dom.addEventListener("mousemove",mouseMoveCallback);
@@ -1339,6 +1493,7 @@
         dom.addEventListener("touchstart", touchStartCallback);
         dom.addEventListener("touchmove", touchMoveCallback);
         dom.addEventListener("touchend", touchEndCallback);
+        */
     }
     /**
      * Add a GameObject to this scene. 
@@ -1626,8 +1781,8 @@
             if (rotation == 0)
             {
                 return {
-                    x: x / xZoom,
-                    y: y / yZoom
+                    x: x / unitX,
+                    y: y / unitY
                 };
             }
             else
@@ -1635,8 +1790,8 @@
                 var cos = Math.cos(-rotation);
                 var sin = Math.sin(-rotation);
                 return {
-                    x: (x * cos - y * sin) / xZoom,
-                    y: (y * cos + x * sin) / yZoom
+                    x: (x * cos - y * sin) / unitX,
+                    y: (y * cos + x * sin) / unitY
                 };
             }
         }
@@ -1645,16 +1800,16 @@
             if (rotation == 0)
             {
                 return {
-                    x: x * xZoom,
-                    y: y * yZoom
+                    x: x * unitX,
+                    y: y * unitY
                 };
             }
             else
             {
                 var cos = Math.cos(rotation);
                 var sin = Math.sin(rotation);
-                var dx = x * xZoom;
-                var dy = y * yZoom;
+                var dx = x * unitX;
+                var dy = y * unitY;
                 return {
                     x: dx * cos - dy * sin,
                     y: dy * cos + dx * sin
@@ -2311,6 +2466,7 @@
         this.viewCoordinate = Coordinate.Default;
 
         var input = new Input(node);
+        input.display = this;
         Object.defineProperty(this, "input", {
             get: function () { return input; }
         });
@@ -2715,9 +2871,19 @@
         var input = this;
 
         this.ignorePadding = true;
-        this.coordinate = null;
         this.scene=null;
         this.display = null;
+
+        var coordinate = null;
+        Object.defineProperty(this, "coordinate", {
+            get: function ()
+            {
+                if (input.display)
+                    return input.display.viewCoordinate;
+                return null;
+            }
+
+        });
 
         var mouseCapture = true;
         Object.defineProperty(this, "mouseCapture", {
@@ -2749,14 +2915,14 @@
             }
         });
 
-        this.onMouseEnter = null;
-        this.onMouseLeave = null;
-        this.onMouseMove = null;
-        this.onMouseDown = null;
-        this.onMouseUp = null;
-        this.onClick = null;
-        this.onDoubleClick = null;
-        this.onWheel = null;
+        EventJs.defineEvent(this, "onMouseEnter");
+        EventJs.defineEvent(this, "onMouseLeave");
+        EventJs.defineEvent(this, "onMouseMove");
+        EventJs.defineEvent(this, "onMouseDown");
+        EventJs.defineEvent(this, "onMouseUp");
+        EventJs.defineEvent(this, "onClick");
+        EventJs.defineEvent(this, "onDoubleClick");
+        EventJs.defineEvent(this, "onWheel");
 
         this.onKeyDown = null;
         this.onKeyUp = null;
@@ -2782,7 +2948,7 @@
             if (input.onMouseEnter)
             {
                 var argsInput = args.copy();
-                input.onMouseEnter(argsInput);
+                input.onMouseEnter.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2798,7 +2964,7 @@
             var args = new Args(e);
             if (input.onMouseLeave) {
                 var argsInput = args.copy();
-                input.onMouseLeave(argsInput);
+                input.onMouseLeave.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2814,7 +2980,7 @@
             var args = new Args(e);
             if (input.onMouseMove) {
                 var argsInput = args.copy();
-                input.onMouseMove(argsInput);
+                input.onMouseMove.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2824,7 +2990,7 @@
                 if (argsGUI.handled)
                     return;
             }
-            if (input.scene) {
+            if (input.scene && input.coordinate) {
                 var argsScene = args.copy();
                 input.scene.mouseMoveCallback(argsScene);
                 
@@ -2835,7 +3001,7 @@
             var args = new Args(e);
             if (input.onMouseDown) {
                 var argsInput = args.copy();
-                input.onMouseDown(argsInput);
+                input.onMouseDown.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2845,7 +3011,7 @@
                 if (argsGUI.handled)
                     return;
             }
-            if (input.scene) {
+            if (input.scene && input.coordinate) {
                 var argsScene = args.copy();
                 input.scene.mouseDownCallback(argsScene);
 
@@ -2856,7 +3022,7 @@
             var args = new Args(e);
             if (input.onMouseUp) {
                 var argsInput = args.copy();
-                input.onMouseUp(argsInput);
+                input.onMouseUp.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2866,7 +3032,7 @@
                 if (argsGUI.handled)
                     return;
             }
-            if (input.scene) {
+            if (input.scene && input.coordinate) {
                 var argsScene = args.copy();
                 input.scene.mouseUpCallback(argsScene);
 
@@ -2877,7 +3043,7 @@
             var args = new Args(e);
             if (input.onClick) {
                 var argsInput = args.copy();
-                input.onClick(argsInput);
+                input.onClick.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2887,7 +3053,7 @@
                 if (argsGUI.handled)
                     return;
             }
-            if (input.scene) {
+            if (input.scene && input.coordinate) {
                 var argsScene = args.copy();
                 input.scene.clickCallback(argsScene);
 
@@ -2898,7 +3064,7 @@
             var args = new Args(e);
             if (input.onDoubleClick) {
                 var argsInput = args.copy();
-                input.onDoubleClick(argsInput);
+                input.onDoubleClick.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2908,7 +3074,7 @@
                 if (argsGUI.handled)
                     return;
             }
-            if (input.scene) {
+            if (input.scene && input.coordinate) {
                 var argsScene = args.copy();
                 input.scene.doubleClickCallback(argsScene);
 
@@ -2919,7 +3085,7 @@
             var args = new Args(e);
             if (input.onWheel) {
                 var argsInput = args.copy();
-                input.onWheel(argsInput);
+                input.onWheel.invoke(argsInput);
                 if (argsInput.handled)
                     return;
             }
@@ -2929,7 +3095,7 @@
                 if (argsGUI.handled)
                     return;
             }
-            if (input.scene) {
+            if (input.scene && input.coordinate) {
                 var argsScene = args.copy();
                 input.scene.wheelCallback(argsScene);
 
@@ -2955,6 +3121,9 @@
             this.raw = null;
             this.input = null;
             this.handled = false;
+            this.deltaX = 0;
+            this.deltaY = 0;
+            this.deltaZ = 0;
             if (!e)
                 return;
             
@@ -2972,6 +3141,9 @@
             this.handled = false;
             this.input = input;
             this.raw = e;
+            this.deltaX = e.deltaX;
+            this.deltaY = e.deltaY;
+            this.deltaZ = e.deltaZ;
             lastPos = new Point(this.x, this.y);
             lastTime = new Date().getTime();
         }
@@ -2985,7 +3157,9 @@
             args.dt = this.dt;
             args.input = this.input;
             args.button = this.button;
-            
+            args.deltaX = this.deltaX;
+            args.deltaY = this.deltaY;
+            args.deltaZ = this.deltaZ;
             args.raw = this.raw;
             args.handled = false;
             return args;
@@ -3251,7 +3425,10 @@
         this.position.y = y;
         this.viewCoordinate.originX = x;
         this.viewCoordinate.originY = y;
-
+        for (var i = 0; i < this.displayList.length; i++) {
+            this.displayList[i].viewCoordinate.originX = this.position.x - (this.displayList[i].renderWidth / 2 / this.zoom);
+            this.displayList[i].viewCoordinate.originY = this.position.y + (this.displayList[i].renderHeight / 2 / this.zoom);
+        }
     }
     Camera.prototype.zoomTo = function (z, x, y)
     {
@@ -3265,8 +3442,14 @@
             this.moveTo(ox, oy);
         }
         this.zoom = z;
-        this.viewCoordinate.unitX = z;
-        this.viewCoordinate.unitY = z;
+        this.viewCoordinate.unitX = 1 / z;
+         this.viewCoordinate.unitY = 1 / z;
+        for (var i = 0; i < this.displayList.length; i++) {
+            this.displayList[i].viewCoordinate.originX = this.position.x - (this.displayList[i].renderWidth / 2 / z);
+            this.displayList[i].viewCoordinate.originY = this.position.y + (this.displayList[i].renderHeight / 2 / z);
+            this.displayList[i].viewCoordinate.unitX = 1/z;
+            this.displayList[i].viewCoordinate.unitY = -1/z;
+        }
     }
     Camera.prototype.rotate = function (angle, x, y)
     {
