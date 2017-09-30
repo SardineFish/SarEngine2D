@@ -6,7 +6,7 @@
     }
 
 
-//-----BEGIN SarEngine2D.Objects-----
+    //-----BEGIN SarEngine2D.Objects-----
 
     //-------Vector2
     function Vector2(x, y)
@@ -1186,7 +1186,6 @@
         this.center = new Point(0, 0);
         this.position = this.center.copy();
         this.coordinate = Coordinate.Default;
-        this.fCount = (options && options["fCount"]) || 0;
         this.fps = (options && options["fps"]) || 0;
         this.clipX = (options && options["clipX"]) || 0;
         this.clipY = (options && options["clipY"]) || 0;
@@ -1194,6 +1193,7 @@
         this.frames.width = (options && options["frameWidth"]) || 0;
         this.frames.height = (options && options["frameHeight"]) || 0;
         this.frames.length = (options && options["count"]) || 0;
+        this.src = (options && options["src"]) || 0;
         Object.defineProperty(this.frames, "count", {
             get: function () { return imgAnim.frames.length; },
             set: function (value) { imgAnim.frames.length = value; }
@@ -1204,8 +1204,8 @@
         this.frame = 0;
         this.playing = true;
         this.reverse = false;
-        this.width = (options && options["width"]) || 0;
-        this.heigh = (options && options["height"]) || 0;
+        this.width = (options && options["renderWidth"]) || 0;
+        this.height = (options && options["renderHeight"]) || 0;
         this.onBegine = null;
         this.onEnd = null;
         this.onFrameUpdate = null;
@@ -1338,21 +1338,62 @@
     }
     ImageAnimation.prototype.load = function (callback, onprogress)
     {
-        var canvas = document.createElement("canvas");
-        var width=this.width;
-        var height=this.height;
-        canvas.width = width;
-        canvas.height = heigh;
-        var ctx = canvas.getContext('2d');
-        for (var i = 0; i < this.frames.length; i++) {
-            // X offset of each frames on the original image.
-            var x = this.clipX + (i * this.frames.width);
-            // Y offset of each frames on the original image.
-            var y = this.clipY;
-            ctx.clearRect(0, 0, width, height);
-            ctx.drawImage(this.imgRaw, x, y, this.frames.width, this.frames.height, 0, 0, width, height);
-            
+        var imgAnim = this;
+        this.imgRaw = document.createElement("img");
+        this.imgRaw.onload = function ()
+        {
+            var width = imgAnim.width;
+            var height = imgAnim.height;
+            var taskMgn = new TaskManagment();
+            for (var i = 0; i < imgAnim.frames.length; i++) {
+                var task = new Task(function (completeCallback, idx)
+                {
+                    //Init canvas
+                    var canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext('2d');
+
+                    // X offset of each frames on the original image.
+                    var x = imgAnim.clipX + (idx * imgAnim.frames.width);
+                    // Y offset of each frames on the original image.
+                    var y = imgAnim.clipY;
+
+                    //Draw a frame to the canvas.
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.drawImage(imgAnim.imgRaw, x, y, imgAnim.frames.width, imgAnim.frames.height, 0, 0, width, height);
+                    
+                    //Get the Img from the canvas.
+                    canvas.toBlob(function (blob)
+                    {
+                        var img = document.createElement("img");
+                        img.onload = function ()
+                        {
+                            imgAnim.frames[idx] = img;
+                            completeCallback();
+                        }
+                        img.src = URL.createObjectURL(blob);
+                    });
+                }, i);
+                taskMgn.addTask(task);
+            }
+            taskMgn.onComplete = function ()
+            {
+                if (onprogress) {
+                    onprogress(taskMgn.completed.length / taskMgn.tasks.length);
+                }
+            }
+            taskMgn.onAllComplete = function ()
+            {
+                if (callback)
+                    callback();
+            }
+            taskMgn.start();
+        };
+        this.imgRaw.onprogress=function (e){
+            var x=e;
         }
+        this.imgRaw.src = this.src;
     }
     ImageAnimation.prototype.clipFrame = function (clipX, clipY, fWidth, fHeight, fCount)
     {
@@ -3779,8 +3820,78 @@
     Engine.Colliders = Colliders;
     window.Colliders = Colliders;
 
-//-----END SarEngine2D.Objects-----
+    //-----END SarEngine2D.Objects-----
 
+    //TaskManagment
+    function TaskManagment()
+    {
+        var taskMgn = this;
+        this.tasks = ArrayList();
+        this.pending = ArrayList();
+        this.completed = ArrayList();
+        this.onAllComplete = null;
+        this.onComplete = null;
+        this.onError = null;
+        this.addTask = function (task)
+        {
+            if (!(task instanceof Task)) {
+                throw new Error("An instance of Task is required.");
+            }
+            task.onComplete = onComplete;
+            taskMgn.tasks.add(task);
+        }
+        this.start = function ()
+        {
+            taskMgn.pending = ArrayList();
+            taskMgn.completed = ArrayList();
+            for (var i = 0; i < taskMgn.tasks.length ; i++) {
+                taskMgn.pending.add(taskMgn.tasks[i]);
+                taskMgn.tasks[i].status = Task.Status.Pending;
+            }
+            for (var i = 0; i < taskMgn.tasks.length; i++) {
+                var task = taskMgn.tasks[i];
+                try {
+                    task.start();
+                }
+                catch (ex) {
+                    if (taskMgn.onError)
+                        taskMgn.onError(ex);
+                }
+            }
+        }
+        function onComplete(task)
+        {
+            taskMgn.pending.remove(task);
+            taskMgn.completed.add(task);
+            if (taskMgn.onComplete)
+                taskMgn.onComplete(this);
+            if (taskMgn.pending.length <= 0 && taskMgn.onAllComplete)
+                taskMgn.onAllComplete();
+        }
+    }
+    function Task(f, args)
+    {
+        var task = this;
+        this.onComplete = null;
+        this.func = f;
+        this.id = null;
+        this.status = Task.Status.Pending;
+        this.start = function ()
+        {
+            if (!task.func || !(task.func instanceof Function))
+                return;
+            task.status = Task.Status.Running;
+            task.func(completeCallback, args);
+        }
+        function completeCallback()
+        {
+            task.status = Task.Status.Completed;
+            if (task.onComplete instanceof Function) {
+                task.onComplete(task);
+            }
+        }
+    }
+    Task.Status = { Pending: 0, Running: 1, Completed: 2 };
 
     //ArrayList
     function ArrayList()
