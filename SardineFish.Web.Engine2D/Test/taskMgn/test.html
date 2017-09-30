@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Test</title>
+    <script src="TaskManagment.js"></script>
+</head>
+<body>
+    <script>
+        function asyncFunction(callback)
+        {
+            setTimeout(function ()
+            {
+                console.log(new Date().toString());
+                callback();
+            }, 10000*Math.random());
+        }
+        var taskMgn = new TaskManagment();
+        for(var i=0;i<10;i++){
+            var task = new Task(function (callback)
+            {
+                asyncFunction(function ()
+                {
+                    callback();
+                })
+            });
+            taskMgn.addTask(task);
+        }
+        taskMgn.onAllComplete = function ()
+        {
+            console.log("All completed.");
+        }
+        taskMgn.start();
+    </script>
+</body>
+</html>

@@ -480,6 +480,8 @@
         window.Color = Color;
     }
 
+//-----BEGIN SarEngine2D.GUI-----
+
     function Thickness(top, bottom, left, right)
     {
         if (isNaN(top))
@@ -1291,5 +1293,7 @@
         this.onClick = null;
     }
     GUI.Joystick = Joystick;
+
+//-----END SarEngine2D.GUI-----
 
 })(window.SarEngine);

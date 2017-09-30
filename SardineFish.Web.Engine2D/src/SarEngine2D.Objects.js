@@ -5,72 +5,8 @@
         throw new Error("Engine not found.");
     }
 
-    //ArrayList
-    function ArrayList()
-    {
-        var list = [];
-        list.add = function (obj)
-        {
-            list[list.length] = obj;
-            return list.length - 1;
-        }
-        list.insert = function (obj, index)
-        {
-            if (isNaN(index) || index < 0)
-            {
-                throw new Error("Invalid index.");
-            }
-            for (var i = this.length - 1; i >= index; i--)
-            {
-                this[i + 1] = this[i];
-            }
-            this[index] = obj;
-        }
-        list.removeAt = function (index)
-        {
-            if (isNaN(index) || index < 0 || index >= list.length)
-            {
-                throw new Error("Invalid index.");
-            }
-            for (var i = index; i < list.length - 1; i++)
-            {
-                list[i] = list[i + 1];
-            }
-            list.length -= 1;
-        }
-        list.remove = function (obj)
-        {
-            for (var i = 0; i < list.length; i++)
-            {
-                if (list[i] == obj)
-                {
-                    for (; i < list.length - 1; i++)
-                    {
-                        list[i] = list[i + 1];
-                    }
-                    list.length -= 1;
-                    return;
-                }
-            }
-            throw new Error("Object not found.");
-        }
-        list.addRange = function (arr, startIndex, count)
-        {
-            if (!startIndex || isNaN(startIndex))
-                startIndex = 0;
-            if (!count || isNaN(count))
-                count = arr.length;
-            for (var i = startIndex; i < count; i++)
-            {
-                list[list.length] = arr[i];
-            }
-        }
-        list.contain = function (obj)
-        {
-            return (list.indexOf(obj) >= 0);
-        }
-        return list;
-    }
+
+//-----BEGIN SarEngine2D.Objects-----
 
     //-------Vector2
     function Vector2(x, y)
@@ -1242,37 +1178,46 @@
     Engine.Combination = Combination;
     window.Combination = Combination;
 
+    
     //ImageAnimation
-    function ImageAnimation()
+    function ImageAnimation(options)
     {
+        var imgAnim = this;
         this.center = new Point(0, 0);
         this.position = this.center.copy();
         this.coordinate = Coordinate.Default;
-        this.fCount = 0;
-        this.fps = 0;
-        this.clipX = 0;
-        this.clipY = 0;
-        this.fWidth = 0;
-        this.fHeight = 0;
+        this.fCount = (options && options["fCount"]) || 0;
+        this.fps = (options && options["fps"]) || 0;
+        this.clipX = (options && options["clipX"]) || 0;
+        this.clipY = (options && options["clipY"]) || 0;
+        this.frames = [];
+        this.frames.width = (options && options["frameWidth"]) || 0;
+        this.frames.height = (options && options["frameHeight"]) || 0;
+        this.frames.length = (options && options["count"]) || 0;
+        Object.defineProperty(this.frames, "count", {
+            get: function () { return imgAnim.frames.length; },
+            set: function (value) { imgAnim.frames.length = value; }
+        });
         this.time = 0;
-        this.img = null;
+        this.imgRaw = null;
+        this.loaded = false;
         this.frame = 0;
         this.playing = true;
         this.reverse = false;
-        this.width = 0;
-        this.heigh = 0;
+        this.width = (options && options["width"]) || 0;
+        this.heigh = (options && options["height"]) || 0;
         this.onBegine = null;
         this.onEnd = null;
         this.onFrameUpdate = null;
         this.loop = new ImageAnimation.Loop();
     }
     //---ImagImageAnimation.Loop
-    ImageAnimation.Loop = function ()
+    ImageAnimation.Loop = function (from,to,loopTimes)
     {
-        this.from = 0;
-        this.to = 0;
-        this.length = 0;
-        this.loopTimes = -1;
+        this.from = from || 0;
+        this.to = to || 0;
+        this.length = this.from - this.to + 1;
+        this.loopTimes = loopTimes || -1;
         this.lt = 0;
         this.enable = true;
         this.onEnd = null;
@@ -1304,18 +1249,22 @@
         if (t && this.onEnd)
             this.onEnd();
     }
-    ImageAnimation.loadFromUrl = function (url, clipX, clipY, fWidth, fHeight, width, height, fCount, fps, callback)
+    ImageAnimation.loadFromUrl = function (url, options, callback,onprogress)
     {
-        var ia = new ImageAnimation;
-        ia.img = new Image();
+        var clipX = options["clipX"] || 0;
+        var clipY = options["clipY"] || 0;
+        var fWidth = options["fWidth"] || 0;
+        var fHeight = options["fHeight"] || 0;
+        var width = options["width"] || 0;
+        var height = options["height"] || 0;
+        var fCount = options["fCount"] || 1;
+        var fps = options["fps"] || 60;
+        clipX, clipY, fWidth, fHeight, width, height, fCount, fps
+        var ia = new ImageAnimation(options);
+        ia.imgRaw = new Image();
         ia.img.onload = function (e)
         {
-            ia.fps = fps;
-            ia.width = width;
-            ia.heigh = height;
-            ia.clipFrame(clipX, clipY, fWidth, fHeight, fCount);
-            if (callback)
-                callback();
+            ia.load(callback, onprogress);
         }
         ia.img.src = url;
         return ia;
@@ -1326,7 +1275,8 @@
     ImageAnimation.prototype.copy = function ()
     {
         var ia = new ImageAnimation;
-        ia.img = this.img;
+        ia.imgRaw = this.imgRaw;
+        ia.loaded = this.loaded;
         ia.center = this.center.copy();
         ia.position = this.position.copy();
         ia.coordinate = this.coordinate;
@@ -1385,6 +1335,24 @@
         this.position.y = y;
         this.center.x = this.center.x - rx + x;
         this.center.y = this.center.y - ry + y;
+    }
+    ImageAnimation.prototype.load = function (callback, onprogress)
+    {
+        var canvas = document.createElement("canvas");
+        var width=this.width;
+        var height=this.height;
+        canvas.width = width;
+        canvas.height = heigh;
+        var ctx = canvas.getContext('2d');
+        for (var i = 0; i < this.frames.length; i++) {
+            // X offset of each frames on the original image.
+            var x = this.clipX + (i * this.frames.width);
+            // Y offset of each frames on the original image.
+            var y = this.clipY;
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(this.imgRaw, x, y, this.frames.width, this.frames.height, 0, 0, width, height);
+            
+        }
     }
     ImageAnimation.prototype.clipFrame = function (clipX, clipY, fWidth, fHeight, fCount)
     {
@@ -3810,5 +3778,67 @@
 
     Engine.Colliders = Colliders;
     window.Colliders = Colliders;
+
+//-----END SarEngine2D.Objects-----
+
+
+    //ArrayList
+    function ArrayList()
+    {
+        var list = [];
+        list.add = function (obj)
+        {
+            list[list.length] = obj;
+            return list.length - 1;
+        }
+        list.insert = function (obj, index)
+        {
+            if (isNaN(index) || index < 0) {
+                throw new Error("Invalid index.");
+            }
+            for (var i = this.length - 1; i >= index; i--) {
+                this[i + 1] = this[i];
+            }
+            this[index] = obj;
+        }
+        list.removeAt = function (index)
+        {
+            if (isNaN(index) || index < 0 || index >= list.length) {
+                throw new Error("Invalid index.");
+            }
+            for (var i = index; i < list.length - 1; i++) {
+                list[i] = list[i + 1];
+            }
+            list.length -= 1;
+        }
+        list.remove = function (obj)
+        {
+            for (var i = 0; i < list.length; i++) {
+                if (list[i] == obj) {
+                    for (; i < list.length - 1; i++) {
+                        list[i] = list[i + 1];
+                    }
+                    list.length -= 1;
+                    return;
+                }
+            }
+            throw new Error("Object not found.");
+        }
+        list.addRange = function (arr, startIndex, count)
+        {
+            if (!startIndex || isNaN(startIndex))
+                startIndex = 0;
+            if (!count || isNaN(count))
+                count = arr.length;
+            for (var i = startIndex; i < count; i++) {
+                list[list.length] = arr[i];
+            }
+        }
+        list.contain = function (obj)
+        {
+            return (list.indexOf(obj) >= 0);
+        }
+        return list;
+    }
 
 })(window.SarEngine);

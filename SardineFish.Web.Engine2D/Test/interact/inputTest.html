@@ -37,6 +37,7 @@
         var camera = new Camera(0, 0);
         var input = display.getInput();
         scene.addInput(input);
+        scene.addInput(scene.cameraList[0].displayList[0].getInput());
         scene.addCamera(camera);
         display.connectTo(camera);
         engine.start();
@@ -51,6 +52,10 @@
         {
             
         }
+        scene.onMouseMove = function (e)
+        {
+            $("#output").text("Move (" + e.x + "," + e.y + ")");
+        }
 
         input.onWheel = function (e)
         {
@@ -61,7 +66,7 @@
                 camera.zoomTo(camera.zoom * 2);
             }
         }
-        input.onKeyDown = function (e)
+        scene.onKeyDown = function (e)
         {
             switch (e.key) {
                 case Keyboard.Keys.A:
