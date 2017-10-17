@@ -2015,7 +2015,7 @@
     }
     Layer.prototype.render = function (graphics, dt)
     {
-
+        
         for (var i = 0; i < this.objectList.length; i++)
         {
             if (this.objectList[i].onRender)
@@ -3067,6 +3067,7 @@
             this.raw = null;
             this.input = null;
             this.handled = false;
+            this.wheelDelta = 0;
             this.deltaX = 0;
             this.deltaY = 0;
             this.deltaZ = 0;
@@ -3090,6 +3091,7 @@
             this.deltaX = e.deltaX;
             this.deltaY = e.deltaY;
             this.deltaZ = e.deltaZ;
+            this.wheelDelta = e.deltaY;
             lastPos = new Point(this.x, this.y);
             lastTime = new Date().getTime();
         }

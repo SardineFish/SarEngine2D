@@ -36,6 +36,11 @@
         var display = new Display(viewDisplay, 600, 300);
         var camera = new Camera(0, 0);
         var input = display.getInput();
+        var layer = scene.layers[0];
+        layer.onEndRender = function ()
+        {
+
+        }
         scene.addInput(input);
         scene.addInput(scene.cameraList[0].displayList[0].getInput());
         scene.addCamera(camera);
@@ -59,11 +64,15 @@
 
         input.onWheel = function (e)
         {
-            if (e.deltaY > 0) {
-                camera.zoomTo(camera.zoom * 0.5);
+            
+        }
+        scene.onWheel = function (e)
+        {
+            if (e.wheelDelta > 0) {
+                camera.zoomTo(camera.zoom * 0.5, e.x, e.y);
             }
-            else if (e.deltaY <0) {
-                camera.zoomTo(camera.zoom * 2);
+            else if (e.wheelDelta < 0) {
+                camera.zoomTo(camera.zoom * 2, e.x, e.y);
             }
         }
         scene.onKeyDown = function (e)
