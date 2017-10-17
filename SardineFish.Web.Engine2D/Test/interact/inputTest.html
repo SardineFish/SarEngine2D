@@ -37,9 +37,11 @@
         var camera = new Camera(0, 0);
         var input = display.getInput();
         var layer = scene.layers[0];
-        layer.onEndRender = function ()
+        layer.onEndRender = function (args)
         {
-
+            var graphics = args.graphics;
+            graphics.fillStyle = "red";
+            graphics.fillRect(0, 0, 10, 10);
         }
         scene.addInput(input);
         scene.addInput(scene.cameraList[0].displayList[0].getInput());
