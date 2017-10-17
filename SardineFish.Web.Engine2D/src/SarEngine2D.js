@@ -3463,11 +3463,13 @@
                     var graphics = display.layers[j];
                     this.resetTransform(graphics);
                     graphics.ctx.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
-                    if (bgColor)
-                    {
-                        graphics.ctx.fillStyle = bgColor;
-                        graphics.ctx.fillRect(0, 0, graphics.canvas.width, graphics.canvas.height);
-                    }
+                    this.applyTransform();
+                }
+                if (display.layers.length > 0 && bgColor) {
+                    var graphics = display.layers[0];
+                    this.resetTransform(graphics);
+                    graphics.ctx.fillStyle = bgColor;
+                    graphics.ctx.fillRect(0, 0, graphics.canvas.width, graphics.canvas.height);
                     this.applyTransform();
                 }
             }

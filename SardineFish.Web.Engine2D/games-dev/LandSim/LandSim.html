@@ -8,6 +8,8 @@
     <script src="/src/SarEngine2D.js"></script>
     <script src="/src/SarEngine2D.Objects.js"></script>
     <script src="/src/SarEngine2D.GUI.js"></script>
+    <script src="map.js"></script>
+    <script src="states.js"></script>
     <style>
         body{
             margin: 0px;
@@ -31,6 +33,9 @@
         var gamingElement = $("#game").get(0);
         var Width = $("#game").width();
         var Height = $("#game").height();
+        var mapWidth = 500;
+        var mapHeight = 500;
+        var blockSize = 20;
         var game = SarEngine.createInNode(gamingElement, Width, Height);
         var scene = game.scene;
         var camera = scene.cameraList[0];
@@ -38,8 +43,61 @@
         var input = display.getInput();
         var layerLand = scene.layers[0];
         var layerAnimals = new Layer(Coordinate.Default);
+        scene.addInput(input);
         scene.addLayer(layerAnimals, 1);
         game.start();
+        noise.seed(Math.random());
+        var map = initMap(mapWidth, mapHeight);
+        layerLand.onEndRender = function (args)
+        {
+            var o = input.coordinate.pointMapTo(Coordinate.Default, 0, Height);
+            var xto = input.coordinate.pointMapTo(Coordinate.Default, Width, 0);
+            var yto = input.coordinate.pointMapTo(Coordinate.Default, 0, 0);
+            o = new Vector2(parseInt(o.x / blockSize)-3, parseInt(o.y / blockSize)-3);
+            xto = parseInt(xto.x / blockSize)+3;
+            yto = parseInt(yto.y / blockSize)+3;
+            for (var x = o.x; x < xto; x++) {
+                for (var y = o.y; y < yto; y++) {
+                    if (!map[x] || !map[x][y])
+                        continue;
+                    switch(map[x][y].type)
+                    {
+                        case Map.Types.Sand:
+                            args.graphics.fillStyle = "#fffeb5";
+                            break;
+                        case Map.Types.Grass:
+                            args.graphics.fillStyle = "#92d480";
+                            break;
+                        case Map.Types.Wood:
+                            args.graphics.fillStyle = "#278165";
+                    }
+                    args.graphics.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                }
+            }
+        }
+        scene.onWheel = function (e)
+        {
+            if (e.wheelDelta < 0) {
+                camera.zoomTo(camera.zoom * 1.2, e.x, e.y);
+            }
+            else {
+                camera.zoomTo(camera.zoom * (1 / 1.2), e.x, e.y);
+            }
+        }
+        var mouseHold = false;
+        input.onMouseDown = function (e)
+        {
+            mouseHold = true;
+        }
+        input.onMouseUp = function (e)
+        {
+            mouseHold = false;
+        }
+        input.onMouseMove = function (e)
+        {
+            if (mouseHold)
+                camera.moveTo(camera.position.x - e.dx * input.coordinate.unitX, camera.position.y - e.dy * input.coordinate.unitY);
+        }
     </script>
 </body>
 </html>
