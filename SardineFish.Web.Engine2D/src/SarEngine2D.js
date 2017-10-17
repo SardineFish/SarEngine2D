@@ -1989,8 +1989,8 @@
         this.objectList = ArrayList();
         this.followCamera = false;
         this.scene = null;
-        this.onRender = null;
-        this.onEndRender = null;
+        EventJs.defineEvent(this, "onRender");
+        EventJs.defineEvent(this, "onEndRender");
 
     }
     Layer.prototype.addGameObject = function (obj, keepCoordinate, index)
@@ -2015,7 +2015,14 @@
     }
     Layer.prototype.render = function (graphics, dt)
     {
-        
+        var args = {
+            graphics: graphics,
+            dt: dt,
+            cancel: false
+        };
+        this.onRender.invoke(args);
+        if (args.cancel)
+            return;
         for (var i = 0; i < this.objectList.length; i++)
         {
             if (this.objectList[i].onRender)
@@ -2034,6 +2041,11 @@
             }
             this.objectList[i].render(graphics, this.objectList[i].position.x, this.objectList[i].position.y, this.objectList[i].rotation, dt);
         }
+        var args = {
+            graphics: graphics,
+            dt: dt,
+        };
+        this.onEndRender.invoke(args);
         if (this.coordinate.axis && this.coordinate.axis.visible)
             this.coordinate.axis.render(graphics, dt);
     }
