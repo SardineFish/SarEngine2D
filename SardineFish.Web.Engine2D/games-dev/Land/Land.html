@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Land</title>
+    <script src="/lib/jQuery/jquery.min.js"></script>
+    <script src="/src/SarEngine2D.js"></script>
+    <script src="/src/SarEngine2D.Objects.js"></script>
+    <script src="/src/SarEngine2D.GUI.js"></script>
+    <style>
+        body{
+            margin: 0px;
+            padding: 0px;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        #game{
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+
+    </div>
+    <script>
+        var gamingElement = $("#game").get(0);
+        var Width = $("#game").width();
+        var Height = $("#game").height();
+        var game = SarEngine.createInNode(gamingElement, Width, Height);
+        var scene = game.scene;
+        var camera = scene.cameraList[0];
+        var display = camera.displayList[0];
+        var input = display.getInput();
+        var layerLand = scene.layers[0];
+        var layerAnimals = new Layer(Coordinate.Default);
+        scene.addLayer(layerAnimals, 1);
+        game.start();
+    </script>
+</body>
+</html>
