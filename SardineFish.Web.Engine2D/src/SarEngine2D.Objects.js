@@ -88,6 +88,12 @@
             return this;
         }
     }
+    Vector2.prototype.normalize = function ()
+    {
+        var mod = this.mod();
+        this.x /= mod;
+        this.y /= mod;
+    }
     Vector2.prototype.toLine = function (x, y)
     {
         return new Line(new Point(x, y), new Point(x + this.x, y + this.y));
@@ -122,6 +128,13 @@
         {
             return (new Vector2(u.x * v, u.y * v));
         }
+    }
+    Vector2.normalize = function (v)
+    {
+        if (!(v instanceof Vector2))
+            throw new Error("v must be an Vector2.");
+        var mod = v.mod();
+        return new Vector2(v.x / mod, v.y / mod);
     }
     Engine.Vector2 = Vector2;
     window.Vector2 = Vector2;
@@ -1768,7 +1781,7 @@
             gameObject.center.y += dy;
         }
     }
-    GameObject.prototype.moveTo = function (x, y)
+    GameObject.prototype.moveTo = function (x, y) 
     {
         this.position.x = x;
         this.position.y = y;

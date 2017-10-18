@@ -491,6 +491,8 @@
             for (var i = 0; i < objectList.length; i++)
             {
                 var obj = this.layers[this.layers.depthList[d]].objectList[i];
+                var F = Vector2.plus(obj.F, obj.constantForce);
+                
                 obj.a.x = (obj.F.x + obj.constantForce.x) / obj.mass;
                 obj.a.y = (obj.F.y + obj.constantForce.y) / obj.mass;
                 if (obj.gravity && (!obj.collider || !obj.collider.landed))

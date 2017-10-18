@@ -27,5 +27,12 @@ function initMap(width,height)
             }
         }
     }
+    map.get = function (x, y)
+    {
+        if (map[x] && map[x][y])
+            return map[x][y];
+        else
+            return null;
+    }
     return map;
 }

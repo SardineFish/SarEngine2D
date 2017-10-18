@@ -10,6 +10,9 @@
     <script src="/src/SarEngine2D.GUI.js"></script>
     <script src="map.js"></script>
     <script src="states.js"></script>
+    <script src="animal.js"></script>
+    <script src="deer.js"></script>
+    <script src="tiger.js"></script>
     <style>
         body{
             margin: 0px;
@@ -18,14 +21,26 @@
             height: 100vh;
             position: relative;
         }
+        #debug {
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            z-index: 100;
+            color: red;
+        }
         #game{
             position: absolute;
             height: 100%;
             width: 100%;
+            top: 0px;
+            left: 0px;
         }
     </style>
 </head>
 <body>
+    <div id="debug">
+
+    </div>
     <div id="game">
 
     </div>
@@ -48,6 +63,7 @@
         game.start();
         noise.seed(Math.random());
         var map = initMap(mapWidth, mapHeight);
+        // Map Rendering
         layerLand.onEndRender = function (args)
         {
             var o = input.coordinate.pointMapTo(Coordinate.Default, 0, Height);
@@ -71,10 +87,12 @@
                         case Map.Types.Wood:
                             args.graphics.fillStyle = "#278165";
                     }
-                    args.graphics.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+                    args.graphics.fillRect(x * blockSize, (y+1) * blockSize, blockSize, blockSize);
                 }
             }
         }
+
+        // Mouse Control
         scene.onWheel = function (e)
         {
             if (e.wheelDelta < 0) {
@@ -97,6 +115,17 @@
         {
             if (mouseHold)
                 camera.moveTo(camera.position.x - e.dx * input.coordinate.unitX, camera.position.y - e.dy * input.coordinate.unitY);
+        }
+        scene.onMouseMove = function (e)
+        {
+            debug.innerText = e.x + "," + e.y;
+        }
+        //var tiger = new Tiger(0);
+        var deer = new Deer(1, 0, 0);
+        //deer.state = new DeerGlobalState(deer);
+        
+        for (var i = 0; i < 0; i++) {
+            new Deer(1, Math.random() * mapWidth * blockSize, Math.random() * mapHeight * blockSize);
         }
     </script>
 </body>
