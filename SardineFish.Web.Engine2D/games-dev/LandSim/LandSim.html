@@ -125,7 +125,8 @@
         {
             if(deer)
             {
-                deer.state.direction = new Vector2(e.x, e.y);
+                deer.changeState(new DeerControl(deer));
+                deer.state.target = new Vector2(e.x, e.y);
             }
         }
         //var tiger = new Tiger(0);

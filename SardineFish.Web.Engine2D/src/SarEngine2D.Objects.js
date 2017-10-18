@@ -1562,6 +1562,7 @@
     {
         this.id = -1;
         this.name = "GameObject";
+        this.scene = null;
         this.graphic = null;
         this.collider = null;
         this.collideGroups = ArrayList();

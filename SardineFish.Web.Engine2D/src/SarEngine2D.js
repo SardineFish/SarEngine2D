@@ -1581,6 +1581,7 @@
         }
         this.collideTable.rows = this._objList.length;
         this.collideTable.columns = this._objList.length;
+        obj.scene = this;
         return obj.id;
     }
     Scene.prototype.removeGameObject = function (id)
@@ -1614,7 +1615,7 @@
         }
         this._objList[id] = null;
         obj.id = -1;
-
+        obj.scene = null;
         /*this.collideTable.rows = this.objectList.length;
         this.collideTable.columns = this.objectList.length;*/
     }

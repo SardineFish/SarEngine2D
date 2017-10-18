@@ -41,6 +41,17 @@
     moveTo(target, power, maxForce, maxTurn, dt)
     {
         this.energy -= power * dt;
+        //this.gameObject.v = Vector2.multi(this.forward, 40 * Math.random());
+        var distance = Number.MAX_VALUE;
+        var ang = 0;
+        if (target instanceof Vector2) {
+            ang = Math.atan2(target.y - this.gameObject.position.y, target.x - this.gameObject.position.x) - Math.atan2(this.forward.y, this.forward.x);
+            distance = Vector2.minus(target, this.gameObject.position).mod();
+        }
+        else if (!isNaN(target))
+            ang = target - Math.atan2(this.forward.y, this.forward.x);
+
+
         var F = null;
         if (this.gameObject.v.mod() <= 0) {
             F = Vector2.multi(this.forward, maxForce);
@@ -51,13 +62,10 @@
                 F = maxForce;
             F = Vector2.multi(this.forward, F);
         }
-        this.gameObject.F = F;
-        //this.gameObject.v = Vector2.multi(this.forward, 40 * Math.random());
-        var ang = 0;
-        if (target instanceof Vector2) 
-            ang = Math.atan2(target.y, target.x) - Math.atan2(this.forward.y, this.forward.x);
-        else if (!isNaN(target))
-            ang = target - Math.atan2(this.forward.y, this.forward.x);
+        if (distance < 1)
+            return;
+        if (distance > (this.gameObject.v.mod() * this.gameObject.v.mod()) / (this.gameObject.scene.physics.f / this.gameObject.mass * 2))
+            this.gameObject.F = F;
 
         if (ang > maxTurn) {
             this.gameObject.rotate(maxTurn);
@@ -178,7 +186,7 @@ class DeerWander extends State
     {
         super(deer);
 
-        this.power = 30000;
+        this.power = 20000;
         this.maxTurn = 0.02;
         this.maxForce = 5000;
         this.nextTarget();
@@ -283,6 +291,23 @@ class DeerEat extends State
 
         this.eatSpeed = 20;
 
+    }
+}
+
+class DeerControl extends State
+{
+    constructor(deer)
+    {
+        super(deer);
+        this.target = null;
+        this.power = 20000;
+        this.maxTurn = 0.1;
+        this.maxForce = 5000;
+    }
+    update(dt)
+    {
+        if (this.target)
+            this.animal.moveTo(this.target, this.power, this.maxForce, this.maxTurn, dt);
     }
 }
 
