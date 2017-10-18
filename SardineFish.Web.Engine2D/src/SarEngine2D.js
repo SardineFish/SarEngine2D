@@ -498,7 +498,8 @@
                 }
                 if (this.physics.f > 0)
                 {
-                    var F = Vector2.multi(normV, Fvector).mod();
+                    var normV = Vector2.normalize(obj.v);
+                    var F = Vector2.multi(normV, Fvector);
                     if (obj.v.x == 0 && obj.v.y == 0)
                     {
                         if (Fvector.mod() < this.physics.f)
@@ -507,7 +508,6 @@
                             Fvector = Vector2.multi(Fvector.normalize(), Fvector.mod() - this.physics.f);
                     }
                     else {
-                        var normV = Vector2.normalize(obj.v);
                         var f = Vector2.multi(Vector2.multi(normV, -1), this.physics.f);
                         Fvector.plus(f);
                     }
@@ -4235,48 +4235,6 @@
     }
     window.Align = Align;
 
-    //Force
-    function Force(x, y, f)
-    {
-        this.x = 0;
-        this.y = 0;
-        if (x == undefined)
-            return;
-        if (x instanceof Vector2)
-        {
-            this.x = x.x;
-            this.y = x.y;
-        }
-        else if (f)
-        {
-            var l = Math.sqrt(x * x + y * y);
-            this.x = x * f / l;
-            this.y = y * f / l;
-        }
-        else
-        {
-            this.x = x;
-            this.y = y;
-        }
-    }
-    Force.prototype.copy = function ()
-    {
-        return new Force(this.x, this.y, this.f);
-    }
-    Force.prototype.toString = function ()
-    {
-        return "(" + this.x + "," + this.y + ")";
-    }
-    Force.prototype.getValue = function ()
-    {
-        return Math.sqrt(this.x * this.x + this.y * this.y);
-    }
-    Force.prototype.toAcceleration = function (m)
-    {
-        return new Vector(this.x / m, this.y / m);
-    }
-    Engine.Force = Force;
-    window.Force = Force;
 
     //Mouse
     function Mouse()

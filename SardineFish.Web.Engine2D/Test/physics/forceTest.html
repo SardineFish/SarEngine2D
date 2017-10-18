@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Force Test</title>
+    <script src="/src/SarEngine2D.js"></script>
+    <script src="/src/SarEngine2D.Objects.js"></script>
+    <script src="/src/SarEngine2D.GUI.js"></script>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+            height: 100vh;
+            width: 100vw;
+        }
+        #gameDisplay{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameDisplay">
+
+    </div>
+    <script>
+        var Width = document.body.clientWidth;
+        var Height = document.body.clientHeight;
+        var game = SarEngine.createInNode(gameDisplay, Width, Height);
+        var scene = game.scene;
+        var camera = scene.cameraList[0];
+        var display = camera.displayList[0];
+        var input = display.getInput();
+        scene.addInput(input);
+        game.start();
+        scene.physics.f = 50;
+        var obj;
+        scene.onClick = function (e)
+        {
+            var circle = new Circle(50);
+            
+            obj = new GameObject();
+            obj.graphic = circle;
+            obj.v = new Vector2(Math.random() * 300 - 150, Math.random() * 300 - 150);
+            obj.moveTo(e.x, e.y);
+            scene.addGameObject(obj);
+        }
+        
+    </script>
+</body>
+</html>

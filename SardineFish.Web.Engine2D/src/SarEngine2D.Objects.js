@@ -145,6 +145,50 @@
     Engine.Vector2 = Vector2;
     window.Vector2 = Vector2;
 
+
+    //Force
+    function Force(x, y, f)
+    {
+        Vector2.call(this, x, y);
+        this.x = 0;
+        this.y = 0;
+        if (x == undefined)
+            return;
+        if (x instanceof Vector2) {
+            this.x = x.x;
+            this.y = x.y;
+        }
+        else if (f) {
+            var l = Math.sqrt(x * x + y * y);
+            this.x = x * f / l;
+            this.y = y * f / l;
+        }
+        else {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    Force.prototype = new Vector2();
+    Force.prototype.constructor = Force;
+    Force.prototype.copy = function ()
+    {
+        return new Force(this.x, this.y, this.f);
+    }
+    Force.prototype.toString = function ()
+    {
+        return "(" + this.x + "," + this.y + ")";
+    }
+    Force.prototype.getValue = function ()
+    {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+    Force.prototype.toAcceleration = function (m)
+    {
+        return new Vector(this.x / m, this.y / m);
+    }
+    Engine.Force = Force;
+    window.Force = Force;
+
     //-------Point
     function Point(x, y)
     {
