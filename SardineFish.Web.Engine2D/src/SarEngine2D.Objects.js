@@ -91,8 +91,12 @@
     Vector2.prototype.normalize = function ()
     {
         var mod = this.mod();
-        this.x /= mod;
-        this.y /= mod;
+        if (mod == 0)
+            this.x = this.y = 0;
+        else {
+            this.x /= mod;
+            this.y /= mod;
+        }
     }
     Vector2.prototype.toLine = function (x, y)
     {
@@ -134,6 +138,8 @@
         if (!(v instanceof Vector2))
             throw new Error("v must be an Vector2.");
         var mod = v.mod();
+        if (mod == 0)
+            return new Vector2(0, 0);
         return new Vector2(v.x / mod, v.y / mod);
     }
     Engine.Vector2 = Vector2;

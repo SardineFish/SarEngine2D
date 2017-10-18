@@ -491,15 +491,32 @@
             for (var i = 0; i < objectList.length; i++)
             {
                 var obj = this.layers[this.layers.depthList[d]].objectList[i];
-                var F = Vector2.plus(obj.F, obj.constantForce);
-                
-                obj.a.x = (obj.F.x + obj.constantForce.x) / obj.mass;
-                obj.a.y = (obj.F.y + obj.constantForce.y) / obj.mass;
+                var Fvector = Vector2.plus(obj.F, obj.constantForce);
                 if (obj.gravity && (!obj.collider || !obj.collider.landed))
                 {
-                    obj.a.x += scene.physics.g.x;
-                    obj.a.y += scene.physics.g.y;
+                    Fvector.plus(Vector2.multi(this.physics.g, obj.mass));
                 }
+                if (this.physics.f > 0)
+                {
+                    var F = Vector2.multi(normV, Fvector).mod();
+                    if (obj.v.x == 0 && obj.v.y == 0)
+                    {
+                        if (Fvector.mod() < this.physics.f)
+                            Fvector = new Vector2(0, 0);
+                        else
+                            Fvector = Vector2.multi(Fvector.normalize(), Fvector.mod() - this.physics.f);
+                    }
+                    else {
+                        var normV = Vector2.normalize(obj.v);
+                        var f = Vector2.multi(Vector2.multi(normV, -1), this.physics.f);
+                        Fvector.plus(f);
+                    }
+
+                }
+
+                obj.a.x = Fvector.x / obj.mass;
+                obj.a.y = Fvector.y / obj.mass;
+
                 obj.moveTo(obj.position.x + obj.v.x * dt + 0.5 * obj.a.x * dt * dt, obj.position.y + obj.v.y * dt + 0.5 * obj.a.y * dt * dt);
                 obj.v.x += obj.a.x * dt;
                 obj.v.y += obj.a.y * dt;
