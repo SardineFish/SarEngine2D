@@ -37,7 +37,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
     <div id="debug">
 
     </div>
@@ -60,6 +60,7 @@
         var layerAnimals = new Layer(Coordinate.Default);
         scene.addInput(input);
         scene.addLayer(layerAnimals, 1);
+        scene.physics.f = 500;
         game.start();
         noise.seed(Math.random());
         var map = initMap(mapWidth, mapHeight);
@@ -119,6 +120,13 @@
         scene.onMouseMove = function (e)
         {
             debug.innerText = e.x + "," + e.y;
+        }
+        scene.onClick = function (e)
+        {
+            if(deer)
+            {
+                deer.state.direction = new Vector2(e.x, e.y);
+            }
         }
         //var tiger = new Tiger(0);
         var deer = new Deer(1, 0, 0);

@@ -97,6 +97,7 @@
             this.x /= mod;
             this.y /= mod;
         }
+        return this;
     }
     Vector2.prototype.toLine = function (x, y)
     {

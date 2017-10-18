@@ -38,11 +38,21 @@
         this.state.onEnter(previous);
     }
 
-    moveTo(target, powerCost, maxTurn, dt)
+    moveTo(target, power, maxForce, maxTurn, dt)
     {
-        this.energy -= powerCost * dt;
-
-        this.gameObject.v = Vector2.multi(this.forward, 40 * Math.random());
+        this.energy -= power * dt;
+        var F = null;
+        if (this.gameObject.v.mod() <= 0) {
+            F = Vector2.multi(this.forward, maxForce);
+        }
+        else {
+            F = power / this.gameObject.v.mod();
+            if (F > maxForce)
+                F = maxForce;
+            F = Vector2.multi(this.forward, F);
+        }
+        this.gameObject.F = F;
+        //this.gameObject.v = Vector2.multi(this.forward, 40 * Math.random());
         var ang = 0;
         if (target instanceof Vector2) 
             ang = Math.atan2(target.y, target.x) - Math.atan2(this.forward.y, this.forward.x);
@@ -63,6 +73,7 @@
     randomDirection()
     {
         var direction = (Math.tan((Math.random() - 0.5) * Math.PI * 0.93) / 20 + 0.5) * Math.PI * 2 - Math.PI;
+        //var direction = Math.random() * Math.PI * 2 - Math.PI;
         direction += Math.atan2(this.forward.y, this.forward.x);
         return direction;
     }
@@ -96,7 +107,7 @@ class Deer extends Animal
     constructor(id, x, y)
     {
         super(id, "deer");
-        this.energy = 200;
+        this.energy = 200000000;
         this.state = new DeerWander(this);
         var pol = new Polygon([new Point(0, 10), new Point(10, -10), new Point(-10, -10)]);
         pol.setCenter(0, 0);
@@ -136,7 +147,7 @@ class DeerWander extends State
             this.animal.changeState(new DeerForage(this.animal));
             return;
         }
-        this.animal.moveTo(this.direction, this.power, this.maxTurn, dt);
+        this.animal.moveTo(this.direction, this.power * Math.random(), this.maxForce, this.maxTurn, dt);
         var state = this;
     }
     onEnter(previousState)
@@ -167,8 +178,9 @@ class DeerWander extends State
     {
         super(deer);
 
-        this.power = 1;
+        this.power = 30000;
         this.maxTurn = 0.02;
+        this.maxForce = 5000;
         this.nextTarget();
     }
 }
@@ -187,7 +199,7 @@ class DeerForage extends State
             this.findGrass();
         }
         else {
-            this.animal.moveTo(this.target, this.power, this.maxTurn, dt);
+            this.animal.moveTo(this.target, this.power, this.maxForce, this.maxTurn, dt);
         }
     }
     onEnter(previousState)
