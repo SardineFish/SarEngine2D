@@ -63,7 +63,7 @@
             F = Vector2.multi(this.forward, F);
         }
         if (distance < 1)
-            return;
+            return true;
         if (distance > (this.gameObject.v.mod() * this.gameObject.v.mod()) / (this.gameObject.scene.physics.f / this.gameObject.mass * 2))
             this.gameObject.F = F;
 
@@ -76,6 +76,7 @@
         else {
             this.gameObject.rotate(ang);
         }
+        return false;
     }
 
     randomDirection()
@@ -306,8 +307,10 @@ class DeerControl extends State
     }
     update(dt)
     {
-        if (this.target)
-            this.animal.moveTo(this.target, this.power, this.maxForce, this.maxTurn, dt);
+        if (this.target) {
+            if (this.animal.moveTo(this.target, this.power, this.maxForce, this.maxTurn, dt))
+                this.target = null;
+        }
     }
 }
 

@@ -500,6 +500,11 @@
                 {
                     var normV = Vector2.normalize(obj.v);
                     var F = Vector2.multi(normV, Fvector);
+
+                    // Fuck the accuracy.
+                    if (obj.v.mod() < 1)
+                        obj.v.zero();
+
                     if (obj.v.x == 0 && obj.v.y == 0)
                     {
                         if (Fvector.mod() < this.physics.f)
@@ -509,9 +514,9 @@
                     }
                     else {
                         var f = Vector2.multi(Vector2.multi(normV, -1), this.physics.f);
+                        
                         Fvector.plus(f);
                     }
-
                 }
 
                 obj.a.x = Fvector.x / obj.mass;

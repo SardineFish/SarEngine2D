@@ -48,6 +48,12 @@
         this.y = v.y;
         this.coordinate = coordinate;
     }
+    Vector2.prototype.zero = function ()
+    {
+        this.x = 0;
+        this.y = 0;
+        return this;
+    }
     Vector2.prototype.getLength = function ()
     {
         return Math.sqrt(this.x * this.x + this.y * this.y);
@@ -142,6 +148,10 @@
         if (mod == 0)
             return new Vector2(0, 0);
         return new Vector2(v.x / mod, v.y / mod);
+    }
+    Vector2.zero = function ()
+    {
+        return new Vector2(0, 0);
     }
     Engine.Vector2 = Vector2;
     window.Vector2 = Vector2;
