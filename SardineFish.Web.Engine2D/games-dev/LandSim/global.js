@@ -1,0 +1,92 @@
+import { Block, initMap } from "./map.js";
+import { Entity } from "./entity.js";
+import { Animal } from "./animal.js";
+import { Tiger } from "./tiger.js";
+import { Deer } from "./deer.js";
+let map = initMap(500, 500);
+let Height = $("#game").height();
+let Width = $("#game").width();
+let MapWidth = 500;
+let MapHeight = 500;
+let BlockSize = 20;
+export {map, Width, Height, MapWidth, MapHeight, BlockSize};
+let gamingElement = $("#game").get(0);
+let game = SarEngine.createInNode(gamingElement, Width, Height);
+let scene = game.scene;
+let camera = scene.cameraList[0];
+let display = camera.displayList[0];
+let input = display.getInput();
+let layerLand = scene.layers[0];
+let layerAnimals = new Layer(Coordinate.Default);
+export { game, scene, camera, display, input, layerLand, layerAnimals } 
+/**
+ * @type {Array<Tiger>}
+ */
+let tigers = [];
+/**
+ * @type {Array<Deer>}
+ */
+let deers = [];
+/**
+ * @type {Array<Animal>}
+ */
+let animals = [];
+/**
+ * @type {Array<Entity>}
+ */
+let entities = [];
+let grassGrow = 0;
+export class Global
+{
+    static get Map()
+    {
+        return map;
+    }
+    static get Height() { return Height; }
+    static get Width() { return Width; }
+    static get MapWidth() { return MapWidth; }
+    static get MapHeight() { return MapHeight; }
+    static get BlockSize() { return BlockSize; }
+    static get Tigers() { return tigers; }
+    static get Deers() { return deers; }
+    static get Animals() { return animals; }
+    static get Entities() { return entities; }
+    static get Grass() { return grassGrow; }
+
+    /**
+     * Grow all the grass in the world.
+     * @param {number} grow 
+     */
+    static GrassGrow(grow)
+    {
+        grassGrow += grow;
+    }
+
+    /**
+     * Register an unique ID.
+     * @returns {Number}
+     */
+    static RegisterID()
+    {
+        return entities.length++;
+    }
+
+    /**
+     * Add an entity to this world.
+     * @param {Entity} entity - The entity to be add to this world. 
+     */
+    static AddEntity(entity)
+    {
+        entities[entity.id] = entity;
+        if (entity instanceof Animal)
+        {
+            animals[animals.length++] = entity;
+            scene.addGameObject(entity.gameObject, 1);
+        }
+        if (entity instanceof Tiger)
+            tigers[tigers.length++] = entity;
+        else if (entity instanceof Deer)
+            deers[deers.length++] = entity;
+        
+    }
+}
