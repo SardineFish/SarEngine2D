@@ -13,6 +13,7 @@
     <script src="animal.js"></script>
     <script src="deer.js"></script>
     <script src="tiger.js"></script>
+    <script src="script.js"></script>
     <style>
         body{
             margin: 0px;
@@ -38,104 +39,101 @@
     </style>
 </head>
 <body oncontextmenu="return false;">
-    <div id="debug">
-
-    </div>
-    <div id="game">
-
-    </div>
+    <div id="debug"></div>
+    <div id="game"></div>
     <script>
         var gamingElement = $("#game").get(0);
-        var Width = $("#game").width();
-        var Height = $("#game").height();
-        var mapWidth = 500;
-        var mapHeight = 500;
-        var blockSize = 20;
-        var game = SarEngine.createInNode(gamingElement, Width, Height);
-        var scene = game.scene;
-        var camera = scene.cameraList[0];
-        var display = camera.displayList[0];
-        var input = display.getInput();
-        var layerLand = scene.layers[0];
-        var layerAnimals = new Layer(Coordinate.Default);
-        scene.addInput(input);
-        scene.addLayer(layerAnimals, 1);
-        scene.physics.f = 500;
-        game.start();
-        noise.seed(Math.random());
-        var map = initMap(mapWidth, mapHeight);
-        // Map Rendering
-        layerLand.onEndRender = function (args)
-        {
-            var o = input.coordinate.pointMapTo(Coordinate.Default, 0, Height);
-            var xto = input.coordinate.pointMapTo(Coordinate.Default, Width, 0);
-            var yto = input.coordinate.pointMapTo(Coordinate.Default, 0, 0);
-            o = new Vector2(parseInt(o.x / blockSize)-3, parseInt(o.y / blockSize)-3);
-            xto = parseInt(xto.x / blockSize)+3;
-            yto = parseInt(yto.y / blockSize)+3;
-            for (var x = o.x; x < xto; x++) {
-                for (var y = o.y; y < yto; y++) {
-                    if (!map[x] || !map[x][y])
-                        continue;
-                    switch(map[x][y].type)
-                    {
-                        case Map.Types.Sand:
-                            args.graphics.fillStyle = "#fffeb5";
-                            break;
-                        case Map.Types.Grass:
-                            args.graphics.fillStyle = "#92d480";
-                            break;
-                        case Map.Types.Wood:
-                            args.graphics.fillStyle = "#278165";
-                    }
-                    args.graphics.fillRect(x * blockSize, (y+1) * blockSize, blockSize, blockSize);
-                }
-            }
-        }
-
-        // Mouse Control
-        scene.onWheel = function (e)
-        {
-            if (e.wheelDelta < 0) {
-                camera.zoomTo(camera.zoom * 1.2, e.x, e.y);
-            }
-            else {
-                camera.zoomTo(camera.zoom * (1 / 1.2), e.x, e.y);
-            }
-        }
-        var mouseHold = false;
-        input.onMouseDown = function (e)
-        {
-            mouseHold = true;
-        }
-        input.onMouseUp = function (e)
-        {
-            mouseHold = false;
-        }
-        input.onMouseMove = function (e)
-        {
-            if (mouseHold)
-                camera.moveTo(camera.position.x - e.dx * input.coordinate.unitX, camera.position.y - e.dy * input.coordinate.unitY);
-        }
-        scene.onMouseMove = function (e)
-        {
-            debug.innerText = e.x + "," + e.y;
-        }
-        scene.onClick = function (e)
-        {
-            if(deer)
+var Width = $("#game").width();
+var Height = $("#game").height();
+var mapWidth = 500;
+var mapHeight = 500;
+var blockSize = 20;
+var game = SarEngine.createInNode(gamingElement, Width, Height);
+var scene = game.scene;
+var camera = scene.cameraList[0];
+var display = camera.displayList[0];
+var input = display.getInput();
+var layerLand = scene.layers[0];
+var layerAnimals = new Layer(Coordinate.Default);
+scene.addInput(input);
+scene.addLayer(layerAnimals, 1);
+scene.physics.f = 500;
+scene.worldBackground = "#fffeb5";
+game.start();
+noise.seed(Math.random());
+var map = initMap(mapWidth, mapHeight);
+// Block Rendering
+layerLand.onEndRender = function (args)
+{
+    var o = input.coordinate.pointMapTo(Coordinate.Default, 0, Height);
+    var xto = input.coordinate.pointMapTo(Coordinate.Default, Width, 0);
+    var yto = input.coordinate.pointMapTo(Coordinate.Default, 0, 0);
+    o = new Vector2(parseInt(o.x / blockSize)-3, parseInt(o.y / blockSize)-3);
+    xto = parseInt(xto.x / blockSize)+3;
+    yto = parseInt(yto.y / blockSize)+3;
+    for (var x = o.x; x < xto; x++) {
+        for (var y = o.y; y < yto; y++) {
+            if (!map[x] || !map[x][y] || map[x][y].type == Block.Types.Sand)
+                continue;
+            switch(map[x][y].type)
             {
-                deer.changeState(new DeerControl(deer));
-                deer.state.target = new Vector2(e.x, e.y);
+                case Block.Types.Sand:
+                    //args.graphics.fillStyle = "#fffeb5";
+                    break;
+                case Block.Types.Grass:
+                    args.graphics.fillStyle = "#92d480";
+                    break;
+                case Block.Types.Wood:
+                    args.graphics.fillStyle = "#278165";
             }
+            args.graphics.fillRect(x * blockSize, (y+1) * blockSize, blockSize, blockSize);
         }
-        //var tiger = new Tiger(0);
-        var deer = new Deer(1, 0, 0);
-        //deer.state = new DeerGlobalState(deer);
-        
-        for (var i = 0; i < 0; i++) {
-            new Deer(1, Math.random() * mapWidth * blockSize, Math.random() * mapHeight * blockSize);
-        }
+    }
+}
+
+// Mouse Control
+scene.onWheel = function (e)
+{
+    if (e.wheelDelta < 0) {
+        camera.zoomTo(camera.zoom * 1.2, e.x, e.y);
+    }
+    else {
+        camera.zoomTo(camera.zoom * (1 / 1.2), e.x, e.y);
+    }
+}
+var mouseHold = false;
+input.onMouseDown = function (e)
+{
+    mouseHold = true;
+}
+input.onMouseUp = function (e)
+{
+    mouseHold = false;
+}
+input.onMouseMove = function (e)
+{
+    if (mouseHold)
+        camera.moveTo(camera.position.x - e.dx * input.coordinate.unitX, camera.position.y - e.dy * input.coordinate.unitY);
+}
+scene.onMouseMove = function (e)
+{
+    debug.innerText = e.x + "," + e.y;
+}
+scene.onClick = function (e)
+{
+    if(deer)
+    {
+        deer.changeState(new DeerControl(deer));
+        deer.state.target = new Vector2(e.x, e.y);
+    }
+}
+//var tiger = new Tiger(0);
+var deer = new Deer(1, 0, 0);
+//deer.state = new DeerGlobalState(deer);
+
+for (var i = 0; i < 500; i++) {
+    new Deer(1, Math.random() * mapWidth * blockSize, Math.random() * mapHeight * blockSize);
+}
     </script>
 </body>
 </html>

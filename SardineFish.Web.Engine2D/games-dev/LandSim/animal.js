@@ -32,10 +32,16 @@
 
     changeState(state)
     {
-        this.state.onExit(state);
+        if (this.state)
+            this.state.onExit(state);
         var previous = this.state;
         this.state = state;
         this.state.onEnter(previous);
+    }
+
+    isHungry()
+    {
+        return false;
     }
 
     moveTo(target, power, maxForce, maxTurn, dt)
@@ -62,10 +68,12 @@
                 F = maxForce;
             F = Vector2.multi(this.forward, F);
         }
-        if (distance < 1)
-            return true;
+        /*if (distance < 1)
+            return true;*/
         if (distance > (this.gameObject.v.mod() * this.gameObject.v.mod()) / (this.gameObject.scene.physics.f / this.gameObject.mass * 2))
             this.gameObject.F = F;
+        else
+            return true;
 
         if (ang > maxTurn) {
             this.gameObject.rotate(maxTurn);
@@ -79,6 +87,7 @@
         return false;
     }
 
+    
     randomDirection()
     {
         var direction = (Math.tan((Math.random() - 0.5) * Math.PI * 0.93) / 20 + 0.5) * Math.PI * 2 - Math.PI;
@@ -116,7 +125,7 @@ class Deer extends Animal
     constructor(id, x, y)
     {
         super(id, "deer");
-        this.energy = 200000000;
+        this.energy = 200000;
         this.state = new DeerWander(this);
         var pol = new Polygon([new Point(0, 10), new Point(10, -10), new Point(-10, -10)]);
         pol.setCenter(0, 0);
@@ -126,6 +135,16 @@ class Deer extends Animal
         this.gameObject.graphic = pol;
         scene.addGameObject(this.gameObject, 1);
         this.gameObject.moveTo(x, y);
+    }
+
+    isHungry()
+    {
+        return (this.energy < 100000);
+    }
+
+    isFull()
+    {
+        return (this.energy > 2000000);
     }
 }
 
@@ -150,13 +169,24 @@ class DeerGlobalState extends State
 
 class DeerWander extends State
 {
+    constructor(deer)
+    {
+        super(deer);
+
+        this.maxPower = 20000;
+        this.power = 0;
+        this.maxTurn = 0.02;
+        this.maxForce = 2000;
+        this.nextTarget();
+    }
     update(dt)
     {
-        if (this.animal.energy < 190) {
+        if (this.animal.isHungry()) {
             this.animal.changeState(new DeerForage(this.animal));
             return;
         }
-        this.animal.moveTo(this.direction, this.power * Math.random(), this.maxForce, this.maxTurn, dt);
+        if (this.direction)
+            this.animal.moveTo(this.direction, this.power, this.maxForce, this.maxTurn, dt);
         var state = this;
     }
     onEnter(previousState)
@@ -171,7 +201,15 @@ class DeerWander extends State
     {
         if (!this.animal)
             return;
-        this.direction = this.animal.randomDirection();
+        if (map.get(this.animal.blockPosition.x, this.animal.blockPosition.y).type == Block.Types.Grass && Math.random() < 0.1) {
+            this.animal.changeState(new DeerEat(this.animal));
+        }
+        else if (Math.random() < 0.75) {
+            this.direction = this.animal.randomDirection();
+            this.power = this.maxPower * Math.random();
+        }
+        else
+            this.direction = null;
         /*
         this.target = new Vector2(Math.random() * 300 - 150, Math.random() * 300 - 150);
         console.log(this.target);
@@ -183,24 +221,24 @@ class DeerWander extends State
             state.nextTarget.call(state);
         }, 1000 + 2000 * Math.random());
     }
-    constructor(deer)
-    {
-        super(deer);
-
-        this.power = 20000;
-        this.maxTurn = 0.02;
-        this.maxForce = 5000;
-        this.nextTarget();
-    }
 }
 
 class DeerForage extends State
 {
+    constructor(deer)
+    {
+        super(deer);
+
+        this.power = 30000;
+        this.maxForce = 5000;
+        this.maxTurn = 0.1;
+        this.target = null;
+    }
     update(dt)
     {
         var blockX = this.animal.blockPosition.x;
         var blockY = this.animal.blockPosition.y;
-        if (map[blockX] && map[blockX][blockY] && map[blockX][blockY].resource > 0) {
+        if (map.get(blockX, blockY).type == Block.Types.Grass && map.get(blockX, blockY).resource > 0) {
             this.animal.changeState(new DeerEat(this.animal));
             return;
         }
@@ -231,10 +269,8 @@ class DeerForage extends State
             var viewBlockY = parseInt(this.animal.gameObject.position.y + this.animal.forward.y * dist / blockSize);
 
             if (viewBlockX != blockX &&
-               viewBlockY != blockY &&
-               map[viewBlockX] &&
-               map[viewBlockX][viewBlockY] &&
-               map[viewBlockX][viewBlockY].type == Map.Types.Grass) {
+                viewBlockY != blockY &&
+                map.get(viewBlockX, viewBlockY).type == Block.Types.Grass) {
                 this.target = Math.atan2(this.animal.forward.y, this.animal.forward.x);
             }
         }
@@ -253,26 +289,25 @@ class DeerForage extends State
             }, Math.random() * 3000 + 1000);
         }
     }
-    constructor(deer)
-    {
-        super(deer);
-
-        this.power = 2;
-        this.maxTurn = 0.1;
-        this.target = null;
-    }
 
 }
 
 class DeerEat extends State
 {
+    constructor(deer)
+    {
+        super(deer);
+
+        this.eatSpeed = 50000;
+        this.eatUntilFull = false;
+    }
     update(dt)
     {
         this.animal.gameObject.v = new Vector2(0, 0);
         var blockX = this.animal.blockPosition.x;
         var blockY = this.animal.blockPosition.y;
         var resource = this.eatSpeed * dt;
-        if (map.get(blockX, blockY) && map.get(blockX, blockY).type==Map.Types.Grass) {
+        if (map.get(blockX, blockY) && map.get(blockX, blockY).type==Block.Types.Grass) {
             if(map.get(blockX,blockY).resource>resource){
                 map[blockX][blockY].resource -= resource;
                 this.animal.energy += resource / 10;
@@ -280,18 +315,19 @@ class DeerEat extends State
             else{
                 resource = map[blockX][blockY].resource;
                 map[blockX][blockY].resource = 0;
-                map[blockX][blockY].type = Map.Types.Sand;
+                map[blockX][blockY].type = Block.Types.Sand;
                 this.animal.energy += resource / 10;
-                this.animal.changeState(new DeerForage(this.animal));
+                if (this.animal.isFull() || !this.eatUntilFull)
+                    this.animal.changeState(new DeerWander(this.animal));
+                else
+                    this.animal.changeState(new DeerForage(this.animal));
             }
         }
     }
-    constructor(deer)
+    onEnter(previousState)
     {
-        super(deer);
-
-        this.eatSpeed = 20;
-
+        if (this.animal.isHungry())
+            this.eatUntilFull = true;
     }
 }
 

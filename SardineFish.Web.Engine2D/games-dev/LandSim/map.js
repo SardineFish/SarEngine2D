@@ -1,12 +1,13 @@
-﻿class Map
+﻿class Block
 {
     constructor(type,resource)
     {
         this.type = type;
         this.resource = resource;
     }
-    static get Types() { return { Sand: 0, Grass: 1, Wood: 2 };}
+    static get Types() { return {Void:-1, Sand: 0, Grass: 1, Wood: 2 };}
 }
+Block.Void = new Block(Block.Types.Void, 0);
 function initMap(width,height)
 {
     var map = [];
@@ -17,13 +18,13 @@ function initMap(width,height)
             n = (n + 1) / 2;
             var type;
             if (n < 0.5) {
-                map[x][y] = new Map(Map.Types.Sand, 0);
+                map[x][y] = new Block(Block.Types.Sand, 0);
             }
             else if (n < 0.7) {
-                map[x][y] = new Map(Map.Types.Grass, 100);
+                map[x][y] = new Block(Block.Types.Grass, 100000);
             }
             else {
-                map[x][y] = new Map(Map.Types.Wood, 100);
+                map[x][y] = new Block(Block.Types.Wood, 100);
             }
         }
     }
@@ -32,7 +33,7 @@ function initMap(width,height)
         if (map[x] && map[x][y])
             return map[x][y];
         else
-            return null;
+            return Block.Void;
     }
     return map;
 }

@@ -250,6 +250,7 @@
         this.collideTable = new Matrix(0, 0);
         this.runtime = 0;
         this.GUI = null;
+        this.worldBackground = new Color(0, 0, 0, 1.0);
         this.background = new BackgroundCollection(this);
         this.device = new Device();
         this.eventSources = ArrayList();
@@ -695,7 +696,7 @@
 
         for (var i = 0; i < this.cameraList.length; i++)
         {
-            this.cameraList[i].clear(new Color(0,0,0,1.0));
+            this.cameraList[i].clear(this.worldBackground);
             this.cameraList[i].render(dt);
         }
 
@@ -787,7 +788,10 @@
             whileRender = false;
             this.physicalSimulate(dt);
             //this.render(dt);
-        /*} catch (ex) { alert(whileRender + ex.message); }*/
+            /*
+        } catch (ex) {
+            console.warn(ex.message);
+        }*/
     }
     Scene.prototype.addInput = function (input)
     {
