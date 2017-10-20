@@ -2,7 +2,9 @@ import {map, Width, Height, MapWidth, MapHeight, BlockSize} from "./global.js";
 import {game, scene, camera, display, input, layerLand, layerAnimals, Global} from "./global.js";
 import { Block, initMap } from "./map.js";
 import { Animal } from "./animal.js";
-import {Deer, DeerControl} from "./deer.js";
+import { Deer, DeerControl } from "./deer.js";
+import { Sound, SoundSpread } from "./sound.js";
+import { Tiger } from "./tiger.js";
 scene.addInput(input);
 scene.addLayer(layerAnimals, 1);
 scene.physics.f = 500;
@@ -68,10 +70,16 @@ scene.onMouseMove = function (e)
 }
 scene.onClick = function (e)
 {
-    if(deer)
+    if (e.button == Mouse.Buttons.Right && deer)
     {
         deer.changeState(new DeerControl(deer));
         deer.state.target = new Vector2(e.x, e.y);
+    }
+    else if (e.button == Mouse.Buttons.Left)
+    {
+        Global.AddEntity(new Tiger(Global.RegisterID(), e.x, e.y));
+        var sound = new Sound(Global.RegisterID(), deer, 10, e.x, e.y, 400);
+        Global.AddEntity(sound);
     }
 }
 //var tiger = new Tiger(0);

@@ -3,9 +3,19 @@ import { Animal } from "./animal.js";
 import { Global } from "./global.js";
 import { State } from "./states.js";
 import { RenderableEntity } from "./renderableEntity.js";
+import { SoundMessage } from "./message.js";
 const SpeedOfSound = 314;
-export class Sound extends Entity
+export class Sound extends RenderableEntity
 {
+	/**
+	 * 
+	 * @param {Number} id 
+	 * @param {Entity} sender 
+	 * @param {Number} volume 
+	 * @param {Number} x 
+	 * @param {Number} y 
+	 * @param {Number} spreadDistance 
+	 */
 	constructor(id, sender, volume, x, y, spreadDistance)
 	{
 		super(id, x, y);
@@ -23,12 +33,16 @@ export class Sound extends Entity
 
 	onDisplay()
 	{
-		this.gameObject.animate({ "graphic.r": this.spreadDistance }, this.spreadDistance / SpeedOfSound);
+		this.changeState(new SoundSpread(this));
 	}
 
 }
 export class SoundSpread extends State
 {
+	/**
+	 * 
+	 * @param {Sound} sound 
+	 */
 	constructor(sound)
 	{
 		super(sound);
@@ -41,6 +55,8 @@ export class SoundSpread extends State
 
 	checkHear()
 	{
+		if (!this.sound || this.sound.disposed)
+			return;
 		for(let i=0; i < Global.Animals.length; i++)
 		{
 			let animal = Global.Animals[i];
@@ -51,12 +67,16 @@ export class SoundSpread extends State
 				msg.dispatch();
 			}
 		}
+		let state = this;
+		setTimeout(function() {
+			state.checkHear.call(state);
+		}, 100);
 	}
 
 	update(dt)
 	{
-		var dx = dt / this.totalTime;
-		var x = spread / this.spreadTo;
+		let dx = dt / this.totalTime;
+		let x = this.spread / this.spreadTo;
 		x += dx;
 		dx = dx > 1 ? 1 : x;
 		this.spread = x * this.spreadTo;
@@ -71,7 +91,12 @@ export class SoundSpread extends State
 	onEnter(previousState)
 	{
 		this.spread = 0;
-		checkHear();
+		this.checkHear();
+	}
+
+	onExit(nextState)
+	{
+		this.sound = null;
 	}
 
 }

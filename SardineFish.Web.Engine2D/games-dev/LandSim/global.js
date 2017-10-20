@@ -89,16 +89,30 @@ export class Global
             deers[deers.length++] = entity;
         if (entity instanceof RenderableEntity)
 		{
-			scene.addGameObject(entity.gameObject. 1);
-			eneity.onDisplay();
-		}
+            scene.addGameObject(entity.gameObject, 1);
+			entity.onDisplay();
+        }
+        else
+        {
+            let updateCallback = function (args)
+            {
+                if (entity.disposed)
+                {
+                    scene.onUpdate.remove(updateCallback);
+                    return;
+                }    
+                entity.update(args.dt); 
+            }
+            scene.onUpdate.add(updateCallback);
+        }
     }
 
 	static RemoveEntity(entity)
 	{
 		if(entity instanceof Entity)
-		{
-			eneities[entity.id] = null;
+        {
+            entity.disposed = true;
+			entities[entity.id] = null;
 			if(entity instanceof RenderableEntity)
 				scene.removeGameObject(entity.gameObject);
 		}

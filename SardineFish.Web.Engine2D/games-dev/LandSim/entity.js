@@ -38,6 +38,7 @@ export class Entity
         y = y || 0;
         this[positionSymbol] = new Vector2(x, y);
         this.detectDistance = 0;
+        this.disposed = false;
     }
 
     get position()

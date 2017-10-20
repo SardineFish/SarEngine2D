@@ -20,11 +20,6 @@ export class Animal extends RenderableEntity
         this.positionMemory = [];
         this.forward = new Vector2(0, 1);
         this.visualRange = { distance: 200, ang: Math.PI };
-        var animal = this;
-        this.gameObject.onUpdate = function (obj, dt)
-        {
-            animal.update.call(animal, dt);
-        }
     }
 
     /**
@@ -68,26 +63,38 @@ export class Animal extends RenderableEntity
         //this.gameObject.v = Vector2.multi(this.forward, 40 * Math.random());
         var distance = Number.MAX_VALUE;
         var ang = 0;
+        var direction = new Vector2(0, 0);
         if (target instanceof Vector2)
         {
             ang = Math.atan2(target.y - this.gameObject.position.y, target.x - this.gameObject.position.x) - Math.atan2(this.forward.y, this.forward.x);
             distance = Vector2.minus(target, this.gameObject.position).mod();
+            direction = Vector2.normalize(target);
         }
         else if (!isNaN(target))
+        {
             ang = target - Math.atan2(this.forward.y, this.forward.x);
-
-
+            direction.x = Math.cos(target);
+            direction.y = Math.sin(target);
+        }
+        if (ang > Math.PI)
+        {
+            ang = ang - Math.PI * 2;
+        }
+        else if (ang < -Math.PI)
+        {
+            ang = Math.PI * 2 + ang;
+        }
         var F = null;
         if (this.gameObject.v.mod() <= 0)
         {
-            F = Vector2.multi(this.forward, maxForce);
+            F = Vector2.multi(direction, maxForce);
         }
         else
         {
             F = power / this.gameObject.v.mod();
             if (F > maxForce)
                 F = maxForce;
-            F = Vector2.multi(this.forward, F);
+            F = Vector2.multi(direction, F);
         }
         /*if (distance < 1)
             return true;*/
@@ -120,8 +127,17 @@ export class Animal extends RenderableEntity
     turnTo(angle, maxTurn, dt)
     {
         let ang = angle - Math.atan2(this.forward.y, this.forward.x);
+        if (ang > Math.PI)
+        {
+            ang = ang - Math.PI * 2;
+        }
+        else if (ang < -Math.PI)
+        {
+            ang = Math.PI * 2 + ang;
+        }
         if (0.001 < ang && ang <= 0.001)
-            return true;    
+            return true;
+        
         if (ang > maxTurn)
             this.gameObject.rotate(maxTurn);
         else if (ang < -maxTurn)
@@ -152,13 +168,13 @@ export class Animal extends RenderableEntity
      */
     guard(visualDistance, visualRange, menaceDistance, target)
     {
-        var dx = new Vector2(target.blockPosition.x - this.blockPosition.x, target.blockPosition.y - this.blockPosition.y);
+        var dx = new Vector2(target.position.x - this.position.x, target.position.y - this.position.y);
         let distance = dx.mod();
         if (distance > visualDistance + target.detectDistance)
             return 0;
         if (Math.acos(Vector2.multi(this.forward, dx) / distance) < visualRange)
         {
-            this.positionMemory[target.id] = target.blockPosition;
+            this.positionMemory[target.id] = target.position;
             return parseInt(menaceDistance / distance);
         }
         else
@@ -172,7 +188,7 @@ export class Animal extends RenderableEntity
      */
     flee(dangerList)
     {
-        let fleeVector = new Vector2;
+        let fleeVector = new Vector2(0,0);
         for (let i = 0; i < dangerList.length; i++)
         {
             let danger = dangerList[i];

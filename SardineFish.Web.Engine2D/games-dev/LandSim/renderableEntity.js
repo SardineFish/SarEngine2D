@@ -1,10 +1,15 @@
 import { Entity } from "./entity.js";
-export class RenderableEntity extens Entity
+export class RenderableEntity extends Entity
 {
 	constructor(id, x, y)
 	{
 		super(id);
-		this.gameObject=new GameObject();
+		this.gameObject = new GameObject();
+		var entity = this;
+		this.gameObject.onUpdate = function (obj, dt)
+		{
+			entity.update.call(entity, dt);
+		}
 	}
 
 	get position(){return this.gameObject.position;}

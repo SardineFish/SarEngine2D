@@ -2855,6 +2855,11 @@
         this.element = element;
         //this.element = document.createElement("div");
 
+        this.clickRange = 30;
+        this.doubleClickDuration = 400;
+        this._lastClickTime = null;
+        this._lastHoldPosition = null;
+
         var input = this;
 
         this.ignorePadding = true;
@@ -2986,6 +2991,7 @@
         function mouseDownCallback(e)
         {
             var args = new Args(e);
+            input._lastHoldPosition = new Vector2(args.x, args.y);
             if (input.onMouseDown) {
                 var argsInput = args.copy();
                 input.onMouseDown.invoke(argsInput);
@@ -3007,43 +3013,60 @@
         function mouseUpCallback(e)
         {
             var args = new Args(e);
+            var argsCPY;
             if (input.onMouseUp) {
-                var argsInput = args.copy();
-                input.onMouseUp.invoke(argsInput);
-                if (argsInput.handled)
-                    return;
+                var argsCPY = args.copy();
+                input.onMouseUp.invoke(argsCPY);
             }
-            if (input.display && input.display.GUI) {
-                var argsGUI = args.copy();
-                input.display.GUI.mouseUpCallback(argsGUI);
-                if (argsGUI.handled)
-                    return;
+            if (input.display && input.display.GUI && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.display.GUI.mouseUpCallback(argsCPY);
             }
-            if (input.scene && input.coordinate) {
-                var argsScene = args.copy();
-                input.scene.mouseUpCallback(argsScene);
+            if (input.scene && input.coordinate && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.scene.mouseUpCallback(argsCPY);
 
+            }
+            var pos = new Vector2(args.x, args.y);
+            if (input._lastHoldPosition && pos.minus(input._lastHoldPosition).mod() <= input.clickRange)
+            {
+                input._lastHoldPosition = null;
+                clickCallback(e);
             }
         }
         function clickCallback(e)
         {
             var args = new Args(e);
+            var argsCPY;
             if (input.onClick) {
-                var argsInput = args.copy();
-                input.onClick.invoke(argsInput);
-                if (argsInput.handled)
-                    return;
+                var argsCPY = args.copy();
+                input.onClick.invoke(argsCPY);
             }
-            if (input.display && input.display.GUI) {
-                var argsGUI = args.copy();
-                input.display.GUI.clickCallback(argsGUI);
-                if (argsGUI.handled)
-                    return;
+            if (input.display && input.display.GUI && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.display.GUI.clickCallback(argsCPY);
             }
-            if (input.scene && input.coordinate) {
-                var argsScene = args.copy();
-                input.scene.clickCallback(argsScene);
+            if (input.scene && input.coordinate && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.scene.clickCallback(argsCPY);
 
+            }
+            if (input._lastClickTime)
+            {
+                var time = new Date().getTime();
+                if (time - input._lastClickTime < input.doubleClickDuration)
+                {
+                    doubleClickCallback(e);
+                    input._lastClickTime = null;
+                }
+                else
+                {
+                    input._lastClickTime = new Date().getTime();
+                }
+            }
+            else
+            {
+                input._lastClickTime = new Date().getTime();
             }
         }
         function doubleClickCallback(e)
@@ -3093,8 +3116,6 @@
         this.element.addEventListener("mousemove", mouseMoveCallback);
         this.element.addEventListener("mousedown", mouseDownCallback);
         this.element.addEventListener("mouseup", mouseUpCallback);
-        this.element.addEventListener("click", clickCallback);
-        this.element.addEventListener("dblclick", doubleClickCallback);
         this.element.addEventListener("wheel", wheelCallback);
 
         function Args(e)
