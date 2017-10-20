@@ -93,4 +93,14 @@ export class Global
 			eneity.onDisplay();
 		}
     }
+
+	static RemoveEntity(entity)
+	{
+		if(entity instanceof Entity)
+		{
+			eneities[entity.id] = null;
+			if(entity instanceof RenderableEntity)
+				scene.removeGameObject(entity.gameObject);
+		}
+	}
 }

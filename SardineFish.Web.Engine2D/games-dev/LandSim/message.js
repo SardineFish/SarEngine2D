@@ -16,15 +16,11 @@ export class Message
      * 
      * @param {Entity} sender - The sender of this message.
      * @param {Entity} receiver - The receiver of this message.
-     * @param {symbol} type - Tht type of this message.
-     * @param {*} data - The data of this message.
      */
-    constructor(sender, receiver, type, data)
+    constructor(sender, receiver)
     {
         this.sender = sender;
         this.receiver = receiver;
-        this.type = type;
-        this.data = data;
     }
 
 	dispatch()
@@ -32,3 +28,12 @@ export class Message
 		this.receiver.onMessage(this);
 	}
 }
+export class SoundMessage extends Message
+{
+	constructor(sender, reciever, sound)
+	{
+		super(sound, reciever);
+		this.sound = sound;
+	}
+}
+
