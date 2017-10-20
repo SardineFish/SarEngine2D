@@ -175,7 +175,11 @@ export class Animal extends RenderableEntity
         if (Math.acos(Vector2.multi(this.forward, dx) / distance) < visualRange)
         {
             this.positionMemory[target.id] = target.position;
-            return parseInt(menaceDistance / distance);
+            var x = distance / menaceDistance;
+            x = -Math.log(x);
+            if (x <= 0)
+                x = 0;    
+            return x;
         }
         else
             return 0;

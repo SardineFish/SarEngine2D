@@ -65,6 +65,7 @@ export class SoundSpread extends State
 			{
 				let msg = new SoundMessage(this.sound, animal);
 				msg.dispatch();
+				this.heard[animal.id] = true;
 			}
 		}
 		let state = this;

@@ -327,7 +327,7 @@ export class DeerCautious extends AnimalState
         if (!this.animal)
             return;
         if (Math.random() < 0.6)
-            this.turnTo = Math.random() * Math.PI * 2;
+            this.turnTo = (Math.random() * Math.PI - Math.PI / 2) * 2;
         let state = this;
         setTimeout(function ()
         {
@@ -347,7 +347,7 @@ export class DeerInDanger extends AnimalState
         this.maxTurn = 0.1;
         this.visualDistance = Deer.VisualDistance * 1.2;
         this.animal.detectDistance = Deer.DetectDistance * 1.5;
-        this.visualAngle = Math.PI * 2 / 3;
+        this.visualAngle = Math.PI;
         this.direction = Math.atan2(this.animal.forward.y, this.animal.forward.x);
     }
 
