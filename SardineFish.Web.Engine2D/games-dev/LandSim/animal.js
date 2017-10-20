@@ -2,7 +2,8 @@
 import { State } from "./states.js";
 import { Message, MessageTypes } from "./message.js";
 import { Entity } from "./entity.js";
-export class Animal extends Entity
+import { RenderableEntity } from "./renderableEntity.js";
+export class Animal extends RenderableEntity
 {
     /**
      * 
@@ -17,7 +18,6 @@ export class Animal extends Entity
         this.energy = 0;
         this.age = 0;
         this.positionMemory = [];
-        this.gameObject = new GameObject();
         this.forward = new Vector2(0, 1);
         this.visualRange = { distance: 200, ang: Math.PI };
         var animal = this;
@@ -25,21 +25,6 @@ export class Animal extends Entity
         {
             animal.update.call(animal, dt);
         }
-    }
-
-    get position()
-    {
-        return this.gameObject.position;
-    }
-
-    set position(value)
-    {
-        this.gameObject.moveTo(value.x, value.y);
-    }
-
-    get blockPosition()
-    {
-        return new Vector2(parseInt(this.position.x), parseInt(this.position.y));
     }
 
     /**

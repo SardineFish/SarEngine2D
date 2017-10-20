@@ -26,4 +26,9 @@ export class Message
         this.type = type;
         this.data = data;
     }
+
+	dispatch()
+	{
+		this.receiver.onMessage(this);
+	}
 }

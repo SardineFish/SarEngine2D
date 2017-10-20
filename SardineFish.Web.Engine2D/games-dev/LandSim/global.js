@@ -1,5 +1,6 @@
 import { Block, initMap } from "./map.js";
 import { Entity } from "./entity.js";
+import { RenderableEntity } from "./renderableEntity.js";
 import { Animal } from "./animal.js";
 import { Tiger } from "./tiger.js";
 import { Deer } from "./deer.js";
@@ -81,12 +82,15 @@ export class Global
         if (entity instanceof Animal)
         {
             animals[animals.length++] = entity;
-            scene.addGameObject(entity.gameObject, 1);
         }
         if (entity instanceof Tiger)
             tigers[tigers.length++] = entity;
         else if (entity instanceof Deer)
             deers[deers.length++] = entity;
-        
+        if (entity instanceof RenderableEntity)
+		{
+			scene.addGameObject(entity.gameObject. 1);
+			eneity.onDisplay();
+		}
     }
 }
