@@ -203,16 +203,19 @@
     //-------Point
     function Point(x, y)
     {
+        Vector2.call(this, x, y);
         if (isNaN(x) || isNaN(y))
             throw "x and y must be numbers.";
         this.x = x;
         this.y = y;
         this.coordinate = Coordinate.Default;
     }
+    Point.prototype = new Vector2();
+    Point.prototype.constructor = Point;
     Point.Distance = function (p1, p2)
     {
         return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-    }
+    };
     Point.prototype.copy = function ()
     {
         var p = new Point(this.x, this.y);
@@ -280,6 +283,7 @@
     //Position
     function Position(x, y)
     {
+        Vector2.call(this);
         this.onChange = null;
         this.changeCallback = null;
         this.coordinate = Coordinate.Default;
@@ -334,7 +338,9 @@
                 position.innerY = value;
             }
         })
-    }
+    }  
+    Position.prototype = new Vector2();
+    Position.prototype.constructor = Position;
     Position.prototype.copy = function ()
     {
         var pos = new Position(this.innerX, this.innerY);
@@ -375,7 +381,12 @@
     function Line(_p1, _p2)
     {
         var p1 = _p1, p2 = _p2;
-        if ((_p1 instanceof Vector2) && (_p2 instanceof Vector2))
+        if ((_p1 instanceof Point) && (_p2 instanceof Point))
+        {
+            p1 = _p1;
+            p2 = _p2;
+        }
+        else if ((_p1 instanceof Vector2) && (_p2 instanceof Vector2))
         {
             p1 = new Point(_p1.x, _p1.y, this);
             p2 = new Point(_p2.x, _p2.y, this);

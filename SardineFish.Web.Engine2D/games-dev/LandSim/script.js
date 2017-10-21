@@ -10,7 +10,6 @@ scene.addLayer(layerAnimals, 1);
 scene.physics.f = 500;
 scene.worldBackground = "#fffeb5";
 game.start();
-noise.seed(Math.random());
 // Block Rendering
 layerLand.onEndRender = function (args)
 {
@@ -31,6 +30,7 @@ layerLand.onEndRender = function (args)
                     break;
                 case Block.Types.Grass:
                     args.graphics.fillStyle = "#92d480";
+                    args.graphics.fillStyle = new Color(146, 212, 128, map[x][y].resource / Block.MaxResource).toString();
                     break;
                 case Block.Types.Wood:
                     args.graphics.fillStyle = "#278165";
@@ -87,6 +87,6 @@ var deer = new Deer(Global.RegisterID(), 0, 0);
 Global.AddEntity(deer);
 //deer.state = new DeerGlobalState(deer);
 
-for (var i = 0; i < 500; i++) {
-    Global.AddEntity(new Deer(Global.RegisterID, Math.random() * MapWidth * BlockSize, Math.random() * MapHeight * BlockSize));
+for (let i = 0; i < 500; i++) {
+    Global.AddEntity(new Deer(Global.RegisterID(), Math.random() * MapWidth * BlockSize, Math.random() * MapHeight * BlockSize));
 }

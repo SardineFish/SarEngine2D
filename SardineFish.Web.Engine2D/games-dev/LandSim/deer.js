@@ -2,8 +2,9 @@
 import {State} from "./states.js";
 import {map,scene,BlockSize} from "./global.js";
 import { Block } from "./map.js";
-import { Message, MessageTypes, SoundMessage } from "./message.js";
+import { Message, MessageTypes, SoundMessage, AttackMessage } from "./message.js";
 import { Global } from "./global.js";
+import { Tiger } from "./tiger.js";
 
 /**
  * A Deer
@@ -14,8 +15,7 @@ export class Deer extends Animal
     constructor(id, x, y)
     {
         super(id, "deer");
-        this.energy = 200000;
-        this.state = new DeerWander(this);
+        this.energy = Deer.EnergyDefault;
         this.detectDistance = Deer.DetectDistance;
         this.visualRange.distance = Deer.VisualDistance;
         this.visualRange.ang = Deer.VisualAngle;
@@ -25,13 +25,16 @@ export class Deer extends Animal
         pol.fillStyle = "white";
         pol.strokeStyle = "rgba(0,0,0,0.05)";
         this.gameObject.graphic = pol;
+        this.gameObject.collider = pol;
+        this.gameObject.collider.rigidBody = true;
         //scene.addGameObject(this.gameObject, 1);
         this.gameObject.moveTo(x, y);
     }
 
+    static get EnergyDefault() { return 200000000; }
     static get DetectDistance() { return 200; }
     static get VisualDistance() { return 200; }
-    static get VisualAngle() { return Math.PI / 6;}
+    static get VisualAngle() { return Math.PI / 3;}
 
     /**
      * 
@@ -41,18 +44,62 @@ export class Deer extends Animal
     {
         if (message instanceof SoundMessage)
         {
-            this.changeState(new DeerCautious(this));
+            if(!(this.state instanceof DeerInDanger))
+            this.changeState(new DeerCautious(this, Math.atan2(message.sound.position.y, message.sound.position.x)));
         }
+        if (message instanceof AttackMessage)
+        {
+            this.HP -= message.damage;
+            if (this.HP < 0)
+            {
+                this.HP = 0;
+                this.changeState(new DeerDead(this));
+                return;
+            }
+        }
+    }
+
+    onDisplay()
+    {
+        this.changeState(new DeerWander(this));
     }
 
     isHungry()
     {
-        return (this.energy < 100000);
+        return (this.energy < Deer.EnergyDefault - 200000);
     }
 
     isFull()
     {
-        return (this.energy > 2000000);
+        return (this.energy > Deer.EnergyDefault);
+    }
+
+    checkFood()
+    {
+        var blockX = this.blockPosition.x;
+        var blockY = this.blockPosition.y;
+        if (map.get(blockX, blockY).type == Block.Types.Grass && map.get(blockX, blockY).resource > 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    seekFood(visualDistance, visualAngle)
+    {
+        var blockX = this.blockPosition.x;
+        var blockY = this.blockPosition.y;
+        for (var dist = 0; dist < visualDistance; dist++)
+        {
+            var viewBlockX = parseInt((this.position.x + this.forward.x * dist) / BlockSize);
+            var viewBlockY = parseInt((this.position.y + this.forward.y * dist) / BlockSize);
+
+            if (map.get(viewBlockX, viewBlockY).type == Block.Types.Grass && map.get(viewBlockX, viewBlockY).resource > 0)
+            {
+                return new Vector2((viewBlockX + 0.5) * BlockSize, (viewBlockY + 0.5) * BlockSize);
+            }
+        }
+        return false;
     }
 }
 
@@ -77,6 +124,10 @@ export class DeerGlobalState extends AnimalState
 
 export class DeerWander extends AnimalState
 {
+    /**
+     * 
+     * @param {Deer} deer 
+     */
     constructor(deer)
     {
         super(deer);
@@ -85,37 +136,74 @@ export class DeerWander extends AnimalState
         this.power = 0;
         this.maxTurn = 0.02;
         this.maxForce = 2000;
-        this.nextTarget();
+        this.visualDistance = Deer.VisualDistance;
+        this.visualAngle = Deer.VisualAngle;
     }
     update(dt)
     {
-        if (this.animal.isHungry()) {
-            this.animal.changeState(new DeerForage(this.animal));
-            return;
-        }
         if (this.direction)
             this.animal.moveTo(this.direction, this.power, this.maxForce, this.maxTurn, dt);
-        var state = this;
     }
     onEnter(previousState)
     {
-
+        this.AIUpdate();
+        this.nextTarget();
     }
     onExit(nextState)
     {
         this.animal = null;
     }
+    AIUpdate()
+    {
+        if (this.disposed)
+            return;
+        
+        // Hungry check
+        if (this.animal.isHungry())
+        {
+            this.animal.changeState(new DeerForage(this.animal));
+            return;
+        }
+        
+        // Visual
+        this.animal.visual(this.visualDistance, this.visualAngle);
+
+        // Guard
+        for (let i = 0; i < this.animal.positionMemory.length; i++)
+        {
+            if (this.animal.positionMemory[i].entity instanceof Tiger)
+            {
+                if (this.animal.guard(600, this.animal.positionMemory[i].entity))
+                {
+                    this.animal.changeState(new DeerInDanger(this.animal));
+                    return;
+                }
+            }
+        }
+
+
+        let state = this;
+        setTimeout(function ()
+        {
+            state.AIUpdate.call(state);
+        }, 100);
+    }
     nextTarget()
     {
         if (!this.animal)
             return;
-        if (map.get(this.animal.blockPosition.x, this.animal.blockPosition.y).type == Block.Types.Grass && Math.random() < 0.1) {
+        
+        // Eat randomly
+        if (Math.random() < 0.1 && this.animal.checkFood() ) {
             this.animal.changeState(new DeerEat(this.animal));
+            return;
         }
+        // Move to next position
         else if (Math.random() < 0.75) {
             this.direction = this.animal.randomDirection();
             this.power = this.maxPower * Math.random();
         }
+        // Stop moving    
         else
             this.direction = null;
         /*
@@ -133,6 +221,10 @@ export class DeerWander extends AnimalState
 
 export class DeerForage extends AnimalState
 {
+    /**
+     * 
+     * @param {Deer} deer 
+     */
     constructor(deer)
     {
         super(deer);
@@ -141,61 +233,85 @@ export class DeerForage extends AnimalState
         this.maxForce = 5000;
         this.maxTurn = 0.1;
         this.target = null;
+        this.foundFood = false;
+        this.visualDistance = Deer.VisualDistance * 1.2;
+        this.visualAngle = Math.PI / 2;
     }
     update(dt)
     {
-        var blockX = this.animal.blockPosition.x;
-        var blockY = this.animal.blockPosition.y;
-        if (map.get(blockX, blockY).type == Block.Types.Grass && map.get(blockX, blockY).resource > 0) {
+        if (this.target !== null)
+        {
+            if (this.animal.moveTo(this.target, this.power, this.maxForce, this.maxTurn, dt))
+            {
+                if (!this.animal.checkFood())
+                {
+                    this.foundFood = false;
+                    this.nextDirection();
+                } 
+            }
+        }
+            
+    }
+
+    nextDirection()
+    {
+        if (this.foundFood)
+            return;
+        this.target = this.animal.randomDirection();
+        
+        let state = this;
+        setTimeout(function() {
+            state.nextDirection.call(state);
+        }, 1000*Math.random());
+    }
+
+    AIUpdate()
+    {
+        if (this.disposed)
+            return;
+        
+        // Chceck food
+        if (this.animal.checkFood())
+        {
             this.animal.changeState(new DeerEat(this.animal));
             return;
+        }    
+        
+        // Seek food
+        if (!this.foundFood)
+            this.target = this.animal.seekFood(this.visualDistance, this.visualAngle);
+        if (this.target)
+        {
+            this.foundFood = true;
+        }  
+        
+        // Visual
+        this.animal.visual(this.visualDistance, this.visualAngle);
+
+        // Guard
+        for (let i = 0; i < this.animal.positionMemory.length; i++)
+        {
+            if (this.animal.positionMemory[i].entity instanceof Tiger)
+            {
+                if (this.animal.guard(600, this.animal.positionMemory[i].entity))
+                {
+                    this.animal.changeState(new DeerInDanger(this.animal));
+                    return;
+                }
+            }
         }
-        else if (this.target === null) {
-            this.findGrass();
-        }
-        else {
-            this.animal.moveTo(this.target, this.power, this.maxForce, this.maxTurn, dt);
-        }
+
+
+        let state = this;
+        setTimeout(function ()
+        {
+            state.AIUpdate.call(state);
+        }, 100);
     }
     onEnter(previousState)
     {
-        this.findGrass();
-    }
-    onExit(nextState)
-    {
-        this.animal = null;
-    }
-    findGrass()
-    {
-        if (!this.animal)
-            return;
-        this.target = null;
-        var blockX = this.animal.blockPosition.x;
-        var blockY = this.animal.blockPosition.y;
-        for (var dist = 0; dist < this.animal.visualRange.distance; dist++) {
-            var viewBlockX = parseInt(this.animal.gameObject.position.x + this.animal.forward.x * dist / BlockSize);
-            var viewBlockY = parseInt(this.animal.gameObject.position.y + this.animal.forward.y * dist / BlockSize);
-
-            if (viewBlockX != blockX &&
-                viewBlockY != blockY &&
-                map.get(viewBlockX, viewBlockY).type == Block.Types.Grass) {
-                this.target = Math.atan2(this.animal.forward.y, this.animal.forward.x);
-            }
-        }
-        var state = this;
-        if (this.target === null) {
-            this.target = this.animal.randomDirection();
-            setTimeout(function ()
-            {
-                state.findGrass.call(state);
-            }, Math.random() * 1000);
-        }
-        else {
-            setTimeout(function ()
-            {
-                state.findGrass.call(state);
-            }, Math.random() * 3000 + 1000);
-        }
+        this.AIUpdate();
+        this.nextDirection();
     }
 
 }
@@ -208,6 +324,8 @@ export class DeerEat extends AnimalState
 
         this.eatSpeed = 50000;
         this.eatUntilFull = false;
+        this.visualDistance = Deer.VisualDistance / 2;
+        this.visualAngle = Math.PI / 6;
     }
     update(dt)
     {
@@ -232,10 +350,38 @@ export class DeerEat extends AnimalState
             }
         }
     }
+    AIUpdate()
+    {
+        if (this.disposed)
+            return;
+        // Visual
+        this.animal.visual(this.visualDistance, this.visualAngle);
+
+        // Guard
+        for (let i = 0; i < this.animal.positionMemory.length; i++)
+        {
+            if (this.animal.positionMemory[i].entity instanceof Tiger)
+            {
+                if (this.animal.guard(600, this.animal.positionMemory[i].entity))
+                {
+                    this.animal.changeState(new DeerInDanger(this.animal));
+                    return;
+                }
+            }
+        }
+
+
+        let state = this;
+        setTimeout(function ()
+        {
+            state.AIUpdate.call(state);
+        }, 100);
+    }
     onEnter(previousState)
     {
         if (this.animal.isHungry())
             this.eatUntilFull = true;
+        this.AIUpdate();
     }
 }
 
@@ -258,41 +404,26 @@ export class DeerControl extends AnimalState
     }
 }
 
-/**
- * The State when a deer is guard against an enmy.
- * @class
- */
-export class DeerGuard extends AnimalState
-{
-    /**
-     * 
-     * @param {Deer} deer 
-     */
-    constructor(deer)
-    {
-        super(deer);
-        this.visualDistance=deer.visualRange.distance;
-    }
-}
-
 export class DeerCautious extends AnimalState
 {
     /**
      * 
-     * @param {Deer} deer 
+     * @param {Deer} deer
+     * @param {Number} source
      */
-    constructor(deer)
+    constructor(deer, source)
     {
         super(deer);
+        this.checkedSource = false;
         this.visualDistance = this.animal.visualRange.distance * 1.5;
-        this.visualAngle = Math.PI * 2 / 3;
-        this.turnTo = 0;
+        this.visualAngle = Math.PI * 5 / 6;
+        this.turnTo = source;
         this.turnSpeed = 0.1;
     }
     onEnter(previousState)
     {
         this.animal.detectDistance = Deer.DetectDistance / 2;
-        this.turnAround();
+        this.AIUpdate();
     }
     onExit(nextState)
     {
@@ -302,24 +433,48 @@ export class DeerCautious extends AnimalState
 
     update(dt)
     {
-        // Gurad
-        for (var i = 0; i < Global.Tigers.length; i++)
-        {
-            var tiger = Global.Tigers[i];
-            if (this.animal.guard(this.visualDistance, this.visualAngle, 600, tiger))
-            {
-                this.animal.changeState(new DeerInDanger(this.animal));
-                return;
-            }
-        }
-
         // Turn around
         if (this.turnTo)
         {
             if (this.animal.turnTo(this.turnTo, this.turnSpeed, dt))
-                this.turnTo = null;    
+            {
+                this.turnTo = null;
+                if (!this.checkedSource)
+                {
+                    this.checkedSource = true;
+                    this.turnAround();
+                }
+            }
         }
         
+    }
+
+    AIUpdate()
+    {
+        if (this.disposed)
+            return;    
+        // Visual
+        this.animal.visual(this.visualDistance, this.visualAngle);
+
+        // Guard
+        for (let i = 0; i < this.animal.positionMemory.length; i++)
+        {
+            if (this.animal.positionMemory[i].entity instanceof Tiger)
+            {
+                if (this.animal.guard(600, this.animal.positionMemory[i].entity))
+                {
+                    this.animal.changeState(new DeerInDanger(this.animal));
+                    return;
+                }
+            }
+        }
+
+
+        let state = this;
+        setTimeout(function ()
+        {
+            state.AIUpdate.call(state);
+        }, 100);
     }
 
     turnAround()
@@ -327,7 +482,13 @@ export class DeerCautious extends AnimalState
         if (!this.animal)
             return;
         if (Math.random() < 0.6)
-            this.turnTo = (Math.random() * Math.PI - Math.PI / 2) * 2;
+        {
+            let sign = 1;
+            if (Math.random() < 0.5)
+                sign = -1;
+            
+            this.turnTo = Math.atan2(this.animal.forward.y, this.animal.forward.x) + sign * (Math.PI / 2 + Math.random() * Math.PI / 2);
+        }
         let state = this;
         setTimeout(function ()
         {
@@ -353,22 +514,36 @@ export class DeerInDanger extends AnimalState
 
     update(dt)
     {
-        this.animal.moveTo(this.direction, this.power, this.maxForce, this.maxTurn, dt);
+        this.animal.moveTo(this.direction, this.animal.powerLimit(this.power,Deer.EnergyDefault), this.maxForce, this.maxTurn, dt);
     }
 
     AIUpdate()
     {
+        if (this.disposed)
+            return;    
+        // Visual
+        this.animal.visual(this.visualDistance, this.visualAngle);
         // Gurad
         var dangerList = [];
-        for (var i = 0; i < Global.Tigers.length; i++)
+        for (var i = 0; i < this.animal.positionMemory.length; i++)
         {
-            var tiger = Global.Tigers[i];
-            var dangerLevel = this.animal.guard(this.visualDistance, this.visualAngle, 600, tiger);
-            if (dangerLevel > 0)
-                dangerList[dangerList.length] = new Danger(tiger, dangerLevel);
+            var danger = this.animal.positionMemory[i];
+            if (danger.entity instanceof Tiger || danger.entity.id < 0)
+            {
+                var dangerLevel = this.animal.guard(800, danger.entity);
+                if (dangerLevel > 0)
+                    dangerList[dangerList.length] = new Danger(danger.entity, dangerLevel, danger.position);
+            }
         }
 
+        if (dangerList.length == 0)
+        {
+            this.animal.changeState(new DeerWander(this.animal));
+            return;
+        }    
+        // Flee
         var direction = this.animal.flee(dangerList);
+
         if (direction== 0)
             direction = this.direction;
         this.direction = direction;
@@ -382,5 +557,31 @@ export class DeerInDanger extends AnimalState
     onEnter(previousState)
     {
         this.AIUpdate();
+    }
+}
+export class DeerDead extends AnimalState
+{
+    constructor(deer)
+    {
+        super(deer);
+        this.deathTime = 0;
+    }
+
+    update(dt)
+    {
+        this.animal.gameObject.graphic.fillStyle = new Color(128, 128, 128, this.animal.energy / Deer.EnergyDefault);
+    }
+
+    onEnter(previousState)
+    {
+        this.deathTime = new Date().getTime();
+        this.animal.gameObject.graphic.fillStyle = "gray";
+        this.animal.gameObject.graphic.strokeStyle = "black";
+        this.animal.onDisplay = function () { };
+        this.animal.onMessage = function () { };
+        let state = this;
+        setTimeout(function() {
+            state.animal.gameObject.v = new Vector2(0, 0);
+        }, 1000);
     }
 }

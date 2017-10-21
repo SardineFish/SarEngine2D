@@ -4,6 +4,7 @@ import { RenderableEntity } from "./renderableEntity.js";
 import { Animal } from "./animal.js";
 import { Tiger } from "./tiger.js";
 import { Deer } from "./deer.js";
+noise.seed(Math.random());
 let map = initMap(500, 500);
 let Height = $("#game").height();
 let Width = $("#game").width();
@@ -37,6 +38,7 @@ let animals = [];
  */
 let entities = [];
 let grassGrow = 0;
+entities["?"] = entities[-1] = new Entity(-1, 0, 0);
 export class Global
 {
     static get Map()
@@ -53,6 +55,7 @@ export class Global
     static get Animals() { return animals; }
     static get Entities() { return entities; }
     static get Grass() { return grassGrow; }
+    static get UnknownEntity() { return entities[-1]; }
 
     /**
      * Grow all the grass in the world.
@@ -89,7 +92,7 @@ export class Global
             deers[deers.length++] = entity;
         if (entity instanceof RenderableEntity)
 		{
-            scene.addGameObject(entity.gameObject, 1);
+            scene.addGameObject(entity.gameObject, 1, scene.collideGroups.ignoreGroup);
 			entity.onDisplay();
         }
         else

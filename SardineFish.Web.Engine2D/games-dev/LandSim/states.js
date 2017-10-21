@@ -9,6 +9,11 @@ export class State
         
     }
 
+    AIUpdate()
+    {
+        
+    }
+
     /**
      * Excute when change to this state.
      * @param {State} previousState - The previous state before changing.
@@ -24,7 +29,7 @@ export class State
      */
     onExit(nextState)
     {
-
+        this.disposed = true;
     }
 
     /**
@@ -37,5 +42,6 @@ export class State
          * @type {Entity}
          */
         this.entity = entity;
+        this.disposed = false;
     }
 }

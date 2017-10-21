@@ -30,10 +30,31 @@ export class Message
 }
 export class SoundMessage extends Message
 {
+    /**
+     * 
+     * @param {Entity} sender 
+     * @param {Entity} reciever 
+     * @param {Sound} sound 
+     */
 	constructor(sender, reciever, sound)
 	{
-		super(sound, reciever);
+		super(sender, reciever);
 		this.sound = sound;
 	}
 }
-
+export class AttackMessage extends Message
+{
+    /**
+     * 
+     * @param {Entity} attacker 
+     * @param {Entity} victim 
+     * @param {Number} damage 
+     */
+    constructor(attacker, victim, damage)
+    {
+        super(attacker, victim);
+        this.attacker = attacker;
+        this.victim = victim;
+        this.damage = damage;
+    }
+}

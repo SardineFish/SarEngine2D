@@ -69,7 +69,10 @@ export class Entity
     changeState(state)
     {
         if (this.state)
+        {
             this.state.onExit(state);
+            this.state.disposed = true;
+        }
         var previous = this.state;
         this.state = state;
         this.state.onEnter(previous);
@@ -79,7 +82,7 @@ export class Entity
      * 
      * @param {Message} message 
      */
-    onMSessage(message)
+    onMessage(message)
     {
         
     }

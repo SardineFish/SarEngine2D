@@ -4,8 +4,9 @@ import { Global } from "./global.js";
 import { State } from "./states.js";
 import { RenderableEntity } from "./renderableEntity.js";
 import { SoundMessage } from "./message.js";
+import { Wave, WaveSpread } from "./wave.js";
 const SpeedOfSound = 314;
-export class Sound extends RenderableEntity
+export class Sound extends Wave
 {
 	/**
 	 * 
@@ -18,15 +19,10 @@ export class Sound extends RenderableEntity
 	 */
 	constructor(id, sender, volume, x, y, spreadDistance)
 	{
-		super(id, x, y);
+		super(id, x, y, spreadDistance, Sound.SpeedOfSound);
 		this.sender = sender;
 		this.spreadDistance = spreadDistance;
 		this.volume = volume;
-		var circle = new Circle(1);
-		circle.strokeStyle = new Color(128, 128, 128, 0.3);
-		circle.fillStyle = new Color(255, 255, 255, 0.3);
-		this.gameObject.graphic = circle;
-		this.gameObject.moveTo(x, y);
 	}
 
 	static get SpeedOfSound() { return SpeedOfSound; }
@@ -37,7 +33,7 @@ export class Sound extends RenderableEntity
 	}
 
 }
-export class SoundSpread extends State
+export class SoundSpread extends WaveSpread
 {
 	/**
 	 * 
@@ -47,9 +43,6 @@ export class SoundSpread extends State
 	{
 		super(sound);
 		this.sound = sound;
-		this.spread = 0;
-		this.spreadTo = sound.spreadDistance;
-		this.totalTime = sound.spreadDistance / Sound.SpeedOfSound;
 		this.heard = [];
 	}
 
@@ -63,7 +56,7 @@ export class SoundSpread extends State
 			let distance = (new Vector2(animal.position.x-this.sound.position.x, animal.position.y-this.sound.position.y)).mod();
 			if (distance < this.spread && !this.heard[animal.id])
 			{
-				let msg = new SoundMessage(this.sound, animal);
+				let msg = new SoundMessage(this.sound.sender, animal, this.sound);
 				msg.dispatch();
 				this.heard[animal.id] = true;
 			}
@@ -76,17 +69,7 @@ export class SoundSpread extends State
 
 	update(dt)
 	{
-		let dx = dt / this.totalTime;
-		let x = this.spread / this.spreadTo;
-		x += dx;
-		dx = dx > 1 ? 1 : x;
-		this.spread = x * this.spreadTo;
-		this.sound.gameObject.graphic.r = this.spread;
-		if(x >= 1)
-		{
-			Global.RemoveEntity(this.sound);
-			return;
-		}
+		super.update(dt);
 	}
 
 	onEnter(previousState)
