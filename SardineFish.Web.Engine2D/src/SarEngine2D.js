@@ -2446,6 +2446,12 @@
     window.Matrix = Matrix;
 
     //Display
+    /**
+     * 
+     * @param {Element} node 
+     * @param {Number} w 
+     * @param {Number} h 
+     */
     function Display(node, w, h)
     {
         if (!(node instanceof Node))
@@ -2477,7 +2483,12 @@
         var renderWidth = 0;
         var renderHeight = 0;
         var seperateSize = false;
-
+        if (w === undefined || h === undefined)
+        {
+            var style = window.getComputedStyle(node);
+            w = node.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+            h = node.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+        }
         if (node.nodeName == "CANVAS")
         {
             displayDom = node;
