@@ -880,7 +880,12 @@
             args.x = mapTo.x;
             args.y = mapTo.y;
 
-            scene.onMouseMove.invoke(args);
+            if (scene.GUI)
+                scene.GUI.mouseDownCallback(e);
+            if (args.handled)
+                return;
+
+            scene.onMouseDown.invoke(args);
         };
         this.mouseUpCallback = function (e)
         {
