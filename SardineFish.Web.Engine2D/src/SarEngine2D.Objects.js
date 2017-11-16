@@ -1093,6 +1093,15 @@
         this.center.changeCoordinate(coordinate);
         this.coordinate = coordinate;
     }
+    Path.prototype.addPoint = function (x,y)
+    {
+        if (x instanceof Path.Point)
+            this.pList.add(x);
+        else if (typeof(x)===typeof(1) && (typeof(y) === typeof(1)))
+        {
+            this.pList.add(new Path.Point(x, y));
+        }
+    }
     Path.prototype.setCenter = function (x, y)
     {
         if (!isNaN(x) && !isNaN(y))
@@ -1117,6 +1126,12 @@
     {
         if (this.pList.length)
             this.pList.add(this.pList[0]);
+    }
+    Path.prototype.toGameObject = function ()
+    {
+        var obj = new GameObject();
+        obj.graphic = this;
+        return obj;
     }
     Path.prototype.render = function (graphics, x, y, r, dt)
     {

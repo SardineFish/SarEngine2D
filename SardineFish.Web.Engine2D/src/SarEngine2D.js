@@ -3919,7 +3919,6 @@
         this.shadowBlur = 0;
         this.shadowOffsetX = 0;
         this.shadowOffsetY = 0;
-        this.lineCap = "butt";
         this.lineJoin = "miter";
         this.miterLimit = 10;
         this.font = new Font("sans-serif", "10px");
@@ -3929,6 +3928,7 @@
         var globalCompositeOperation = "source-over";
         var _graphics = this;
         var lineWidth = 1;
+        var lineCap = "butt";
         Object.defineProperty(this, "width", {
             get: function ()
             {
@@ -3982,6 +3982,17 @@
                 _graphics.ctx.globalCompositeOperation = value;
             }
         });
+        Object.defineProperty(this, "lineCap", {
+            get: function ()
+            {
+                return lineCap;
+            },
+            set: function (value)
+            {
+                lineCap = value;
+                ctx.lineCap = value;
+            }
+        })
     }
     Graphics.LineCap = (function () { var lineCap = {}; lineCap.Butt = "butt"; lineCap.Round = "round"; lineCap.Square = "square"; return lineCap; })();
     Graphics.LineJoin = (function () { var lineJoin = {}; lineJoin.Bevel = "bevel"; lineJoin.Round = "round"; lineJoin.Miter = "miter"; return lineJoin })();
