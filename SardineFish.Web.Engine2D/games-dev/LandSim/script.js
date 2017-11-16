@@ -63,6 +63,10 @@ input.onMouseMove = function (e)
 {
     if (mouseHold)
         camera.moveTo(camera.position.x - e.dx * input.coordinate.unitX, camera.position.y - e.dy * input.coordinate.unitY);
+    if (e.x < 10)
+    {
+        
+    }
 }
 scene.onMouseMove = function (e)
 {
@@ -85,8 +89,25 @@ scene.onClick = function (e)
 //var tiger = new Tiger(0);
 var deer = new Deer(Global.RegisterID(), 0, 0);
 Global.AddEntity(deer);
+deer.gameObject.hitTest = true;
+deer.gameObject.onClick = function (e)
+{
+    e.handled = true;
+}
 //deer.state = new DeerGlobalState(deer);
 
-for (let i = 0; i < 500; i++) {
-    Global.AddEntity(new Deer(Global.RegisterID(), Math.random() * MapWidth * BlockSize, Math.random() * MapHeight * BlockSize));
+for (let i = 0; i < 500; i++)
+{
+    let deer = new Deer(Global.RegisterID(), Math.random() * MapWidth * BlockSize, Math.random() * MapHeight * BlockSize);
+    Global.AddEntity(deer);
+    deer.gameObject.hitTest = true;
+    deer.gameObject.onClick = function (e)
+    {
+        e.handled = true;
+    }
+
+}
+for (let i = 0; i < 50; i++)
+{
+    Global.AddEntity(new Tiger(Global.RegisterID(), Math.random() * MapWidth * BlockSize, Math.random() * MapHeight * BlockSize));
 }

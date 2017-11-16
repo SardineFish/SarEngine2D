@@ -5,7 +5,7 @@ import { State } from "./states.js";
 import { RenderableEntity } from "./renderableEntity.js";
 import { SoundMessage } from "./message.js";
 import { Wave, WaveSpread } from "./wave.js";
-const SpeedOfSound = 314;
+const SpeedOfSound = 600;
 export class Sound extends Wave
 {
 	/**
@@ -64,7 +64,7 @@ export class SoundSpread extends WaveSpread
 		let state = this;
 		setTimeout(function() {
 			state.checkHear.call(state);
-		}, 100);
+		}, 60);
 	}
 
 	update(dt)

@@ -305,12 +305,15 @@ export class Animal extends RenderableEntity
         let dv = Vector2.minus(target.position, this.position);
         let dx = dv.mod();
         let t = dx / (this.gameObject.v.mod() - target.gameObject.v.mod());
+        //let t = dx / this.gameObject.v.mod();
         return Math.atan2(dv.y, dv.x);
         if (t < 0)
         {
             return Math.atan2(dv.y, dv.x);
         }
-        let posPredicted = Vector2.plus(target.position, Vector2.multi(target.gameObject.v, t));
+        //let posPredicted = Vector2.plus(target.position, Vector2.multi(target.gameObject.v, t));
+        //let selfPosPredicted = Vector2.plus(this.position, Vector2.multi(this.gameObject.v, t));
+        //dv = Vector2.minus(target.position, selfPosPredicted).normalize();
         dv = Vector2.minus(posPredicted, target.position);
         return Math.atan2(dv.y, dv.x);
     }

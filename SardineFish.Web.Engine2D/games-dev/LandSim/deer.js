@@ -255,6 +255,8 @@ export class DeerForage extends AnimalState
 
     nextDirection()
     {
+        if (this.disposed)
+            return;    
         if (this.foundFood)
             return;
         this.target = this.animal.randomDirection();
@@ -510,11 +512,12 @@ export class DeerInDanger extends AnimalState
         this.animal.detectDistance = Deer.DetectDistance * 1.5;
         this.visualAngle = Math.PI;
         this.direction = Math.atan2(this.animal.forward.y, this.animal.forward.x);
+        this.dirOffset = 0;
     }
 
     update(dt)
     {
-        this.animal.moveTo(this.direction, this.animal.powerLimit(this.power,Deer.EnergyDefault), this.maxForce, this.maxTurn, dt);
+        this.animal.moveTo(this.direction + this.dirOffset, this.animal.powerLimit(this.power,Deer.EnergyDefault), this.maxForce, this.maxTurn, dt);
     }
 
     AIUpdate()
@@ -554,9 +557,24 @@ export class DeerInDanger extends AnimalState
         }, 100);
     }
 
+    changeDirection()
+    {
+        if (this.disposed)
+            return;
+        
+        this.dirOffset = (Math.random() * Math.PI / 3) - Math.PI / 6;
+        
+        let state = this;
+        setTimeout(function ()
+        {
+            state.changeDirection.call(state);
+        }, 2000 * Math.random());
+    }
+
     onEnter(previousState)
     {
         this.AIUpdate();
+        this.changeDirection();
     }
 }
 export class DeerDead extends AnimalState

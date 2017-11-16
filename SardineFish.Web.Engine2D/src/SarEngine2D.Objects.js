@@ -2767,6 +2767,12 @@
                 }
             return false;
         }
+        else if (col instanceof Point) {
+            function pointInTriangle(p, p1, p2, p3)
+            {
+
+            }
+        }
         else if (col instanceof Particle)
         {
             return col.isCollideWith(this, v2, v1, dt);

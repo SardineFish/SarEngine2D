@@ -943,6 +943,18 @@
             args.x = mapTo.x;
             args.y = mapTo.y;
 
+            for (var i = 0; i < scene.objectList.length; i++) {
+                var obj = scene.objectList[i];
+                if (obj.hitTest && obj.onClick && obj.collider) {
+                    var p = new Point(args.x, args.y);
+                    if (obj.collider.isCollideWith(p)) {
+                        obj.onClick(args);
+                        if (args.handled)
+                            break;
+                    }
+                }
+            }
+
             scene.onClick.invoke(args);
 
             if (e.button == Mouse.Buttons.Left) {
