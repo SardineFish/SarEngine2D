@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Land</title>
+    <script src="/lib/jQuery/jquery.min.js"></script>
+    <script src="/lib/noisejs/perlin.js"></script>
+    <script src="/src/SarEngine2D.js"></script>
+    <script src="/src/SarEngine2D.Objects.js"></script>
+    <script src="/src/SarEngine2D.GUI.js"></script>
+    <script type="module" src="script.js"></script>
+    <style>
+        body{
+            margin: 0px;
+            padding: 0px;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        #debug {
+            position: fixed;
+            left: 0px;
+            right: 0px;
+            z-index: 100;
+            color: red;
+        }
+        #game{
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0px;
+            left: 0px;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;" onselectstart="return false;">
+    <div id="debug"></div>
+    <div id="game"></div>
+    <script>
+        
+    </script>
+</body>
+</html>

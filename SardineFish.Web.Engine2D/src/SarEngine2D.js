@@ -250,6 +250,7 @@
         this.collideTable = new Matrix(0, 0);
         this.runtime = 0;
         this.GUI = null;
+        this.worldBackground = new Color(0, 0, 0, 1.0);
         this.background = new BackgroundCollection(this);
         this.device = new Device();
         this.eventSources = ArrayList();
@@ -491,13 +492,37 @@
             for (var i = 0; i < objectList.length; i++)
             {
                 var obj = this.layers[this.layers.depthList[d]].objectList[i];
-                obj.a.x = (obj.F.x + obj.constantForce.x) / obj.mass;
-                obj.a.y = (obj.F.y + obj.constantForce.y) / obj.mass;
+                var Fvector = Vector2.plus(obj.F, obj.constantForce);
                 if (obj.gravity && (!obj.collider || !obj.collider.landed))
                 {
-                    obj.a.x += scene.physics.g.x;
-                    obj.a.y += scene.physics.g.y;
+                    Fvector.plus(Vector2.multi(this.physics.g, obj.mass));
                 }
+                if (this.physics.f > 0)
+                {
+                    var normV = Vector2.normalize(obj.v);
+                    var F = Vector2.multi(normV, Fvector);
+
+                    // Fuck the accuracy.
+                    if (obj.v.mod() < 1)
+                        obj.v.zero();
+
+                    if (obj.v.x == 0 && obj.v.y == 0)
+                    {
+                        if (Fvector.mod() < this.physics.f)
+                            Fvector = new Vector2(0, 0);
+                        else
+                            Fvector = Vector2.multi(Fvector.normalize(), Fvector.mod() - this.physics.f);
+                    }
+                    else {
+                        var f = Vector2.multi(Vector2.multi(normV, -1), this.physics.f);
+                        
+                        Fvector.plus(f);
+                    }
+                }
+
+                obj.a.x = Fvector.x / obj.mass;
+                obj.a.y = Fvector.y / obj.mass;
+
                 obj.moveTo(obj.position.x + obj.v.x * dt + 0.5 * obj.a.x * dt * dt, obj.position.y + obj.v.y * dt + 0.5 * obj.a.y * dt * dt);
                 obj.v.x += obj.a.x * dt;
                 obj.v.y += obj.a.y * dt;
@@ -671,7 +696,7 @@
 
         for (var i = 0; i < this.cameraList.length; i++)
         {
-            this.cameraList[i].clear(new Color(0,0,0,1.0));
+            this.cameraList[i].clear(this.worldBackground);
             this.cameraList[i].render(dt);
         }
 
@@ -763,7 +788,10 @@
             whileRender = false;
             this.physicalSimulate(dt);
             //this.render(dt);
-        /*} catch (ex) { alert(whileRender + ex.message); }*/
+            /*
+        } catch (ex) {
+            console.warn(ex.message);
+        }*/
     }
     Scene.prototype.addInput = function (input)
     {
@@ -852,7 +880,12 @@
             args.x = mapTo.x;
             args.y = mapTo.y;
 
-            scene.onMouseMove.invoke(args);
+            if (scene.GUI)
+                scene.GUI.mouseDownCallback(e);
+            if (args.handled)
+                return;
+
+            scene.onMouseDown.invoke(args);
         };
         this.mouseUpCallback = function (e)
         {
@@ -914,6 +947,18 @@
             args.y = (display.camera.height - e.pageY / display.camera.zoom) + (display.camera.center.y - display.camera.height / 2);*/
             args.x = mapTo.x;
             args.y = mapTo.y;
+
+            for (var i = 0; i < scene.objectList.length; i++) {
+                var obj = scene.objectList[i];
+                if (obj.hitTest && obj.onClick && obj.collider) {
+                    var p = new Point(args.x, args.y);
+                    if (obj.collider.isCollideWith(p)) {
+                        obj.onClick(args);
+                        if (args.handled)
+                            break;
+                    }
+                }
+            }
 
             scene.onClick.invoke(args);
 
@@ -1562,6 +1607,7 @@
         }
         this.collideTable.rows = this._objList.length;
         this.collideTable.columns = this._objList.length;
+        obj.scene = this;
         return obj.id;
     }
     Scene.prototype.removeGameObject = function (id)
@@ -1595,7 +1641,7 @@
         }
         this._objList[id] = null;
         obj.id = -1;
-
+        obj.scene = null;
         /*this.collideTable.rows = this.objectList.length;
         this.collideTable.columns = this.objectList.length;*/
     }
@@ -2405,6 +2451,12 @@
     window.Matrix = Matrix;
 
     //Display
+    /**
+     * 
+     * @param {Element} node 
+     * @param {Number} w 
+     * @param {Number} h 
+     */
     function Display(node, w, h)
     {
         if (!(node instanceof Node))
@@ -2436,7 +2488,12 @@
         var renderWidth = 0;
         var renderHeight = 0;
         var seperateSize = false;
-
+        if (w === undefined || h === undefined)
+        {
+            var style = window.getComputedStyle(node);
+            w = node.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+            h = node.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+        }
         if (node.nodeName == "CANVAS")
         {
             displayDom = node;
@@ -2826,6 +2883,11 @@
         this.element = element;
         //this.element = document.createElement("div");
 
+        this.clickRange = 30;
+        this.doubleClickDuration = 400;
+        this._lastClickTime = null;
+        this._lastHoldPosition = null;
+
         var input = this;
 
         this.ignorePadding = true;
@@ -2957,6 +3019,7 @@
         function mouseDownCallback(e)
         {
             var args = new Args(e);
+            input._lastHoldPosition = new Vector2(args.x, args.y);
             if (input.onMouseDown) {
                 var argsInput = args.copy();
                 input.onMouseDown.invoke(argsInput);
@@ -2978,43 +3041,60 @@
         function mouseUpCallback(e)
         {
             var args = new Args(e);
+            var argsCPY;
             if (input.onMouseUp) {
-                var argsInput = args.copy();
-                input.onMouseUp.invoke(argsInput);
-                if (argsInput.handled)
-                    return;
+                var argsCPY = args.copy();
+                input.onMouseUp.invoke(argsCPY);
             }
-            if (input.display && input.display.GUI) {
-                var argsGUI = args.copy();
-                input.display.GUI.mouseUpCallback(argsGUI);
-                if (argsGUI.handled)
-                    return;
+            if (input.display && input.display.GUI && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.display.GUI.mouseUpCallback(argsCPY);
             }
-            if (input.scene && input.coordinate) {
-                var argsScene = args.copy();
-                input.scene.mouseUpCallback(argsScene);
+            if (input.scene && input.coordinate && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.scene.mouseUpCallback(argsCPY);
 
+            }
+            var pos = new Vector2(args.x, args.y);
+            if (input._lastHoldPosition && pos.minus(input._lastHoldPosition).mod() <= input.clickRange)
+            {
+                input._lastHoldPosition = null;
+                clickCallback(e);
             }
         }
         function clickCallback(e)
         {
             var args = new Args(e);
+            var argsCPY;
             if (input.onClick) {
-                var argsInput = args.copy();
-                input.onClick.invoke(argsInput);
-                if (argsInput.handled)
-                    return;
+                var argsCPY = args.copy();
+                input.onClick.invoke(argsCPY);
             }
-            if (input.display && input.display.GUI) {
-                var argsGUI = args.copy();
-                input.display.GUI.clickCallback(argsGUI);
-                if (argsGUI.handled)
-                    return;
+            if (input.display && input.display.GUI && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.display.GUI.clickCallback(argsCPY);
             }
-            if (input.scene && input.coordinate) {
-                var argsScene = args.copy();
-                input.scene.clickCallback(argsScene);
+            if (input.scene && input.coordinate && !argsCPY.handled) {
+                var argsCPY = args.copy();
+                input.scene.clickCallback(argsCPY);
 
+            }
+            if (input._lastClickTime)
+            {
+                var time = new Date().getTime();
+                if (time - input._lastClickTime < input.doubleClickDuration)
+                {
+                    doubleClickCallback(e);
+                    input._lastClickTime = null;
+                }
+                else
+                {
+                    input._lastClickTime = new Date().getTime();
+                }
+            }
+            else
+            {
+                input._lastClickTime = new Date().getTime();
             }
         }
         function doubleClickCallback(e)
@@ -3064,8 +3144,6 @@
         this.element.addEventListener("mousemove", mouseMoveCallback);
         this.element.addEventListener("mousedown", mouseDownCallback);
         this.element.addEventListener("mouseup", mouseUpCallback);
-        this.element.addEventListener("click", clickCallback);
-        this.element.addEventListener("dblclick", doubleClickCallback);
         this.element.addEventListener("wheel", wheelCallback);
 
         function Args(e)
@@ -3463,11 +3541,13 @@
                     var graphics = display.layers[j];
                     this.resetTransform(graphics);
                     graphics.ctx.clearRect(0, 0, graphics.canvas.width, graphics.canvas.height);
-                    if (bgColor)
-                    {
-                        graphics.ctx.fillStyle = bgColor;
-                        graphics.ctx.fillRect(0, 0, graphics.canvas.width, graphics.canvas.height);
-                    }
+                    this.applyTransform();
+                }
+                if (display.layers.length > 0 && bgColor) {
+                    var graphics = display.layers[0];
+                    this.resetTransform(graphics);
+                    graphics.ctx.fillStyle = bgColor;
+                    graphics.ctx.fillRect(0, 0, graphics.canvas.width, graphics.canvas.height);
                     this.applyTransform();
                 }
             }
@@ -3844,7 +3924,6 @@
         this.shadowBlur = 0;
         this.shadowOffsetX = 0;
         this.shadowOffsetY = 0;
-        this.lineCap = "butt";
         this.lineJoin = "miter";
         this.miterLimit = 10;
         this.font = new Font("sans-serif", "10px");
@@ -3854,6 +3933,7 @@
         var globalCompositeOperation = "source-over";
         var _graphics = this;
         var lineWidth = 1;
+        var lineCap = "butt";
         Object.defineProperty(this, "width", {
             get: function ()
             {
@@ -3907,6 +3987,17 @@
                 _graphics.ctx.globalCompositeOperation = value;
             }
         });
+        Object.defineProperty(this, "lineCap", {
+            get: function ()
+            {
+                return lineCap;
+            },
+            set: function (value)
+            {
+                lineCap = value;
+                ctx.lineCap = value;
+            }
+        })
     }
     Graphics.LineCap = (function () { var lineCap = {}; lineCap.Butt = "butt"; lineCap.Round = "round"; lineCap.Square = "square"; return lineCap; })();
     Graphics.LineJoin = (function () { var lineJoin = {}; lineJoin.Bevel = "bevel"; lineJoin.Round = "round"; lineJoin.Miter = "miter"; return lineJoin })();
@@ -4214,48 +4305,6 @@
     }
     window.Align = Align;
 
-    //Force
-    function Force(x, y, f)
-    {
-        this.x = 0;
-        this.y = 0;
-        if (x == undefined)
-            return;
-        if (x instanceof Vector2)
-        {
-            this.x = x.x;
-            this.y = x.y;
-        }
-        else if (f)
-        {
-            var l = Math.sqrt(x * x + y * y);
-            this.x = x * f / l;
-            this.y = y * f / l;
-        }
-        else
-        {
-            this.x = x;
-            this.y = y;
-        }
-    }
-    Force.prototype.copy = function ()
-    {
-        return new Force(this.x, this.y, this.f);
-    }
-    Force.prototype.toString = function ()
-    {
-        return "(" + this.x + "," + this.y + ")";
-    }
-    Force.prototype.getValue = function ()
-    {
-        return Math.sqrt(this.x * this.x + this.y * this.y);
-    }
-    Force.prototype.toAcceleration = function (m)
-    {
-        return new Vector(this.x / m, this.y / m);
-    }
-    Engine.Force = Force;
-    window.Force = Force;
 
     //Mouse
     function Mouse()

@@ -48,6 +48,12 @@
         this.y = v.y;
         this.coordinate = coordinate;
     }
+    Vector2.prototype.zero = function ()
+    {
+        this.x = 0;
+        this.y = 0;
+        return this;
+    }
     Vector2.prototype.getLength = function ()
     {
         return Math.sqrt(this.x * this.x + this.y * this.y);
@@ -88,6 +94,17 @@
             return this;
         }
     }
+    Vector2.prototype.normalize = function ()
+    {
+        var mod = this.mod();
+        if (mod == 0)
+            this.x = this.y = 0;
+        else {
+            this.x /= mod;
+            this.y /= mod;
+        }
+        return this;
+    }
     Vector2.prototype.toLine = function (x, y)
     {
         return new Line(new Point(x, y), new Point(x + this.x, y + this.y));
@@ -123,22 +140,82 @@
             return (new Vector2(u.x * v, u.y * v));
         }
     }
+    Vector2.normalize = function (v)
+    {
+        if (!(v instanceof Vector2))
+            throw new Error("v must be an Vector2.");
+        var mod = v.mod();
+        if (mod == 0)
+            return new Vector2(0, 0);
+        return new Vector2(v.x / mod, v.y / mod);
+    }
+    Vector2.zero = function ()
+    {
+        return new Vector2(0, 0);
+    }
     Engine.Vector2 = Vector2;
     window.Vector2 = Vector2;
+
+
+    //Force
+    function Force(x, y, f)
+    {
+        Vector2.call(this, x, y);
+        this.x = 0;
+        this.y = 0;
+        if (x == undefined)
+            return;
+        if (x instanceof Vector2) {
+            this.x = x.x;
+            this.y = x.y;
+        }
+        else if (f) {
+            var l = Math.sqrt(x * x + y * y);
+            this.x = x * f / l;
+            this.y = y * f / l;
+        }
+        else {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    Force.prototype = new Vector2();
+    Force.prototype.constructor = Force;
+    Force.prototype.copy = function ()
+    {
+        return new Force(this.x, this.y, this.f);
+    }
+    Force.prototype.toString = function ()
+    {
+        return "(" + this.x + "," + this.y + ")";
+    }
+    Force.prototype.getValue = function ()
+    {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+    Force.prototype.toAcceleration = function (m)
+    {
+        return new Vector(this.x / m, this.y / m);
+    }
+    Engine.Force = Force;
+    window.Force = Force;
 
     //-------Point
     function Point(x, y)
     {
+        Vector2.call(this, x, y);
         if (isNaN(x) || isNaN(y))
             throw "x and y must be numbers.";
         this.x = x;
         this.y = y;
         this.coordinate = Coordinate.Default;
     }
+    Point.prototype = new Vector2();
+    Point.prototype.constructor = Point;
     Point.Distance = function (p1, p2)
     {
         return Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-    }
+    };
     Point.prototype.copy = function ()
     {
         var p = new Point(this.x, this.y);
@@ -206,6 +283,7 @@
     //Position
     function Position(x, y)
     {
+        Vector2.call(this);
         this.onChange = null;
         this.changeCallback = null;
         this.coordinate = Coordinate.Default;
@@ -260,7 +338,9 @@
                 position.innerY = value;
             }
         })
-    }
+    }  
+    Position.prototype = new Vector2();
+    Position.prototype.constructor = Position;
     Position.prototype.copy = function ()
     {
         var pos = new Position(this.innerX, this.innerY);
@@ -301,7 +381,12 @@
     function Line(_p1, _p2)
     {
         var p1 = _p1, p2 = _p2;
-        if ((_p1 instanceof Vector2) && (_p2 instanceof Vector2))
+        if ((_p1 instanceof Point) && (_p2 instanceof Point))
+        {
+            p1 = _p1;
+            p2 = _p2;
+        }
+        else if ((_p1 instanceof Vector2) && (_p2 instanceof Vector2))
         {
             p1 = new Point(_p1.x, _p1.y, this);
             p2 = new Point(_p2.x, _p2.y, this);
@@ -1008,6 +1093,15 @@
         this.center.changeCoordinate(coordinate);
         this.coordinate = coordinate;
     }
+    Path.prototype.addPoint = function (x,y)
+    {
+        if (x instanceof Path.Point)
+            this.pList.add(x);
+        else if (typeof(x)===typeof(1) && (typeof(y) === typeof(1)))
+        {
+            this.pList.add(new Path.Point(x, y));
+        }
+    }
     Path.prototype.setCenter = function (x, y)
     {
         if (!isNaN(x) && !isNaN(y))
@@ -1032,6 +1126,12 @@
     {
         if (this.pList.length)
             this.pList.add(this.pList[0]);
+    }
+    Path.prototype.toGameObject = function ()
+    {
+        var obj = new GameObject();
+        obj.graphic = this;
+        return obj;
     }
     Path.prototype.render = function (graphics, x, y, r, dt)
     {
@@ -1089,6 +1189,10 @@
     Combination.prototype.removeObjectAt = function (index)
     {
         this.objectList.removeAt(index);
+    }
+    Combination.prototype.clearObject = function ()
+    {
+        this.objectList.clear();
     }
     Combination.prototype.setCoordinate = function (coordinate)
     {
@@ -1500,6 +1604,7 @@
     {
         this.id = -1;
         this.name = "GameObject";
+        this.scene = null;
         this.graphic = null;
         this.collider = null;
         this.collideGroups = ArrayList();
@@ -1770,7 +1875,7 @@
             gameObject.center.y += dy;
         }
     }
-    GameObject.prototype.moveTo = function (x, y)
+    GameObject.prototype.moveTo = function (x, y) 
     {
         this.position.x = x;
         this.position.y = y;
@@ -2073,6 +2178,14 @@
         ctx.fillStyle = this.fillStyle;
         ctx.fill();
         ctx.stroke();
+    }
+    Circle.prototype.toGameObject = function (initCollider)
+    {
+        var obj = new GameObject();
+        obj.graphic = this;
+        if (initCollider)
+            obj.collider = this;
+        return obj;
     }
     Circle.prototype.render = function (graphics, x, y, r, dt)
     {
@@ -2682,6 +2795,12 @@
                     }
                 }
             return false;
+        }
+        else if (col instanceof Point) {
+            function pointInTriangle(p, p1, p2, p3)
+            {
+
+            }
         }
         else if (col instanceof Particle)
         {
@@ -3906,29 +4025,36 @@
         }
         list.insert = function (obj, index)
         {
-            if (isNaN(index) || index < 0) {
+            if (isNaN(index) || index < 0)
+            {
                 throw new Error("Invalid index.");
             }
-            for (var i = this.length - 1; i >= index; i--) {
+            for (var i = this.length - 1; i >= index; i--)
+            {
                 this[i + 1] = this[i];
             }
             this[index] = obj;
         }
         list.removeAt = function (index)
         {
-            if (isNaN(index) || index < 0 || index >= list.length) {
+            if (isNaN(index) || index < 0 || index >= list.length)
+            {
                 throw new Error("Invalid index.");
             }
-            for (var i = index; i < list.length - 1; i++) {
+            for (var i = index; i < list.length - 1; i++)
+            {
                 list[i] = list[i + 1];
             }
             list.length -= 1;
         }
         list.remove = function (obj)
         {
-            for (var i = 0; i < list.length; i++) {
-                if (list[i] == obj) {
-                    for (; i < list.length - 1; i++) {
+            for (var i = 0; i < list.length; i++)
+            {
+                if (list[i] == obj)
+                {
+                    for (; i < list.length - 1; i++)
+                    {
                         list[i] = list[i + 1];
                     }
                     list.length -= 1;
@@ -3937,13 +4063,18 @@
             }
             throw new Error("Object not found.");
         }
+        list.clear = function ()
+        {
+            list.length = 0;
+        }
         list.addRange = function (arr, startIndex, count)
         {
             if (!startIndex || isNaN(startIndex))
                 startIndex = 0;
             if (!count || isNaN(count))
                 count = arr.length;
-            for (var i = startIndex; i < count; i++) {
+            for (var i = startIndex; i < count; i++)
+            {
                 list[list.length] = arr[i];
             }
         }
