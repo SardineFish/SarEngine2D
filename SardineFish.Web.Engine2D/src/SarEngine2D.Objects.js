@@ -3425,6 +3425,7 @@
         this.rigidBody = false;
         this.dff = 0;//dynamic friction factor
         this.e = 1;
+        this.bounce = 1;
         this.I = 1;//moment of inercial
         this.static = false;
         this.soft = true;
@@ -3596,8 +3597,11 @@
     {
         if (obj instanceof Ground)
         {
-            var o = new Point(this.o.x + this.center.x, this.o.y + this.center.y);
-            return (!(o.x > obj.xR || o.x + this.width < obj.xL) && (o.y >= obj.y && obj.y >= o.y - this.height));
+            var o = Vector2.plus(this.o, this.center);
+            var isCollide = obj.xL <= o.x && o.x + this.width <= obj.xR && o.y <= obj.y;
+            if (isCollide)
+                this.landed = true;    
+            return isCollide;
         }
         else if (obj instanceof Wall)
         {
@@ -3787,14 +3791,24 @@
         }
         else if (target.collider instanceof Ground)
         {
-            if (self.collider.o.y - self.collider.height <= target.collider.y)
+            var o = Vector2.plus(this.o, this.center);
+            if (target.collider.xL <= o.x && o.x + this.width <= target.collider.xR && o.y < target.collider.y)
             {
-                var t = (self.collider.o.y - self.collider.height - target.collider.y) / self.v.y;
-                t = isNaN(t) ? 0 : t;
-                self.moveTo(self.position.x, self.position.y - self.v.y * t);
-                self.v.y = -self.v.y * self.collider.bounce;
                 if (self.gravity)
                     self.collider.landed = true;
+                if (self.v.y > 0)
+                    return;
+                var bounce = self.collider.bounce * target.collider.bounce;
+                self.v.y = -self.v.y * bounce;
+                if (!self.collider.soft || !target.collider.soft)
+                {
+                    dy = target.collider.y - o.y;
+                    self.moveTo(self.position.x, self.position.y + dy);
+                }    
+                /*var t = (self.collider.o.y - self.collider.height - target.collider.y) / self.v.y;
+                t = isNaN(t) ? 0 : t;
+                self.moveTo(self.position.x, self.position.y - self.v.y * t);
+                self.v.y = -self.v.y * self.collider.bounce;*/
             }
         }
         else if (target.collider instanceof Wall)
@@ -3816,8 +3830,9 @@
     //-------Ground
     function Ground(y, xL, xR)
     {
-        xL = isNaN(xL) ? -Number.MIN_SAFE_INTEGER : xL;
+        xL = isNaN(xL) ? Number.MIN_SAFE_INTEGER : xL;
         xR = isNaN(xR) ? Number.MAX_SAFE_INTEGER : xR;
+        this.bounce = 1;
         this.position = new Point(xL, y);
         this.y = y;
         this.width = xR - xL;

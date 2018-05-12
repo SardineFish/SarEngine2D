@@ -12,6 +12,7 @@ var input = new Input(window, {
 });
 
 scene.addInput(input);
+scene.physics.g = new Vector2(0, -800);
 engine.start();
 
 scene.worldBackground = new Color(0, 0, 0, 0.0);
@@ -20,3 +21,7 @@ var player = new Player(input);
 scene.addGameObject(player.gameObject);
 
 var ground = new Ground(0);
+ground.bounce = 0;
+var groundObj = new GameObject();
+groundObj.collider = ground;
+scene.addGameObject(groundObj);
