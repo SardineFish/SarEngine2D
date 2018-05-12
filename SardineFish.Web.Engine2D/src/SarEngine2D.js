@@ -2894,6 +2894,11 @@
         this.scene=null;
         this.display = null;
 
+        this.keysState = [];
+        for (const key in Keyboard.Keys) {
+            this.keysState[Keyboard.Keys[key]] = Keyboard.KeyState.None;
+        }
+
         this.enableKeyInput = options ?
             (options["keyInput"] === undefined ? true : options["keyInput"])
             :
@@ -3227,6 +3232,10 @@
         var lastPress = new Date().getTime();
         function keyDownCallback(e)
         {
+            if (input.keysState[e.keyCode] === Keyboard.KeyState.Pressed)
+                return;
+            input.keysState[e.keyCode] = Keyboard.KeyState.Pressed;
+            //console.log(e.key + "down");
             var t = new Date().getTime();
             var args = new KeyEventArgs();
             args.key = e.keyCode;
@@ -3258,6 +3267,11 @@
         }
         function keyUpCallback(e)
         {
+            if (input.keysState[e.keyCode] === Keyboard.KeyState.Pressed)
+                input.keysState[e.keyCode] = Keyboard.KeyState.None;
+            else
+                return;    
+            //console.log(e.key + "up");
             var t = new Date().getTime();
             var args = new KeyEventArgs();
             args.key = e.keyCode;
