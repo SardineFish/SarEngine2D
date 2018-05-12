@@ -1190,6 +1190,10 @@
     {
         this.objectList.removeAt(index);
     }
+    Combination.prototype.clearObject = function ()
+    {
+        this.objectList.clear();
+    }
     Combination.prototype.setCoordinate = function (coordinate)
     {
         if (this.coordinate.const) {
