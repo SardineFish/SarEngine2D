@@ -1249,7 +1249,7 @@
         if (t && this.onEnd)
             this.onEnd();
     }
-    ImageAnimation.loadFromUrl = function (url, options, callback,onprogress)
+    ImageAnimation.loadFromUrl = function (url, options, callback, onprogress)
     {
         var clipX = options["clipX"] || 0;
         var clipY = options["clipY"] || 0;
@@ -1257,9 +1257,9 @@
         var fHeight = options["fHeight"] || 0;
         var width = options["width"] || 0;
         var height = options["height"] || 0;
-        var fCount = options["fCount"] || 1;
+        var fCount = options["count"] || 1;
         var fps = options["fps"] || 60;
-        clipX, clipY, fWidth, fHeight, width, height, fCount, fps
+        /*clipX, clipY, fWidth, fHeight, width, height, fCount, fps*/
         var ia = new ImageAnimation(options);
         ia.imgRaw = new Image();
         ia.img.onload = function (e)
@@ -1336,32 +1336,34 @@
         this.center.x = this.center.x - rx + x;
         this.center.y = this.center.y - ry + y;
     }
-    ImageAnimation.prototype.load = function (callback, onprogress)
+    ImageAnimation.prototype.load = function (resolve, onprogress)
     {
         var imgAnim = this;
         this.imgRaw = document.createElement("img");
         this.imgRaw.onload = function ()
         {
-            var width = imgAnim.width;
-            var height = imgAnim.height;
+            var width = imgAnim.frames.width;
+            var height = imgAnim.frames.heigh;
             var taskMgn = new TaskManagment();
+
+            // Clip each frame and pre-render to a canvas
             for (var i = 0; i < imgAnim.frames.length; i++) {
-                var task = new Task(function (completeCallback, idx)
+                var task = new Task(function (resolve, idx)
                 {
                     //Init canvas
                     var canvas = document.createElement("canvas");
                     canvas.width = width;
-                    canvas.height = height;
+                    canvas.height = heigh;
                     var ctx = canvas.getContext('2d');
 
                     // X offset of each frames on the original image.
-                    var x = imgAnim.clipX + (idx * imgAnim.frames.width);
+                    var x = imgAnim.clipX + (idx * width);
                     // Y offset of each frames on the original image.
                     var y = imgAnim.clipY;
 
                     //Draw a frame to the canvas.
                     ctx.clearRect(0, 0, width, height);
-                    ctx.drawImage(imgAnim.imgRaw, x, y, imgAnim.frames.width, imgAnim.frames.height, 0, 0, width, height);
+                    ctx.drawImage(imgAnim.imgRaw, x, y, width, height, 0, 0, width, height);
                     
                     //Get the Img from the canvas.
                     canvas.toBlob(function (blob)
@@ -1370,7 +1372,7 @@
                         img.onload = function ()
                         {
                             imgAnim.frames[idx] = img;
-                            completeCallback();
+                            resolve();
                         }
                         img.src = URL.createObjectURL(blob);
                     });
@@ -1385,8 +1387,8 @@
             }
             taskMgn.onAllComplete = function ()
             {
-                if (callback)
-                    callback();
+                if (resolve)
+                    resolve();
             }
             taskMgn.start();
         };
@@ -1488,7 +1490,7 @@
         }
 
         var center = this.center.coordinate.pFrom(this.center.x, this.center.y);
-        graphics.drawImage(this.img, this.clipX + (this.fWidth * this.frame), this.clipY, this.fWidth, this.fHeight, center.x, center.y, this.width, this.heigh);
+        graphics.drawImage(this.frames[this.frame], 0, 0, this.frames.width, this.frames.heigh, center.x, center.y, this.width, this.heigh);
     }
     Engine.ImageAnimation = ImageAnimation;
     window.ImageAnimation = ImageAnimation;
