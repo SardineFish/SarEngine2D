@@ -1297,7 +1297,7 @@
         this.frames.width = (options && options["frameWidth"]) || 0;
         this.frames.height = (options && options["frameHeight"]) || 0;
         this.frames.length = (options && options["count"]) || 0;
-        this.src = (options && options["src"]) || 0;
+        this.src = (options && options["src"]) || null;
         Object.defineProperty(this.frames, "count", {
             get: function () { return imgAnim.frames.length; },
             set: function (value) { imgAnim.frames.length = value; }
@@ -1313,7 +1313,8 @@
         this.onBegine = null;
         this.onEnd = null;
         this.onFrameUpdate = null;
-        this.loop = new ImageAnimation.Loop();
+        this.loop = new ImageAnimation.Loop(0, this.frames.length - 1);
+        this.o = new Point(-this.width / 2, this.height / 2);
     }
     //---ImagImageAnimation.Loop
     ImageAnimation.Loop = function (from,to,loopTimes)
@@ -1353,7 +1354,7 @@
         if (t && this.onEnd)
             this.onEnd();
     }
-    ImageAnimation.loadFromUrl = function (url, options, callback, onprogress)
+    ImageAnimation.loadFromUrl = function (options, callback, onprogress)
     {
         var clipX = options["clipX"] || 0;
         var clipY = options["clipY"] || 0;
@@ -1365,12 +1366,7 @@
         var fps = options["fps"] || 60;
         /*clipX, clipY, fWidth, fHeight, width, height, fCount, fps*/
         var ia = new ImageAnimation(options);
-        ia.imgRaw = new Image();
-        ia.img.onload = function (e)
-        {
-            ia.load(callback, onprogress);
-        }
-        ia.img.src = url;
+        ia.load(callback, onprogress);
         return ia;
     }
     ImageAnimation.create = function (width, height, fCount, fps)
@@ -1443,11 +1439,11 @@
     ImageAnimation.prototype.load = function (resolve, onprogress)
     {
         var imgAnim = this;
-        this.imgRaw = document.createElement("img");
+        this.imgRaw = new window.Image();
         this.imgRaw.onload = function ()
         {
             var width = imgAnim.frames.width;
-            var height = imgAnim.frames.heigh;
+            var height = imgAnim.frames.height;
             var taskMgn = new TaskManagment();
 
             // Clip each frame and pre-render to a canvas
@@ -1457,7 +1453,7 @@
                     //Init canvas
                     var canvas = document.createElement("canvas");
                     canvas.width = width;
-                    canvas.height = heigh;
+                    canvas.height = height;
                     var ctx = canvas.getContext('2d');
 
                     // X offset of each frames on the original image.
@@ -1472,7 +1468,7 @@
                     //Get the Img from the canvas.
                     canvas.toBlob(function (blob)
                     {
-                        var img = document.createElement("img");
+                        var img = new window.Image();
                         img.onload = function ()
                         {
                             imgAnim.frames[idx] = img;
@@ -1491,6 +1487,7 @@
             }
             taskMgn.onAllComplete = function ()
             {
+                imgAnim.loaded = true;
                 if (resolve)
                     resolve();
             }
@@ -1543,6 +1540,8 @@
     }
     ImageAnimation.prototype.render = function (graphics, x, y, r, dt)
     {
+        if (!this.loaded)
+            return;    
         if (this.time == 0 && this.onBegine)
             this.onBegine();
         this.time += dt;
@@ -1592,9 +1591,12 @@
                 f = F;
             this.frame = f;
         }
-
+        //console.log(this.frame);
+        var o = this.center.coordinate.pFrom(this.center.x, this.center.y);
+        o.x += this.o.x;
+        o.y += this.o.y;
         var center = this.center.coordinate.pFrom(this.center.x, this.center.y);
-        graphics.drawImage(this.frames[this.frame], 0, 0, this.frames.width, this.frames.heigh, center.x, center.y, this.width, this.heigh);
+        graphics.drawImage(this.frames[this.frame], 0, 0, this.frames.width, this.frames.height, o.x, o.y, this.width, this.height);
     }
     Engine.ImageAnimation = ImageAnimation;
     window.ImageAnimation = ImageAnimation;
