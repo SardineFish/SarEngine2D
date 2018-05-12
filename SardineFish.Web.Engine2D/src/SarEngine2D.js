@@ -2874,12 +2874,12 @@
     Engine.Display = Display;
     window.Display = Display;
         
-    function Input(element)
+    function Input(element, options)
     {
-        if (!element || !(element instanceof window.Element))
+        /*if (!element || !(element instanceof window.Element))
         {
             throw new Error("A HTML Element is required.");
-        }
+        }*/
         this.element = element;
         //this.element = document.createElement("div");
 
@@ -2893,6 +2893,20 @@
         this.ignorePadding = true;
         this.scene=null;
         this.display = null;
+
+        this.enableKeyInput = options ?
+            (options["keyInput"] === undefined ? true : options["keyInput"])
+            :
+            true;
+        this.enableMouseInput = options ?
+            (options["mouseInput"] === undefined ? true : options["mouseInput"])
+            :
+            true;
+        this.enableTouchInput = options ?
+            (options["touchInput"] === undefined ? true : options["touchInput"])
+            :
+            true;
+
 
         var coordinate = null;
         Object.defineProperty(this, "coordinate", {
@@ -2952,8 +2966,10 @@
         this.onTouchEnd = null;
         this.onTouchMove = null;
 
-        this.initMouseEvent();
-        this.initKeyEvent();
+        if (this.enableMouseInput)
+            this.initMouseEvent();
+        if (this.enableKeyInput)
+            this.initKeyEvent();
 
 
     }

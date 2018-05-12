@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome",
-            "url": "http://localhost:3000/Test/animation/newAnimationTest.html",
+            "url": "http://localhost:3000/games-dev/YourStory/your-story.html",
             "webRoot": "${workspaceFolder}/SardineFish.Web.Engine2D/"
         },
         {
