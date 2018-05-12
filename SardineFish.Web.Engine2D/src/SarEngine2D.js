@@ -776,6 +776,12 @@
                 obj.lifeTime += delay;
                 if (obj.deleted)
                     return;
+                if (!obj.active)
+                {
+                    obj.active = true;
+                    if (obj.onStart)
+                        obj.onStart();    
+                }    
                 if (obj.onUpdate)
                     obj.onUpdate(obj, dt);
                 for (var j = 0; this.objectList[i] && j < this.objectList[i].animationCallbackList.length; j++)

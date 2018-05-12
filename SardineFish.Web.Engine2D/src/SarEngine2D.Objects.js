@@ -708,6 +708,7 @@
     {
         this.text = text;
         this.font = new Font("sans-serif", 16);
+        this.textAlign = TextAlign.Center;
         this.position = new Point(0, 0);
         this.coordinate = Coordinate.Default;
         this.center = new Point(0, 0);
@@ -791,7 +792,12 @@
         if (this.onRender)
             this.onRender();
         var center = this.center.coordinate.pFrom(this.center.x, this.center.y);
-        graphics.textAlign = TextAlign.Left;
+        if (this.textAlign == TextAlign.Center)
+        {
+            var width = graphics.measureText(this.text).width;
+            center.x -= width / 2;
+        }
+        graphics.fontAlign = this.textAlign;
         graphics.textBaseline = TextBaseline.Top;
         graphics.font = this.font;
         graphics.fillStyle = this.fillStyle;
@@ -1605,6 +1611,7 @@
     function GameObject()
     {
         this.id = -1;
+        this.active = false;
         this.name = "GameObject";
         this.scene = null;
         this.graphic = null;
