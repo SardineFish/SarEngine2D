@@ -72,6 +72,8 @@
         var engine = this;
         function animationFrame(delay)
         {
+            // request next frame whatever.
+            engine.animationFrameId = requestAnimationFrame(animationFrame);
                 if (engine.status == EngineStatus.Starting)
                 {
                     engine.status = EngineStatus.Running;
@@ -85,7 +87,7 @@
                             return;
                         }
                     }
-                    engine.animationFrameId = requestAnimationFrame(animationFrame);
+                    //engine.animationFrameId = requestAnimationFrame(animationFrame);
                     return;
                 }
                 else if (engine.status == EngineStatus.Pausing)
@@ -124,7 +126,7 @@
                         }
                     }
                     engine.status = EngineStatus.Running;
-                    engine.animationFrameId = requestAnimationFrame(animationFrame);
+                    //engine.animationFrameId = requestAnimationFrame(animationFrame);
                     return;
 
                 }
@@ -176,7 +178,6 @@
                 }
             }*/
 
-            engine.animationFrameId = requestAnimationFrame(animationFrame);
 
         }
         this.status = EngineStatus.Starting;

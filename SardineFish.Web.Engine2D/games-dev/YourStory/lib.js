@@ -480,4 +480,4 @@ class Jump extends PlayerState
         this.player.gameObject.v.x = Math.sign(this.player.control) * this.player.walkSpeed;
     }
 }
-export { Player, NPC };
+export { Player, NPC, Character };
