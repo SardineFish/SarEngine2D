@@ -40,6 +40,7 @@ class GameSystemClass {
         this.mouseInput = this.display.input;
         this.scene.addInput(this.mouseInput);
         this.scene.onMouseDown.add(e => this.mouseDown(e));
+        this.renderMainUI();
         //this.camera.linkTo(this.player.gameObject);
     }
 
@@ -60,6 +61,17 @@ class GameSystemClass {
     {
         var entity = new Type();
         entity.gameObject.moveTo(pos, 0);
+    }
+
+    renderMainUI()
+    {
+        let text = new Text("Your Story");
+        text.moveTo(0, this.display.viewRange.top - 100);
+        text.font.fontSize = 160;
+        text.textAlign = TextAlign.Center;
+        var obj = new GameObject();
+        obj.graphic = text;
+        this.scene.addGameObject(obj);
     }
 }
 const GameSystem = new GameSystemClass();

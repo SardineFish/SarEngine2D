@@ -2484,10 +2484,24 @@
 
         var input = new Input(node);
         input.display = this;
+        var display = this;
         Object.defineProperty(this, "input", {
             get: function () { return input; }
         });
+        Object.defineProperty(this, "viewRange", {
+            get: function ()
+            {
+                var p1 = Vector2.plus(this.viewArea.coordinate.pFrom(0, 0), this.viewArea.coordinate.vFrom(this.viewArea.width / 2, this.viewArea.height / 2));
+                var p0 = Vector2.minus(this.viewArea.coordinate.pFrom(0, 0), this.viewArea.coordinate.vFrom(this.viewArea.width / 2, this.viewArea.height / 2));
 
+                return {
+                    left: p0.x,
+                    right: p1.x,
+                    top: p1.y,
+                    bottom: p0.y
+                };
+            }
+        });
         var displayDom = null;
         var graphics = null;
         var width = 0;

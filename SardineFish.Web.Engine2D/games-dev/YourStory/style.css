@@ -2,3 +2,44 @@ body{
     margin: 0;
     padding: 0;
 }
+#ui {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 1000;
+}
+
+#main-ui {
+    position: absolute;
+    
+}
+
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    padding: 100px 200px;
+    box-sizing: border-box;
+}
+
+#main-wrapper {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+}
+
+#title {
+    font-size: 60px;
+}
+
+#game-text {
+    padding-top: 200px;
+}
+
+#aside-text {
+    font-size: 24px;
+}

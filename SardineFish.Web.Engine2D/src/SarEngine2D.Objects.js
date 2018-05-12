@@ -111,18 +111,18 @@
     }
     Vector2.plus = function (u, v)
     {
-        if (!(u instanceof Vector2) || !(u instanceof Vector2))
+        /*if (!(u instanceof Vector2) || !(u instanceof Vector2))
         {
             throw new Error("u and v must be an Vector2.");
-        }
+        }*/
         return new Vector2(u.x + v.x, u.y + v.y);
     }
     Vector2.minus = function (u, v)
     {
-        if (!(u instanceof Vector2) || !(u instanceof Vector2))
+        /*if (!(u instanceof Vector2) || !(u instanceof Vector2))
         {
             throw new Error("u and v must be an Vector2.");
-        }
+        }*/
         return new Vector2(u.x - v.x, u.y - v.y);
     }
     Vector2.multi = function (u, v)
