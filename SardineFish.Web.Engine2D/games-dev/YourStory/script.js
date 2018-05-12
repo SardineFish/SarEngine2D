@@ -18,3 +18,5 @@ scene.worldBackground = new Color(0, 0, 0, 0.0);
 
 var player = new Player(input);
 scene.addGameObject(player.gameObject);
+
+var ground = new ground(0);

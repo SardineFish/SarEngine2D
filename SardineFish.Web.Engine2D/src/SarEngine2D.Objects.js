@@ -3815,7 +3815,7 @@
     //-------Ground
     function Ground(y, xL, xR)
     {
-        xL = isNaN(xL) ? 0 : xL;
+        xL = isNaN(xL) ? -Number.MIN_SAFE_INTEGER : xL;
         xR = isNaN(xR) ? Number.MAX_SAFE_INTEGER : xR;
         this.position = new Point(xL, y);
         this.y = y;
