@@ -66,8 +66,8 @@ class GameSystemClass {
     renderMainUI()
     {
         let text = new Text("Your Story");
-        text.moveTo(0, this.display.viewRange.top - 100);
-        text.font.fontSize = 160;
+        text.moveTo(0, this.display.viewRange.top - 200);
+        text.font.fontSize = 120;
         text.textAlign = TextAlign.Center;
         var obj = new GameObject();
         obj.graphic = text;

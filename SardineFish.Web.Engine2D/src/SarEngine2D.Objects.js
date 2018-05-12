@@ -792,16 +792,15 @@
         if (this.onRender)
             this.onRender();
         var center = this.center.coordinate.pFrom(this.center.x, this.center.y);
-        if (this.textAlign == TextAlign.Center)
-        {
-            var width = graphics.measureText(this.text).width;
-            center.x -= width / 2;
-        }
         graphics.fontAlign = this.textAlign;
         graphics.textBaseline = TextBaseline.Top;
         graphics.font = this.font;
         graphics.fillStyle = this.fillStyle;
         graphics.strokeStyle = this.strokeStyle;
+        if (this.textAlign == TextAlign.Center) {
+            var width = graphics.measureText(this.text).width;
+            center.x -= width / 2;
+        }
         graphics.fillText(this.text, center.x, center.y);
         graphics.strokeText(this.text, center.x, center.y);
     }
