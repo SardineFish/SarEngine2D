@@ -1561,7 +1561,7 @@
                 else
                 {
                     f -= this.loop.from;
-                    f %= (this.loop.to - this.loop.from);
+                    f %= (this.loop.to - this.loop.from + 1);
                     if (!f)
                         f = 0;
                     f = this.loop.from + f;

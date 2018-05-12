@@ -22,7 +22,7 @@ class Player
             fps: 15,
             count: 2
         });
-        this.walkSpeed = 1;
+        this.walkSpeed = 100;
         this.gameObject.graphic = this.standAnim;
         this.gameObject.onUpdate = (obj, dt) => this.update(dt);
         input.onKeyDown.add(e => this.keyDown(e));
@@ -40,7 +40,7 @@ class Player
     walk(dir)
     {
         this.gameObject.graphic = this.walkAnim;
-        
+        this.gameObject.v = new Vector2(Math.sign(dir.x) * this.walkSpeed, 0);
     }
 
     update(dt)
