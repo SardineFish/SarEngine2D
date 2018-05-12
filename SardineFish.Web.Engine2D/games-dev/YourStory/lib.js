@@ -23,8 +23,8 @@ class Player
             count: 2
         });
         this.walkSpeed = 100;
-        this.gameObject.collide = new Rectangle();
-        this.gameObject.graphic = this.collide;
+        this.gameObject.collider = new Rectangle(200, 200);
+        this.gameObject.graphic = new Combination([this.gameObject.collider,this.walkAnim ]);
         this.gameObject.onUpdate = (obj, dt) => this.update(dt);
         input.onKeyDown.add(e => this.keyDown(e));
     }

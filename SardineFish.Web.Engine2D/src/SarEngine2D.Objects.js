@@ -1158,9 +1158,9 @@
     window.Path = Path;
 
     //Combination
-    function Combination()
+    function Combination(objList)
     {
-        this.objectList = ArrayList();
+        this.objectList = objList || ArrayList();
         this.position = new Point(0, 0);
         this.center = new Point(0, 0);
         this.rotation = 0;
@@ -3588,8 +3588,9 @@
         var o = this.center.coordinate.pFrom(this.center.x, this.center.y);
         o.x += this.o.coordinate.vFrom(this.o.x, this.o.y).x;
         o.y += this.o.coordinate.vFrom(this.o.x, this.o.y).y;
-        graphic.fillRect(o.x, o.y + this.height * this.coordinate.unitY, this.width * this.coordinate.unitX, this.height * this.coordinate.unitY);
-        graphic.strokeRect(o.x, o.y + this.height * this.coordinate.unitY, this.width * this.coordinate.unitX, this.height * this.coordinate.unitY);
+        var size = this.coordinate.vFrom(this.width, this.height);
+        graphic.fillRect(o.x, o.y + size.y, size.x, size.y);
+        graphic.strokeRect(o.x, o.y + size.y, size.x, size.y);
     }
     Rectangle.prototype.isCollideWith = function (obj, v1,v2,dt)
     {
