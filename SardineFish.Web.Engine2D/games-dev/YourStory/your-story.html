@@ -10,8 +10,8 @@
     <script src="../../src/SarEngine2D.Objects.js"></script>
 </head>
 <body>
-    <div id="ui">
-       <div id="main-wrapper" class="page">
+    <div id="ui" class="unselectable" unselectable>
+       <div id="main-wrapper" class="page" >
         <div id="main-ui">
             <header id="title">Your Story</header>
         </div>
@@ -19,6 +19,13 @@
        <div class="page" id="game-text">
        <div id="aside-wrapper">
         <div id="aside-text">The Story</div>
+       </div>
+       <div id="choice-wrapper">
+           <ul id="choices">
+               <li class="choice">Ok.</li>
+               <li class="choice">Fine.</li>
+               <li class="choice">No.</li>
+           </ul>
        </div>
        </div>
     </div>

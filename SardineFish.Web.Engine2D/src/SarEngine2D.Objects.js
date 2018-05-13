@@ -972,6 +972,41 @@
     }
     Engine.Image = Image;
 
+    function InfiniteTexture(options)
+    {
+        this.src = options || options["src"];
+        this.position = new Position(0, 0);
+        this.sliceWidth = options || options["sliceWidth"] || 0;
+        this.sliceHeight = options || options["sliceHeight"] || 0;
+        this.rawImg = new window.Image();
+    }
+    InfiniteTexture.prototype.copy = function ()
+    {
+        var it = new InfiniteTexture({
+            src: this.src,
+            sliceWidth: this.sliceWidth,
+            sliceHeight: this.sliceHeight
+        });
+        it.position = this.position.copy();
+    }
+    InfiniteTexture.prototype.moveTo = function (x, y)
+    {
+        this.position.x = x;
+        this.position.y = y;
+    }
+    InfiniteTexture.prototype.setCoordinate = function ()
+    {
+        
+    }
+    InfiniteTexture.prototype.changeCoordinate = function ()
+    {
+        
+    }
+    InfiniteTexture.prototype.render = function (graphics, x, y, r, dt)
+    {
+        
+    }
+
     //Path
     function Path()
     {

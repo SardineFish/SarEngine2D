@@ -39,8 +39,83 @@ body{
 
 #game-text {
     padding-top: 200px;
+    font-size: 24px;
 }
 
 #aside-text {
-    font-size: 24px;
+    position: relative;
+}
+#aside-text.erase{
+    animation-name: hide;
+    animation-duration: .5s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+.unselectable {
+    user-select: none;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#choices {
+    padding-left: 1em;
+    margin-top: 1em;
+}
+#choices.out .choice{
+    animation-name: eraseOut;
+    animation-duration: .5s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+.choice {
+    padding: 10px 20px;
+    cursor: pointer;
+    width: 300px;
+    position: relative;
+    animation-name: showUp;
+    animation-duration: .7s;
+}
+#choices.out .choice.chosen{
+    animation-delay: .2s;
+    animation-duration: .5s;
+}
+.choice:hover{
+    background-color: black;
+    color:white;
+}
+.choice::before{
+    content: ">";
+    color: transparent;
+    padding-right: 10px;
+}
+.choice:hover::before{
+    content: ">";
+    color: inherit;
+}
+
+@keyframes showUp{
+    from{
+        opacity: 0;
+    }
+    to{
+        opacity: 1;
+    }
+}
+@keyframes eraseOut{
+    from{
+        left:0;
+    }
+    to{
+        left: 50px;
+        opacity: 0;
+    }
+}
+@keyframes hide{
+    to{
+        opacity: 0;
+    }
 }

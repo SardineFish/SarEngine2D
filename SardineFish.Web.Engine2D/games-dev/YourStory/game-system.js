@@ -1,4 +1,10 @@
 import { Player, NPC } from "./lib.js";
+/**
+ * 
+ * @param {string} selector 
+ * @returns {HTMLElement}
+ */
+const $ = selector => document.querySelector(selector);
 class Range
 {
     constructor(l, r)
@@ -24,6 +30,9 @@ class GameSystemClass {
         this.display = null;
         this.playerPos = 0;
         this.viewRange = new Range(0, 0);
+        this.choicePopSpeed = 7;
+        this.textPopSpeed = 20;
+        this.textPopTimmer = null;
     }
     /**
      * @returns {GameSystemClass}
@@ -63,6 +72,11 @@ class GameSystemClass {
         entity.gameObject.moveTo(pos, 0);
     }
 
+    clearUI()
+    {
+        $("#aside-text").innerText = "";
+        $("#choices").innerHTML = null;
+    }
     renderMainUI()
     {
         let text = new Text("Your Story");
@@ -72,7 +86,91 @@ class GameSystemClass {
         var obj = new GameObject();
         obj.graphic = text;
         this.scene.addGameObject(obj);
+        this.showChoice("Please make a choice :)", ["Ok.", "Fine.", "No."]).then(i =>
+        {
+            console.log(i); 
+        });
     }
+
+    /**
+     * 
+     * @param {string} text 
+     */
+    showAsideText(text)
+    {
+        return new Promise((resolve) =>
+        {
+            this.clearUI();
+            if (this.textPopTimmer)
+                clearInterval(this.textPopTimmer);
+            let textRender = "";
+            let i = 0;
+            let element = $("#aside-text");
+            this.textPopTimmer = setInterval(() => {
+                textRender += text.charAt(i++);
+                element.innerText = textRender;
+                if (i >= text.length) {
+                    clearInterval(this.textPopTimmer);
+                    resolve();
+                    return;
+                }
+            }, 1000 / this.textPopSpeed);
+        });
+    }
+
+    hideAsideText()
+    {
+        $("#aside-text").classList.add("erase");
+        setTimeout(() =>
+        {
+            this.clearUI();
+        }, 500);
+    }
+
+    /**
+     * 
+     * @param {string} aside 
+     * @param {Array<string>} choices 
+     */
+    showChoice(aside, choices)
+    {
+        return new Promise(resolve =>
+        {
+            this.showAsideText(aside).then(() =>
+            {
+                let container = $("#choices");
+                let i = 0;
+                setTimeout(() =>
+                {
+                    this.textPopTimmer = setInterval(() =>
+                    {
+                        let idx = i;
+                        let choice = choices[i];
+                        let element = document.createElement("li");
+                        element.className = "choice";
+                        element.innerText = choices[i];
+                        element.addEventListener("click", () =>
+                        {
+                            resolve(idx);
+                            container.classList.add("out");
+                            element.classList.add("chosen");
+                            setTimeout(() =>
+                            {
+                                container.innerHTML = "";
+                                this.hideAsideText();
+                            }, 1000);
+                        });
+                        container.appendChild(element);
+                        i++;
+                        if (i >= choices.length)
+                            clearInterval(this.textPopTimmer);
+                    }, 1000 / this.choicePopSpeed);
+                }, 200);
+                
+            });
+        });
+    }
+
 }
 const GameSystem = new GameSystemClass();
 export { GameSystem };
