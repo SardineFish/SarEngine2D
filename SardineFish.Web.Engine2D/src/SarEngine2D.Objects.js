@@ -997,10 +997,13 @@
         this.position = new Position(0, 0);
         this.sliceWidth = options && options["sliceWidth"] || 0;
         this.sliceHeight = options && options["sliceHeight"] || 0;
-        this.xMin = options && options["xMin"] || 0;
-        this.xMax = options && options["xMax"] || this.sliceWidth;
-        this.yMin = options && options["yMin"] || -this.sliceHeight;
-        this.yMax = options && options["yMax"] || 0;
+        this.xMin = 0;
+        this.xMax = this.sliceWidth;
+        this.yMin = -this.sliceHeight;
+        this.yMax = 0;
+        this.rawImg = new window.Image();
+        this.coordinate = Coordinate.Default;
+
         var self = this;
         Object.defineProperty(this, "xRange", {
             get: function ()
@@ -1024,7 +1027,13 @@
             this.yMin = Number.MIN_SAFE_INTEGER;
             this.yMax = Number.MAX_SAFE_INTEGER;
         }
-        this.rawImg = new window.Image();
+        if (options)
+        {
+            this.xMin = options["xMin"] === undefined ? this.xMin : options["xMin"];
+            this.xMax = options["xMax"] === undefined ? this.xMax : options["xMax"];
+            this.yMin = options["yMin"] === undefined ? this.yMin : options["yMin"];
+            this.yMax = options["yMax"] === undefined ? this.yMax : options["yMax"];
+        }    
     }
     InfiniteTexture.Direction = {
         Vertical: "vertical",
@@ -1044,9 +1053,9 @@
         this.position.x = x;
         this.position.y = y;
     }
-    InfiniteTexture.prototype.setCoordinate = function ()
+    InfiniteTexture.prototype.setCoordinate = function (coordinate)
     {
-        
+        this.coordinate = coordinate;
     }
     InfiniteTexture.prototype.changeCoordinate = function ()
     {
@@ -1078,22 +1087,23 @@
     }    
     InfiniteTexture.prototype.render = function (graphics, display, camera, dt)
     {
+        var o = this.coordinate.pFrom(this.position.x, this.position.y);
         var displayRange = display.viewRange;
-        var dy = displayRange.bottom - this.position.y;
-        var dx = displayRange.left - this.position.x;
-        var ox = Math.floor(dx / this.sliceWidth) * this.sliceWidth;
-        var oy = Math.floor(dy / this.sliceHeight) * this.sliceHeight;
-        var ex = Math.ceil((displayRange.right - this.position.x) / this.sliceWidth) * this.sliceWidth;
-        var ey = Math.ceil((displayRange.top - this.position.y) / this.sliceHeight) * this.sliceHeight;
+        var dy = displayRange.bottom - o.y;
+        var dx = displayRange.left - o.x;
+        var fx = Math.floor(dx / this.sliceWidth) * this.sliceWidth + o.x;
+        var fy = Math.floor(dy / this.sliceHeight) * this.sliceHeight + o.y;
+        var ex = Math.ceil((displayRange.right - o.x) / this.sliceWidth) * this.sliceWidth + o.x;
+        var ey = Math.ceil((displayRange.top - o.y) / this.sliceHeight) * this.sliceHeight + o.y;
 
         var xRange = this.xRange;
         var yRange = this.yRange;
         
-        for (var y = oy; y <= ey; y += this.sliceHeight)
+        for (var y = fy; y <= ey; y += this.sliceHeight)
         {
             if (yRange.inRangeInclude(y) || yRange.inRangeInclude(y - this.sliceHeight))
             {
-                for (var x = ox; x <= ex; x += this.sliceWidth)
+                for (var x = fx; x <= ex; x += this.sliceWidth)
                 {
                     if (xRange.inRangeInclude(x) || xRange.inRangeInclude(x + this.sliceWidth))
                     {

@@ -44,7 +44,24 @@ var it = new InfiniteTexture({
     xMax: 900
 });
 it.load();
-groundObj.graphic = it;
+//groundObj.graphic = it;
 scene.addGameObject(groundObj);
+
+var backgroundLayer = new Background();
+backgroundLayer.followSpeed = 0.2;
+scene.background.add(backgroundLayer);
+var bg = new InfiniteTexture({
+    src: "res/img/bg-forest.jpg",
+    sliceWidth: 3840,
+    sliceHeight: 2160,
+    direction: InfiniteTexture.Direction.Horizontal,
+    yMax: 3000,
+    yMin: 0
+});
+bg.moveTo(0, -500);
+bg.load();
+var bgObj = new GameObject();
+bgObj.graphic = bg;
+scene.addGameObject(bgObj,backgroundLayer);
 
 GameSystem.start();
