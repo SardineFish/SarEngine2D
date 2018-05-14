@@ -2066,7 +2066,7 @@
     {
         this.objectList.remove(obj);
     }
-    Layer.prototype.render = function (graphics, dt)
+    Layer.prototype.render = function (graphics, dt, display)
     {
         var args = {
             graphics: graphics,
@@ -2092,7 +2092,7 @@
                 if (args.cancel)
                     continue;
             }
-            this.objectList[i].render(graphics, this.objectList[i].position.x, this.objectList[i].position.y, this.objectList[i].rotation, dt);
+            this.objectList[i].render(graphics, display, display.camera, dt);
         }
         var args = {
             graphics: graphics,
@@ -2129,8 +2129,9 @@
             return false;
         this.objectList.removeAt(index);
     }
-    Background.prototype.render = function (graphics, dt, camera)
+    Background.prototype.render = function (graphics, dt, display)
     {
+        var camera = display.camera;
         var dx = 0, dy = 0;
         if (camera)
         {
@@ -2141,7 +2142,7 @@
         this.coordinate.originY = dy;
         for (var i = 0; i < this.objectList.length ; i++)
         {
-            this.objectList[i].render(graphics, 0, 0, 0, dt);
+            this.objectList[i].render(graphics, display, camera, dt);
         }
     }
     Engine.Background = Background;
@@ -3711,7 +3712,7 @@
                 var graphics = this.displayList[j].getLayer(i);
                 this.resetTransform(graphics);
                 this.applyTransform(graphics);
-                layer.render(graphics, dt, this);
+                layer.render(graphics, dt, this.displayList[j]);
             }
         }
         var bgCount = this.scene.background.count;
@@ -3723,7 +3724,7 @@
                 var graphics = this.displayList[j].getLayer(bgCount + i);
                 this.resetTransform(graphics);
                 this.applyTransform(graphics);
-                layer.render(graphics, dt);
+                layer.render(graphics, dt, this.displayList[j]);
             }
         }
     }

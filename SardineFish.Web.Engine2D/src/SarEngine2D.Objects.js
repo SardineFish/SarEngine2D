@@ -273,7 +273,7 @@
             throw "this object has something wrong.";
         this.lines[this.lines.length] = l;
     }
-    Point.prototype.render = function (graphics, x, y, r, dt)
+    Point.prototype.render = function (graphics, display, camera, dt)
     {
 
     }
@@ -550,7 +550,7 @@
             return obj.isCollideWith(this, 0, 0);
         }
     }
-    Line.prototype.render = function (graphics, x, y, r, dt)
+    Line.prototype.render = function (graphics, display, camera, dt)
     {
         var p1 = this.p1.coordinate.pFrom(this.p1.x, this.p1.y);
         var p2 = this.p2.coordinate.pFrom(this.p2.x, this.p2.y);
@@ -621,7 +621,7 @@
         this.start += ang;
         this.end += ang;
     }
-    Arc.prototype.render = function (graphics, x, y, r, dt)
+    Arc.prototype.render = function (graphics, display, camera, dt)
     {
         var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
         graphics.beginPath();
@@ -785,7 +785,7 @@
         ctx.fillText(this.text, x, y);
         ctx.strokeText(this.text, x, y);
     }
-    Text.prototype.render = function (graphics, x, y, r, dt)
+    Text.prototype.render = function (graphics, display, camera, dt)
     {
         if (!graphics || !graphics.ctx)
             return;
@@ -948,7 +948,7 @@
         }
         this.rotation = angle;
     }
-    Image.prototype.render = function (graphics, x, y, r, dt)
+    Image.prototype.render = function (graphics, display, camera, dt)
     {
         if (!graphics)
             return;
@@ -1002,7 +1002,7 @@
     {
         
     }
-    InfiniteTexture.prototype.render = function (graphics, x, y, r, dt)
+    InfiniteTexture.prototype.render = function (graphics, display, camera, dt)
     {
         
     }
@@ -1173,7 +1173,7 @@
         obj.graphic = this;
         return obj;
     }
-    Path.prototype.render = function (graphics, x, y, r, dt)
+    Path.prototype.render = function (graphics, display, camera, dt)
     {
         graphics.beginPath();
         for (var i = 0; i < this.pList.length - 1; i++)
@@ -1312,11 +1312,11 @@
         this.center.rotate(ang, x, y);
         this.rotation += ang;
     }
-    Combination.prototype.render = function (graphics, x, y, r, dt)
+    Combination.prototype.render = function (graphics, display, camera, dt)
     {
         for (var i = 0; i < this.objectList.length; i++)
         {
-            this.objectList[i].render(graphics, this.objectList[i].position.x, this.objectList[i].position.y, this.objectList[i].rotation, dt);
+            this.objectList[i].render(graphics, display, camera, dt);
         }
     }
     Engine.Combination = Combination;
@@ -1578,7 +1578,7 @@
         graphics.drawImage(this.img, 0, 0, this.fWidth, this.fHeight, 0, 0, this.width, this.heigh);
         graphics.clearRect(0, 0, this.width, this.height);
     }
-    ImageAnimation.prototype.render = function (graphics, x, y, r, dt)
+    ImageAnimation.prototype.render = function (graphics, display, camera, dt)
     {
         if (!this.loaded)
             return;    
@@ -1881,12 +1881,12 @@
         if (this.graphic)
             this.graphic.drawToCanvas(canvas, x, y, r, dt);
     }
-    GameObject.prototype.render = function (graphics, x, y, r, dt)
+    GameObject.prototype.render = function (graphics, display, camera, dt)
     {
         if (this._animCallback)
             this._animCallback(dt);
         if (this.graphic)
-            this.graphic.render(graphics, x, y, r, dt);
+            this.graphic.render(graphics, display, camera, dt);
     }
     GameObject.prototype.setCenter = function (x, y)
     {
@@ -2075,7 +2075,7 @@
         }
         this.rotation += rad;
     }
-    Particle.prototype.render = function (graphics, x, y, r, dt)
+    Particle.prototype.render = function (graphics, display, camera, dt)
     {
         var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
         o.x += this.center.x;
@@ -2230,7 +2230,7 @@
             obj.collider = this;
         return obj;
     }
-    Circle.prototype.render = function (graphics, x, y, r, dt)
+    Circle.prototype.render = function (graphics, display, camera, dt)
     {
         var o = this.o.coordinate.pFrom(this.o.x, this.o.y);
         graphics.beginPath();
@@ -2737,7 +2737,7 @@
         this.center = this.position;
         this.constructing = false;
     }
-    Polygon.prototype.render = function (graphics, x, y, r, dt)
+    Polygon.prototype.render = function (graphics, display, camera, dt)
     {
         graphics.beginPath();
         if (this.V.length < 3)
@@ -3623,7 +3623,7 @@
         ctx.fillRect(this.o.x, this.o.y, this.width, this.height);
         ctx.strokeRect(this.o.x, this.o.y, this.width, this.height);
     }
-    Rectangle.prototype.render = function (graphic, x, y, r, dt)
+    Rectangle.prototype.render = function (graphic, display, camera, dt)
     {
         graphic.fillStyle = this.fillStyle;
         graphic.strokeStyle = this.strokeStyle;
@@ -3911,7 +3911,7 @@
         ctx.fillRect(this.center.x, this.center.y, canvas.width, this.height);
         ctx.strokeRect(this.center.x, this.center.y, canvas.width, this.height);
     }
-    Ground.prototype.render = function (graphics, x, y, r, dt)
+    Ground.prototype.render = function (graphics, display, camera, dt)
     {
         return;
     }
