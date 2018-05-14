@@ -411,7 +411,7 @@
         if (zIndex < 0)
             zIndex = 0;
         this.bgList.insert(bg, zIndex);
-        for (var i = 0; i < this.scene.cameraList; i++)
+        for (var i = 0; i < this.scene.cameraList.length; i++)
         {
             for (var j = 0; j < this.scene.cameraList[i].displayList.length; j++)
             {
@@ -431,6 +431,10 @@
             });
         })(this.count-1);
     }
+    /**
+     * 
+     * @param {Background} bg 
+     */
     BackgroundCollection.prototype.remove = function (bg)
     {
         if (!bg)
@@ -445,6 +449,10 @@
         if (index < 0)
             return false;
         this.bgList.removeAt(index);
+        for (var i = 0; i < bg.objectList.length; i++)
+        {
+            this.scene.removeGameObject(bg.objectList[i]);
+        }
         for (var i = 0; i < this.scene.cameraList; i++)
         {
             for (var j = 0; j < this.scene.cameraList[i].displayList.length; j++)
@@ -5599,6 +5607,7 @@
         }
     }
     Task.Status = { Pending: 0, Running: 1, Completed: 2 };
-
+    window.TaskManagment = TaskManagment;
+    window.Task = Task;
     return Engine;
 })(window.SarEngine);

@@ -36,17 +36,17 @@ ground.bounce = 0;
 var groundObj = new GameObject();
 groundObj.collider = ground;
 var it = new InfiniteTexture({
-    src: "res/img/test.png",
-    sliceWidth: 600,
-    sliceHeight: 400,
-    //direction: InfiniteTexture.Direction.Horizontal,
-    xMin: 300,
-    xMax: 900
+    src: "res/img/ground.png",
+    sliceWidth: 1920,
+    sliceHeight: 786,
+    direction: InfiniteTexture.Direction.Horizontal,
 });
 it.load();
-//groundObj.graphic = it;
+it.moveTo(0, 10);
+groundObj.graphic = it;
 scene.addGameObject(groundObj);
 
+/*
 var backgroundLayer = new Background();
 backgroundLayer.followSpeed = 0.2;
 scene.background.add(backgroundLayer);
@@ -62,6 +62,12 @@ bg.moveTo(0, -500);
 bg.load();
 var bgObj = new GameObject();
 bgObj.graphic = bg;
-scene.addGameObject(bgObj,backgroundLayer);
+scene.addGameObject(bgObj,backgroundLayer);*/
+GameSystem.loadBackground([
+    "res/img/bg-forest/0.png",
+    "res/img/bg-forest/1.png",
+    "res/img/bg-forest/2.png",
+    "res/img/bg-forest/3.png",
+]);
 
 GameSystem.start();

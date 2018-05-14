@@ -33,6 +33,7 @@ class GameSystemClass {
         this.choicePopSpeed = 7;
         this.textPopSpeed = 20;
         this.textPopTimmer = null;
+        this.backgroundList = [];
     }
     /**
      * @returns {GameSystemClass}
@@ -89,6 +90,52 @@ class GameSystemClass {
         this.showChoice("Please make a choice :)", ["Ok.", "Fine.", "No."]).then(i =>
         {
             console.log(i); 
+        });
+    }
+
+    /**
+     *  
+     * @param {Array<string>} bgList 
+     * @returns {Promise}
+     */
+    loadBackground(bgList)
+    {
+        return new Promise(resolve =>
+        {
+            var taskMgr = new TaskManagment();
+            taskMgr.onAllComplete = resolve;
+            this.backgroundList.forEach(bg =>
+            {
+                scene.background.remove(bg)
+            });
+            this.backgroundList = bgList.map((url, idx) =>
+            {
+                let background = new Background();
+                background.followSpeed = 1 - ((idx+1) / bgList.length);
+                this.scene.background.add(background);
+                let bg = new InfiniteTexture({
+                    src: url,
+                    sliceWidth: 3840,
+                    sliceHeight: 2160,
+                    direction: InfiniteTexture.Direction.Horizontal,
+                    yMax: 3000,
+                    yMin: -100,
+                });
+                bg.moveTo(0, -750);
+                let bgObj = new GameObject();
+                bgObj.graphic = bg;
+                taskMgr.addTask(new Task((complete) =>
+                {
+                    bg.load(() =>
+                    {
+                        this.scene.addGameObject(bgObj, background);
+                        complete();
+                    });
+                }));
+                return background;
+                //bg.load();
+            });
+            taskMgr.start();
         });
     }
 
