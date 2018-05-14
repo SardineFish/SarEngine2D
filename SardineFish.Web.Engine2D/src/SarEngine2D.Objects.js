@@ -31,7 +31,8 @@
     }
     Vector2.prototype.setCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -39,7 +40,8 @@
     }
     Vector2.prototype.changeCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -99,7 +101,8 @@
         var mod = this.mod();
         if (mod == 0)
             this.x = this.y = 0;
-        else {
+        else
+        {
             this.x /= mod;
             this.y /= mod;
         }
@@ -165,16 +168,19 @@
         this.y = 0;
         if (x == undefined)
             return;
-        if (x instanceof Vector2) {
+        if (x instanceof Vector2)
+        {
             this.x = x.x;
             this.y = x.y;
         }
-        else if (f) {
+        else if (f)
+        {
             var l = Math.sqrt(x * x + y * y);
             this.x = x * f / l;
             this.y = y * f / l;
         }
-        else {
+        else
+        {
             this.x = x;
             this.y = y;
         }
@@ -228,7 +234,8 @@
     }
     Point.prototype.setCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -236,7 +243,8 @@
     }
     Point.prototype.changeCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -289,7 +297,7 @@
         this.coordinate = Coordinate.Default;
         this.innerX = x;
         this.innerY = y;
-        var position=this;
+        var position = this;
         Object.defineProperty(this, "x", {
             get: function ()
             {
@@ -338,7 +346,7 @@
                 position.innerY = value;
             }
         })
-    }  
+    }
     Position.prototype = new Vector2();
     Position.prototype.constructor = Position;
     Position.prototype.copy = function ()
@@ -349,7 +357,8 @@
     }
     Position.prototype.setCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -357,7 +366,8 @@
     }
     Position.prototype.changeCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -426,7 +436,8 @@
     }
     Line.prototype.setCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -438,7 +449,8 @@
     }
     Line.prototype.changeCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -597,7 +609,8 @@
     }
     Arc.prototype.setCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -607,7 +620,8 @@
     }
     Arc.prototype.changeCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -736,7 +750,8 @@
     }
     Text.prototype.setCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -746,7 +761,8 @@
     }
     Text.prototype.changeCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -776,10 +792,10 @@
     {
         var ctx = canvas.getContext("2d");
         ctx.font = this.fontStyle + " "
-                 + this.fontVariant + " "
-                 + this.fontWeight + " "
-                 + this.fontSize + "px "
-                 + this.fontFamily;
+            + this.fontVariant + " "
+            + this.fontWeight + " "
+            + this.fontSize + "px "
+            + this.fontFamily;
         ctx.fillStyle = this.fillStyle;
         ctx.strokeStyle = this.strokeStyle;
         ctx.fillText(this.text, x, y);
@@ -797,7 +813,8 @@
         graphics.font = this.font;
         graphics.fillStyle = this.fillStyle;
         graphics.strokeStyle = this.strokeStyle;
-        if (this.textAlign == TextAlign.Center) {
+        if (this.textAlign == TextAlign.Center)
+        {
             var width = graphics.measureText(this.text).width;
             center.x -= width / 2;
         }
@@ -879,7 +896,8 @@
     }
     Image.prototype.setCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -890,7 +908,8 @@
     }
     Image.prototype.changeCoordinate = function (coordinate)
     {
-        if (this.coordinate.const) {
+        if (this.coordinate.const)
+        {
             Engine.onGlobalError.invoke({ sender: this, message: "Cannot set the constant coordinate." });
             return;
         }
@@ -978,8 +997,26 @@
         this.position = new Position(0, 0);
         this.sliceWidth = options || options["sliceWidth"] || 0;
         this.sliceHeight = options || options["sliceHeight"] || 0;
+        this.xMin = 0;
+        this.xMax = sliceWidth;
+        this.yMin = -sliceHeight;
+        this.yMax = 0;
+        if (options || options["direction"] === InfiniteTexture.Direction.Horizontal)
+        {
+            this.xMin = Number.MIN_SAFE_INTEGER;
+            this.xMax = Number.MAX_SAFE_INTEGER;
+        }
+        else if (options || options["direction"] === InfiniteTexture.Direction.Vertical)
+        {
+            this.yMin = Number.MIN_SAFE_INTEGER;
+            this.yMax = Number.MAX_SAFE_INTEGER;
+        }
         this.rawImg = new window.Image();
     }
+    InfiniteTexture.Direction = {
+        Vertical: "vertical",
+        Horizontal: "horizontal"
+    };
     InfiniteTexture.prototype.copy = function ()
     {
         var it = new InfiniteTexture({
@@ -1002,9 +1039,52 @@
     {
         
     }
+    InfiniteTexture.prototype.load = function (resolve)
+    {
+        var it = this;
+        var img = new window.Image();
+        img.onload = function ()
+        {
+            var canvas = document.createElement("canvas");
+            canvas.width = it.sliceWidth;
+            canvas.height = it.sliceHeight;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, it.sliceWidth, it.sliceHeight);
+            canvas.toBlob(function (blob)
+            {
+                var url = URL.createObjectURL(blob);
+                it.rawImg.onload = function ()
+                {
+                    resolve();
+                }
+                it.rawImg.src = url;
+            });
+        }
+        img.src = this.src;
+    }    
     InfiniteTexture.prototype.render = function (graphics, display, camera, dt)
     {
-        
+        var displayRange = display.displayRange;
+        var dy = displayRange.bottom - this.position.y;
+        var dx = displayRange.left - this.position.x;
+        var ox = Math.floor(dx / this.sliceWidth) * this.sliceWidth;
+        var oy = Math.floor(dy / this.sliceHeight) * this.sliceHeight;
+        var ex = Math.ceil((displayRange.right - this.position.x) / this.sliceWidth) * this.sliceWidth;
+        var ey = Math.ceil((displayRange.top - this.position.y) / this.sliceHeight) * this.sliceHeight;
+
+        for (var y = oy; y <= ey; y += this.sliceHeight)
+        {
+            if (this.yMin <= y || y - this.sliceHeight <= this.yMax)
+            {
+                for (var x = ox; x <= ex; x += this.sliceWidth)
+                {
+                    if (this.xMin <= x + this.sliceWidth || x <= this.xMax)
+                    {
+                        graphics.drawImage(this.rawImg, 0, 0, this.sliceWidth, this.sliceHeight, x, y, this.sliceWidth, this.sliceHeight);
+                    }
+                }
+            }
+        }
     }
 
     //Path
