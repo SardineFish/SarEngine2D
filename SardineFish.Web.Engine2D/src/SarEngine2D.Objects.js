@@ -993,20 +993,33 @@
 
     function InfiniteTexture(options)
     {
-        this.src = options || options["src"];
+        this.src = options && options["src"];
         this.position = new Position(0, 0);
-        this.sliceWidth = options || options["sliceWidth"] || 0;
-        this.sliceHeight = options || options["sliceHeight"] || 0;
-        this.xMin = 0;
-        this.xMax = sliceWidth;
-        this.yMin = -sliceHeight;
-        this.yMax = 0;
-        if (options || options["direction"] === InfiniteTexture.Direction.Horizontal)
+        this.sliceWidth = options && options["sliceWidth"] || 0;
+        this.sliceHeight = options && options["sliceHeight"] || 0;
+        this.xMin = options && options["xMin"] || 0;
+        this.xMax = options && options["xMax"] || this.sliceWidth;
+        this.yMin = options && options["yMin"] || -this.sliceHeight;
+        this.yMax = options && options["yMax"] || 0;
+        var self = this;
+        Object.defineProperty(this, "xRange", {
+            get: function ()
+            {
+                return new Range(self.xMin, self.xMax);
+            }
+        });
+        Object.defineProperty(this, "yRange", {
+            get: function ()
+            {
+                return new Range(self.yMin, self.yMax);
+            }
+        });
+        if ((options && options["direction"]) === InfiniteTexture.Direction.Horizontal)
         {
             this.xMin = Number.MIN_SAFE_INTEGER;
             this.xMax = Number.MAX_SAFE_INTEGER;
         }
-        else if (options || options["direction"] === InfiniteTexture.Direction.Vertical)
+        else if ((options && options["direction"]) === InfiniteTexture.Direction.Vertical)
         {
             this.yMin = Number.MIN_SAFE_INTEGER;
             this.yMax = Number.MAX_SAFE_INTEGER;
@@ -1055,7 +1068,8 @@
                 var url = URL.createObjectURL(blob);
                 it.rawImg.onload = function ()
                 {
-                    resolve();
+                    if (resolve)
+                        resolve();
                 }
                 it.rawImg.src = url;
             });
@@ -1064,7 +1078,7 @@
     }    
     InfiniteTexture.prototype.render = function (graphics, display, camera, dt)
     {
-        var displayRange = display.displayRange;
+        var displayRange = display.viewRange;
         var dy = displayRange.bottom - this.position.y;
         var dx = displayRange.left - this.position.x;
         var ox = Math.floor(dx / this.sliceWidth) * this.sliceWidth;
@@ -1072,21 +1086,46 @@
         var ex = Math.ceil((displayRange.right - this.position.x) / this.sliceWidth) * this.sliceWidth;
         var ey = Math.ceil((displayRange.top - this.position.y) / this.sliceHeight) * this.sliceHeight;
 
+        var xRange = this.xRange;
+        var yRange = this.yRange;
+        
         for (var y = oy; y <= ey; y += this.sliceHeight)
         {
-            if (this.yMin <= y || y - this.sliceHeight <= this.yMax)
+            if (yRange.inRangeInclude(y) || yRange.inRangeInclude(y - this.sliceHeight))
             {
                 for (var x = ox; x <= ex; x += this.sliceWidth)
                 {
-                    if (this.xMin <= x + this.sliceWidth || x <= this.xMax)
+                    if (xRange.inRangeInclude(x) || xRange.inRangeInclude(x + this.sliceWidth))
                     {
-                        graphics.drawImage(this.rawImg, 0, 0, this.sliceWidth, this.sliceHeight, x, y, this.sliceWidth, this.sliceHeight);
+                        // Clip out range part
+                        var sx = 0, sy = 0;
+                        var w = this.sliceWidth, h = this.sliceHeight;
+                        if (x < this.xMin)
+                        {
+                            sx = this.xMin - x;
+                            w -= sx;
+                        }
+                        if (x + this.sliceWidth > this.xMax)
+                        {
+                            w -= x + this.sliceWidth - this.xMax;
+                        }
+                        if (y > this.yMax)
+                        {
+                            sy = y - this.yMax;
+                            h -= sy;
+                        }    
+                        if (y - this.sliceHeight < this.yMin)
+                        {
+                            h -= this.yMin - (y - this.sliceHeight);
+                        }
+                        graphics.drawImage(this.rawImg, sx, sy, w, h, x + sx, y + sy, w, h);
                     }
                 }
             }
         }
     }
-
+    Engine.InfiniteTexture = InfiniteTexture;
+    window.InfiniteTexture = InfiniteTexture;
     //Path
     function Path()
     {
@@ -4152,6 +4191,33 @@
         }
     }
     Task.Status = { Pending: 0, Running: 1, Completed: 2 };
+
+    /**
+     * 
+     * @param {Number} from 
+     * @param {Number} to 
+     */
+    function Range(from, to)
+    {
+        this.from = from;
+        this.to = to;
+    }
+    /**
+     * @param {Number}
+     * @returns {Boolean}
+     */
+    Range.prototype.inRangeInclude = function(x)
+    {
+        return this.from <= x && x <= this.to;
+    }
+    /**
+     * @param {Number}
+     * @returns {Boolean}
+     */
+    Range.prototype.inRangeExclude = function(x)
+    {
+        return this.from < x && x < this.to;
+    }
 
     //ArrayList
     function ArrayList()

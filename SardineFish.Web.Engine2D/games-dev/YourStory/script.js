@@ -35,6 +35,16 @@ var ground = new Ground(0);
 ground.bounce = 0;
 var groundObj = new GameObject();
 groundObj.collider = ground;
+var it = new InfiniteTexture({
+    src: "res/img/test.png",
+    sliceWidth: 600,
+    sliceHeight: 400,
+    //direction: InfiniteTexture.Direction.Horizontal,
+    xMin: 300,
+    xMax: 900
+});
+it.load();
+groundObj.graphic = it;
 scene.addGameObject(groundObj);
 
 GameSystem.start();

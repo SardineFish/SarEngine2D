@@ -13,7 +13,29 @@ function sign(x)
 		return -1;
 	return 0;
 }
-
+/**
+ * 
+ * @param {Number} from 
+ * @param {Number} to 
+ */
+function Range(from, to) {
+	this.from = from;
+	this.to = to;
+}
+/**
+ * @param {Number}
+ * @returns {Boolean}
+ */
+Range.prototype.inRangeInclude(x) {
+	return from <= x && x <= to;
+}
+/**
+ * @param {Number}
+ * @returns {Boolean}
+ */
+Range.prototype.inRangeExclude(x) {
+	return from < x && x < to;
+}
 //ArrayList
 function ArrayList()
 {
