@@ -5,7 +5,9 @@ class Entity
     constructor()
     {
         this.gameObject = new GameObject();
-        GameSystem.scene.addGameObject(this.gameObject);
+        this.id = -1;
+        this.name = "Entity";
+        //GameSystem.scene.addGameObject(this.gameObject);
     }
     get position()
     {

@@ -300,6 +300,10 @@
         {
             throw new Error("This Layer has belong to another Scene.");
         }
+        if (depth === undefined)
+        {
+            depth = this.topDepth + 1;
+        }    
         if (isNaN(depth) || this[depth])
         {
             throw new Error("Invalid depth.");

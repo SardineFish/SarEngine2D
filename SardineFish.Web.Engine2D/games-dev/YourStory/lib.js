@@ -1,6 +1,7 @@
 import { FSM, State } from "./fsm.js";
 import { GameSystem } from "./game-system.js";
 import { Entity } from "./entity.js";
+import { Assets } from "./assets.js";
 class Character extends Entity
 {
     constructor()
@@ -78,69 +79,27 @@ class Player extends Character
     {
         super();
         this.input = input;
+        this.name = "Player";
         /** @type {Entity} */
         this.touchedEntity = null;
-        this.standLeftAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
-        this.standRightAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
-        this.walkLeftAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/walk-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 2
-        });
-        this.walkRightAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/walk.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 2
-        });
+        /** @type {Array<NPC>} */
+        this.familiarNPCs = [];
+        this.standLeftAnim = Assets.playerStandLeftAnim.copy();
+        this.standRightAnim = Assets.playerStandRightAnim.copy();
+        this.walkLeftAnim = Assets.playerWalkLeftAnim.copy();
+        this.walkRightAnim = Assets.playerWalkRightAnim.copy();
         this.attackLeftAnim = null;
         this.attackRightAnim = null;
-        this.jumpLeftAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
-        this.jumpRightAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
+        this.jumpLeftAnim = Assets.playerJumpLeftAnim.copy();
+        this.jumpRightAnim = Assets.playerJumpRightAnim.copy();
         input.onKeyDown.add(e => this.keyDown(e));
         input.onKeyUp.add(e => this.keyUp(e));
     }
 
-    keyDown(e) {
+    keyDown(e)
+    {
+        if (GameSystem.blockInput)
+            return;    
         switch (e.key) {
             case Keys.Left:
             case Keys.A:
@@ -160,8 +119,12 @@ class Player extends Character
         }
     }
 
-    keyUp(e) {
-        switch (e.key) {
+    keyUp(e)
+    {
+        if (GameSystem.blockInput)
+            return;
+        switch (e.key)
+        {
             case Keys.Left:
             case Keys.A:
                 this.control += 1;
@@ -186,63 +149,16 @@ class NPC extends Character
     constructor(pos)
     {
         super();
+        this.name = "NPC";
         pos = pos || 0;
-        this.standLeftAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
-        this.standRightAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
-        this.walkLeftAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/walk-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 2
-        });
-        this.walkRightAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/walk.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 2
-        });
+        this.standLeftAnim = Assets.npcStandLeftAnim.copy();
+        this.standRightAnim = Assets.npcStandRightAnim.copy();
+        this.walkLeftAnim = Assets.npcWalkLeftAnim.copy();
+        this.walkRightAnim = Assets.npcWalkRightAnim.copy();
         this.attackLeftAnim = null;
         this.attackRightAnim = null;
-        this.jumpLeftAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
-        this.jumpRightAnim = ImageAnimation.loadFromUrl({
-            src: "res/img/stand.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
-            fps: 15,
-            count: 1
-        });
+        this.jumpLeftAnim = Assets.npcJumpLeftAnim.copy();
+        this.jumpRightAnim = Assets.npcJumpRightAnim.copy();
         this.gameObject.collider = new Rectangle(400, 400);
         this.gameObject.collider.moveTo(0, 200);
         this.gameObject.collider.rigidBody = false;
@@ -280,6 +196,19 @@ class NPC extends Character
                 }, 0.2);
             }
         }
+    }
+
+    interact(player)
+    {
+        function npcSpeek()
+        {
+            GameSystem.showAsideText("NPC: $").then(playerSpeek);
+        }
+        function playerSpeek()
+        {
+            GameSystem.showAsideText("Player: $").then(npcSpeek);
+        }
+        npcSpeek();
     }
 }    
 class PlayerStateMachine extends FSM
@@ -348,7 +277,7 @@ class Stand extends PlayerState
     }
     enter(prevState)
     {
-        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height / 2));
+        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
         this.player.dir = this.dir;
@@ -376,7 +305,7 @@ class Walk extends PlayerState
     }
     enter(prevState)
     {
-        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height / 2));
+        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
         this.player.dir = this.dir;
@@ -407,7 +336,7 @@ class Attack extends PlayerState
     {
         this.anim.frame = 0;
         this.anim.loop.enable = false;
-        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height / 2));
+        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
         this.anim.onEnd = () =>
@@ -441,7 +370,7 @@ class Jump extends PlayerState
             this.anim = this.player.jumpRightAnim;
         else
             this.anim = this.player.jumpLeftAnim;
-        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height / 2));
+        var newpos = Vector2.plus(this.player.position, new Vector2(-this.anim.width / 4, this.anim.height));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
     }

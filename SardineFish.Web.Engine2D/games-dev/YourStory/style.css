@@ -9,6 +9,8 @@ body{
     height: 100%;
     width: 100%;
     z-index: 1000;
+    transform: translateZ(0);
+    color: white;
 }
 
 #main-ui {
@@ -44,8 +46,10 @@ body{
 
 #aside-text {
     position: relative;
+    max-width: 60%;
+    line-height: 1.8;
 }
-#aside-text.erase{
+#aside-wrapper.erase{
     animation-name: hide;
     animation-duration: .5s;
     animation-timing-function: ease-out;
@@ -89,7 +93,6 @@ ul {
 }
 .choice::before{
     content: ">";
-    color: transparent;
     padding-right: 10px;
 }
 .choice:hover::before{
@@ -118,4 +121,49 @@ ul {
     to{
         opacity: 0;
     }
+}
+#aside-wrapper {
+    position: relative;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-end;
+    justify-content: flex-start;
+}
+#aside-wrapper.erase{
+    
+}
+
+#button-skip {
+    font-size: 2em;
+    opacity: 0;
+    cursor: pointer;
+}
+#button-skip.show:hover{
+    opacity: 1;
+}
+#button-skip.show{
+    padding: 10px;
+    opacity: 0.6;
+    margin-left: 10px;
+    transition: all 0.3s;
+}
+
+#skip-wrapper {
+    height: 43px;
+    line-height: 1.8;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.text-fill {
+    display: inline-block;
+    min-width: 5em;
+    outline: none;
+    border-bottom: solid 2px white;
+    box-sizing: border-box;
+    padding: 0 0.5em;
+    white-space: normal;
+    word-break: break-all;
 }

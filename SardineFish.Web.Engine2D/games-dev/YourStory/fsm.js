@@ -52,7 +52,7 @@ class FSM
     changeState(state)
     {
         if (this.currentState)
-            this.currentState(state);
+            this.currentState.exit(state);
         this.prevState = this.currentState;
         this.currentState = state;
         state.enter(this.prevState);

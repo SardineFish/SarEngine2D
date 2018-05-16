@@ -20,18 +20,19 @@ GameSystem.input = input;
 scene.addInput(input);
 scene.physics.g = new Vector2(0, -6400);
 
-scene.worldBackground = new Color(0, 0, 0, 0.0);
+scene.worldBackground = new Color(126, 152, 150, 1.0);
 camera.zoomTo(0.5);
 camera.moveTo(0, 400);
 
-var player = new Player (input);
-//scene.addGameObject(player.gameObject);
-GameSystem.player = player;
+/*var player = new Player(input);
+scene.addGameObject(player.gameObject);
+GameSystem.player = player;*/
+
 
 var npc = new NPC(400);
 //scene.addGameObject(npc.gameObject);
 
-var ground = new Ground(0);
+/*var ground = new Ground(0);
 ground.bounce = 0;
 var groundObj = new GameObject();
 groundObj.collider = ground;
@@ -44,7 +45,7 @@ var it = new InfiniteTexture({
 it.load();
 it.moveTo(0, 10);
 groundObj.graphic = it;
-scene.addGameObject(groundObj);
+scene.addGameObject(groundObj);*/
 
 /*
 var backgroundLayer = new Background();
@@ -63,11 +64,11 @@ bg.load();
 var bgObj = new GameObject();
 bgObj.graphic = bg;
 scene.addGameObject(bgObj,backgroundLayer);*/
-GameSystem.loadBackground([
+/*GameSystem.loadBackground([
     "res/img/bg-forest/0.png",
     "res/img/bg-forest/1.png",
     "res/img/bg-forest/2.png",
     "res/img/bg-forest/3.png",
-]);
+]);*/
 
-GameSystem.start();
+GameSystem.load();

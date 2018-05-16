@@ -6,8 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Your Story</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="res/font/material-design-icons-3.0.1/material-icons.css">
     <script src="../../src/SarEngine2D.js"></script>
     <script src="../../src/SarEngine2D.Objects.js"></script>
+    
 </head>
 <body>
     <div id="ui" class="unselectable" unselectable>
@@ -18,7 +20,10 @@
        </div>
        <div class="page" id="game-text">
        <div id="aside-wrapper">
-        <div id="aside-text">The Story</div>
+        <div id="aside-text">The<span class="text-fill" contenteditable="true"></span> Story</div>
+        <div id="skip-wrapper">
+        <div id="button-skip" class="material-icons">play_arrow</div>
+        </div>
        </div>
        <div id="choice-wrapper">
            <ul id="choices">

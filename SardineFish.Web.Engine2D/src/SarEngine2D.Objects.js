@@ -1044,9 +1044,16 @@
         var it = new InfiniteTexture({
             src: this.src,
             sliceWidth: this.sliceWidth,
-            sliceHeight: this.sliceHeight
+            sliceHeight: this.sliceHeight,
+            xMin: this.xMin,
+            xMax: this.xMax,
+            yMin: this.yMin,
+            yMax: this.yMax
         });
+        it.coordinate = this.coordinate;
+        it.rawImg = this.rawImg;
         it.position = this.position.copy();
+        return it;
     }
     InfiniteTexture.prototype.moveTo = function (x, y)
     {
@@ -1483,6 +1490,7 @@
         this.onEnd = null;
         this.onFrameUpdate = null;
         this.loop = new ImageAnimation.Loop(0, this.frames.length - 1);
+        this.loop.enable = (options && options["loop"] !== undefined) ? options["loop"] : true;
         this.o = new Point(-this.width / 2, this.height / 2);
     }
     //---ImagImageAnimation.Loop
@@ -1525,14 +1533,6 @@
     }
     ImageAnimation.loadFromUrl = function (options, callback, onprogress)
     {
-        var clipX = options["clipX"] || 0;
-        var clipY = options["clipY"] || 0;
-        var fWidth = options["fWidth"] || 0;
-        var fHeight = options["fHeight"] || 0;
-        var width = options["width"] || 0;
-        var height = options["height"] || 0;
-        var fCount = options["count"] || 1;
-        var fps = options["fps"] || 60;
         /*clipX, clipY, fWidth, fHeight, width, height, fCount, fps*/
         var ia = new ImageAnimation(options);
         ia.load(callback, onprogress);
@@ -1549,16 +1549,16 @@
         ia.center = this.center.copy();
         ia.position = this.position.copy();
         ia.coordinate = this.coordinate;
-        ia.fCount = this.fCount;
         ia.fps = this.fps;
         ia.clipX = this.clipX;
         ia.clipY = this.clipY;
-        ia.fWidth = this.fWidth;
-        ia.fHeight = this.fHeight;
         ia.time = this.time;
         ia.width = this.width;
-        ia.heigh = this.heigh;
+        ia.height = this.height;
         ia.frame = this.frame;
+        ia.frames = this.frames.map(f => f);
+        ia.frames.width = this.frames.width;
+        ia.frames.height = this.frames.height;
         ia.playing = this.playing;
         ia.reverse = this.reverse;
         ia.onBegine = this.onBegine;
@@ -1716,7 +1716,7 @@
         this.time += dt;
         var f = Math.floor(this.time / (1 / this.fps));
         if (this.reverse)
-            f = this.fCount - f;
+            f = this.frames.length - f;
         if (this.loop.enable)
         {
             if (f > this.loop.to)
@@ -1725,7 +1725,7 @@
                 if (this.loop.loopTimes > 0 && this.loop.lt >= this.loop.loopTimes)
                 {
                     this.loop.enable = false;
-                    f = f % this.fCount;
+                    f = f % this.frames.length;
                 }
                 else
                 {
@@ -1739,9 +1739,9 @@
         }
         else if (this.playing)
         {
-            if (f >= this.fCount && !this.reverse)
+            if (f >= this.frames.length && !this.reverse)
             {
-                this.frame = f = this.fCount - 1;
+                this.frame = f = this.frames.length - 1;
                 this.end();
             }
             if (f <= 0 && this.reverse)
