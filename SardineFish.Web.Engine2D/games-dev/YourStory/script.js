@@ -18,18 +18,16 @@ GameSystem.display = display;
 GameSystem.input = input;
 
 scene.addInput(input);
-scene.physics.g = new Vector2(0, -6400);
-
-scene.worldBackground = new Color(126, 152, 150, 1.0);
-camera.zoomTo(0.5);
-camera.moveTo(0, 400);
-
+$("#button-start").onclick = (e) =>
+{
+    GameSystem.switchToGame();
+};
 /*var player = new Player(input);
 scene.addGameObject(player.gameObject);
 GameSystem.player = player;*/
 
 
-var npc = new NPC(400);
+//var npc = new NPC(400);
 //scene.addGameObject(npc.gameObject);
 
 /*var ground = new Ground(0);

@@ -3415,18 +3415,36 @@
         this.scene = null;
         this.animationCallbackList = ArrayList();
         var camera = this;
-        var zoom = 1;
+        this._zoom = 1;
         var rotation = 0;
         Object.defineProperty(this, "zoom", {
             get: function ()
             {
-                return zoom;
+                return camera._zoom;
             },
-            set: function (value)
+            set: function (z)
             {
-                zoom = value;
-                camera.viewCoordinate.unitX = 1 / zoom;
-                camera.viewCoordinate.unitY = -1 / zoom;
+                var x = camera.center.x;
+                var y = camera.center.y;
+                /*camera.viewCoordinate.unitX = 1 / zoom;
+                camera.viewCoordinate.unitY = -1 / zoom;*/
+                var k = camera._zoom / z;
+                if (!isNaN(x) && !isNaN(y)) {
+                    var ox = camera.center.x;
+                    var oy = camera.center.y;
+                    ox = x - ((x - ox) * k);
+                    oy = y - ((y - oy) * k);
+                    camera.moveTo(ox, oy);
+                }
+                this._zoom = z;
+                camera.viewCoordinate.unitX = 1 / z;
+                camera.viewCoordinate.unitY = 1 / z;
+                for (var i = 0; i < camera.displayList.length; i++) {
+                    camera.displayList[i].viewCoordinate.originX = camera.position.x - (camera.displayList[i].renderWidth / 2 / z);
+                    camera.displayList[i].viewCoordinate.originY = camera.position.y + (camera.displayList[i].renderHeight / 2 / z);
+                    camera.displayList[i].viewCoordinate.unitX = 1 / z;
+                    camera.displayList[i].viewCoordinate.unitY = -1 / z;
+                }
             }
         });
         Object.defineProperty(this, "rotation", {
@@ -3487,7 +3505,7 @@
                     }
                     else if (delta > 0 && obj[key] >= to)
                     {
-                        obj[key] = to;
+                        obj[key] = parseFloat(to);
                         camera.animationCallbackList.remove(animeCallback);
                         if (callback)
                         {
@@ -3496,7 +3514,7 @@
                     }
                     else if (t >= time)
                     {
-                        obj[key] = to;
+                        obj[key] = parseFloat(to);
                         camera.animationCallbackList.remove(animeCallback);
                         if (callback)
                         {

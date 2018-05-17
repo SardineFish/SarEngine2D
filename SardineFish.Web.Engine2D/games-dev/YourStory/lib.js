@@ -19,7 +19,7 @@ class Character extends Entity
         this.jumpLeftAnim = new ImageAnimation();
         this.jumpRightAnim = new ImageAnimation();
         this.walkSpeed = 500;
-        this.jumpSpeed = 1600;
+        this.jumpSpeed = 3200;
         this.gameObject.setCenter(0, 100);
         this.gameObject.collider = new Rectangle(200, 200);
         this.gameObject.collider.moveTo(0, 100);
@@ -167,11 +167,12 @@ class NPC extends Character
         this.hoverUI = new GameObject();
         this.hoverUI.graphic = new Text("Press [E] to interact.");
         this.hoverUI.graphic.font.fontSize = 40;
+        this.hoverUI.graphic.fillStyle = new Color(255, 255, 255, 1.0);
         this.hoverUI.linkTo(this.gameObject);
         GameSystem.scene.addGameObject(this.hoverUI);
 
         this.gameObject.moveTo(pos, 0);
-        this.hoverUI.moveTo(pos, 250);
+        this.hoverUI.moveTo(pos, 450);
     }
     update()
     {
@@ -277,10 +278,11 @@ class Stand extends PlayerState
     }
     enter(prevState)
     {
-        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height));
+        var newpos = Vector2.plus(this.player.position, new Vector2(-this.anim.width / 2, this.anim.height-20));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
         this.player.dir = this.dir;
+        this.anim.time = 0;
         this.player.gameObject.v = new Vector2(0,0);
     }
     exit(nextState)
@@ -305,10 +307,11 @@ class Walk extends PlayerState
     }
     enter(prevState)
     {
-        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height));
+        var newpos = Vector2.plus(this.player.position, new Vector2(-this.anim.width / 2, this.anim.height - 20));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
         this.player.dir = this.dir;
+        this.anim.time = 0;
         this.player.gameObject.v.x = Math.sign(this.dir) * this.player.walkSpeed;
     }
     exit(nextState)
@@ -336,9 +339,10 @@ class Attack extends PlayerState
     {
         this.anim.frame = 0;
         this.anim.loop.enable = false;
-        var newpos = Vector2.plus(this.player.position, new Vector2(0, this.anim.height));
+        var newpos = Vector2.plus(this.player.position, new Vector2(-this.anim.width / 2, this.anim.height - 20));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
+        this.anim.time = 0;
         this.anim.onEnd = () =>
         {
             this.player.state.changeState(new Stand(this.player, this.dir));
@@ -370,7 +374,7 @@ class Jump extends PlayerState
             this.anim = this.player.jumpRightAnim;
         else
             this.anim = this.player.jumpLeftAnim;
-        var newpos = Vector2.plus(this.player.position, new Vector2(-this.anim.width / 4, this.anim.height));
+        var newpos = Vector2.plus(this.player.position, new Vector2(-this.anim.width / 2, this.anim.height - 20));
         this.anim.moveTo(newpos.x, newpos.y);
         this.player.gameObject.graphic = this.anim;
     }
@@ -379,6 +383,9 @@ class Jump extends PlayerState
         this.resetDir(this.dir);
         if (this.player.gameObject.collider.landed)
             this.player.gameObject.v.y = this.player.jumpSpeed;
+        //this.anim.frame = 0;
+        this.anim.time = 0;
+        this.anim.playing = true;
         this.jumped = true;
         this.jumpFrame = true;
     }

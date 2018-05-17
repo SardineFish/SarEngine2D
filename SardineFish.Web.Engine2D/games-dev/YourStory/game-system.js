@@ -43,6 +43,7 @@ class GameSystemClass {
         this.ground = null;
         this.blockInput = false;
         this.gameState = new StoryStateMachine();
+        this.npcLayer = new Layer();
         /** @type {Array<Entity>} */
         this.entityList = [];
         this.timeline = new TimeLine([new InitialEvent(0)]);
@@ -63,22 +64,53 @@ class GameSystemClass {
     {
         Assets.load(() =>
         {
-            this.start();
+            //this.start();
+            this.hideUI("#loading").then(() =>
+            {
+                this.showUI("#main-menu");
+                this.start();
+                this.switchToUI();
+            });
         },
             (progress) =>
             {
                 console.log(progress);
+                $("#progress").style.width = progress * 100 + "%";
             });
     }
-
+    switchToUI()
+    {
+        //this.camera.moveTo()
+        this.camera.zoomTo(1.2);
+        this.camera.moveTo(400, 200);
+    }
+    switchToGame(title = true)
+    {
+        $("#main-menu .button-wrapper").classList.add("hide");
+        this.camera.animate({
+            "position.x": 0,
+            "position.y": 400,
+            "zoom": 0.5
+        }, 1);
+        setTimeout(() => {
+            this.renderMainUI();
+            $("#main-menu").style["display"] = "none";
+        }, 1000);
+    }
     start()
     {
+        this.scene.physics.g = new Vector2(0, -12800);
+        this.npcLayer = new Layer();
+        this.scene.layers.add(this.npcLayer, -1);
+        this.scene.worldBackground = new Color(126, 152, 150, 1.0);
+        this.camera.zoomTo(0.5);
+        this.camera.moveTo(0, 400);
         this.engine.start();
         this.scene.onUpdate.add((e) => this.update(e.dt));
         this.mouseInput = this.display.input;
         this.scene.addInput(this.mouseInput);
         this.scene.onMouseDown.add(e => this.mouseDown(e));
-        this.renderMainUI();
+        //this.renderMainUI();
         this.blockInput = false;
         this.loadBackground(Assets.bgForest);
         this.loadGround();
@@ -86,6 +118,8 @@ class GameSystemClass {
         //this.scene.addGameObject(this.player.gameObject);
         this.timeline.start();
         this.gameState.changeState(new Wander());
+        this.spawn(new NPC(400), 400);
+        
         //this.camera.linkTo(this.player.gameObject);
     }
 
@@ -145,7 +179,12 @@ class GameSystemClass {
             this.addEntity(entity);
         }
         if (entity.gameObject.id < 0)
-            this.scene.addGameObject(entity.gameObject);
+        {
+            if (entity instanceof NPC)
+                this.scene.addGameObject(entity.gameObject, this.npcLayer);
+            else
+                this.scene.addGameObject(entity.gameObject);
+        }    
     }
 
     addEntity(entity)
@@ -165,6 +204,36 @@ class GameSystemClass {
                 return this.entityList[i].id;    
         }
         return -1;
+    }
+
+    hideUI(selector)
+    {
+        return new Promise((resolve) =>
+        {
+            $(selector).classList.remove("show");
+            $(selector).classList.add("hide");
+            setTimeout(() =>
+            {
+                $(selector).style["display"] = "none";
+                resolve();
+            }, 500);
+        });
+    }
+    showUI(selector)
+    {
+        return new Promise((resolve) =>
+        {
+            $(selector).style["display"] = "flex";
+            setTimeout(() =>
+            {
+                $(selector).classList.remove("hide");
+                $(selector).classList.add("show");
+                setTimeout(() =>
+                {
+                    resolve();
+                }, 500);
+            },200);
+        });
     }
 
     clearUI()
@@ -213,7 +282,7 @@ class GameSystemClass {
                 let background = new Background();
                 background.followSpeed = 1 - ((idx+1) / bgList.length);
                 this.scene.background.add(background);
-                bg.moveTo(0, -750);
+                bg.moveTo(200, -750);
                 let bgObj = new GameObject();
                 bgObj.graphic = bg.copy();
                 /*taskMgr.addTask(new Task((complete) =>

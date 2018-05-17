@@ -34,115 +34,116 @@ class AssetsClass
 
         this.playerStandLeftAnim = new ImageAnimation({
             src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 5,
             count: 13
         });
         this.playerStandRightAnim = new ImageAnimation({
-            src: "res/img/stand.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/stand-right.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 5,
             count: 13
         });
         this.playerWalkLeftAnim = new ImageAnimation({
             src: "res/img/walk-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
-            count: 2
+            count: 8
         });
         this.playerWalkRightAnim = new ImageAnimation({
-            src: "res/img/walk.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/walk-right.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
-            count: 2
+            count: 8
         });
         this.playerAttackLeftAnim = null;
         this.playerAttackRightAnim = null;
         this.playerJumpLeftAnim = new ImageAnimation({
-            src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/jump-left.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
-            count: 1
+            count: 2,
+                loop: false
         });
         this.playerJumpRightAnim = new ImageAnimation({
             src: "res/img/jump-right.png",
             frameWidth: 500,
             frameHeight: 500,
-            renderWidth: 500,
-            renderHeight: 500,
-            fps: 15,
+            renderWidth: 400,
+            renderHeight: 400,
+            fps: 30,
             count: 2,
             loop: false
         });
 
         this.npcStandLeftAnim = new ImageAnimation({
-            src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/npc.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
             count: 1
         });
         this.npcStandRightAnim = new ImageAnimation({
-            src: "res/img/stand.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/npc.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
             count: 1
         });
         this.npcWalkLeftAnim = new ImageAnimation({
-            src: "res/img/walk-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/npc.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
-            count: 2
+            count: 1
         });
         this.npcWalkRightAnim = new ImageAnimation({
-            src: "res/img/walk.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/npc.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
-            count: 2
+            count: 1
         });
         this.npcAttackLeftAnim = null;
         this.npcAttackRightAnim = null;
         this.npcJumpLeftAnim = new ImageAnimation({
-            src: "res/img/stand-left.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/npc.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
             count: 1
         });
         this.npcJumpRightAnim = new ImageAnimation({
-            src: "res/img/stand.png",
-            frameWidth: 200,
-            frameHeight: 200,
-            renderWidth: 200,
-            renderHeight: 200,
+            src: "res/img/npc.png",
+            frameWidth: 500,
+            frameHeight: 500,
+            renderWidth: 400,
+            renderHeight: 400,
             fps: 15,
             count: 1
         });
