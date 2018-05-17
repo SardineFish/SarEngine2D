@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,49 +10,70 @@
     <link rel="stylesheet" href="res/font/material-design-icons-3.0.1/material-icons.css">
     <script src="../../src/SarEngine2D.js"></script>
     <script src="../../src/SarEngine2D.Objects.js"></script>
-    
+
 </head>
+
 <body>
-   <div id="loading" class="show ui-screen unselectable" unselectable>
-      <p id="loading-text">Loading...</p>
-       <div id="progress-bar">
-           <div id="progress">
-               
-           </div>
-       </div>
-   </div>
-   <div id="main-menu" class="ui-screen unselectable" unselectable>
-       <header id="title">Your Story</header>
-       <div class="button-wrapper">
-           
-           <div id="name" class="text-box"></div>
-           <div id="button-start" class="button">Start</div>
-           <div id="button-about" class="button">About</div>
-       </div>
-   </div>
-    <div id="ui" class="unselectable" unselectable>
-       <div id="main-wrapper" class="page" >
-        <div id="main-ui">
-            <header id="title">Your Story</header>
+    <div id="mask" class="ui-screen"></div>
+    <div id="loading" class="show ui-screen unselectable" unselectable>
+        <p id="loading-text">Loading...</p>
+        <div id="progress-bar">
+            <div id="progress">
+
+            </div>
         </div>
-       </div>
-       <div class="page" id="game-text">
-       <div id="aside-wrapper">
-        <div id="aside-text">The<span class="text-fill" contenteditable="true"></span> Story</div>
-        <div id="skip-wrapper">
-        <div id="button-skip" class="material-icons">play_arrow</div>
+    </div>
+    <div id="main-menu" class="ui-screen unselectable" unselectable>
+        <header id="title">Your Story</header>
+        <div class="button-wrapper">
+
+            <div class="text-box-wrapper">
+                <span class="text-header">Your Name: </span>
+                <span id="name" class="text-box" contenteditable="true">
+                    
+                </span>
+            </div>
+            <div class="notice" style="opacity: 0;">Please tell us your name.</div>
+            <div id="button-start" class="button">Start</div>
+            <div id="button-about" class="button">About</div>
         </div>
-       </div>
-       <div id="choice-wrapper">
-           <ul id="choices">
-               <li class="choice">Ok.</li>
-               <li class="choice">Fine.</li>
-               <li class="choice">No.</li>
-           </ul>
-       </div>
-       </div>
+    </div>
+    <div id="pause-menu" class="ui-screen unselectable">
+        <header id="title">Your Story</header>
+        <div class="button-wrapper">
+            <div id="name-text"></div>
+            <div id="button-resume" class="button">Resume</div>
+            <div id="button-load" class="button">Load Save</div>
+            <div id="button-save" class="button">Save</div>
+            <div id="button-about" class="button">About</div>
+        </div>
+    </div>
+    <div id="ui" class="ui-screen unselectable" unselectable>
+        <div id="main-wrapper" class="page">
+            <div id="main-ui">
+                <header id="title">Your Story</header>
+            </div>
+        </div>
+        <div id="button-pause" class="material-icons">pause</div>
+        <div class="page" id="game-text">
+            <div id="aside-wrapper">
+                <div id="aside-text">The
+                    <span class="text-fill" contenteditable="true"></span> Story</div>
+                <div id="skip-wrapper">
+                    <div id="button-skip" class="material-icons">play_arrow</div>
+                </div>
+            </div>
+            <div id="choice-wrapper">
+                <ul id="choices">
+                    <li class="choice">Ok.</li>
+                    <li class="choice">Fine.</li>
+                    <li class="choice">No.</li>
+                </ul>
+            </div>
+        </div>
     </div>
     <div id="display"></div>
     <script src="script.js" type="module"></script>
 </body>
+
 </html>

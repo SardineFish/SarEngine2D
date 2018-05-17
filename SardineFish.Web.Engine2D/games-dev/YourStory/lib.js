@@ -2,6 +2,8 @@ import { FSM, State } from "./fsm.js";
 import { GameSystem } from "./game-system.js";
 import { Entity } from "./entity.js";
 import { Assets } from "./assets.js";
+import { Conversation } from "./timeline.js";
+import { Talking } from "./story-state.js";
 class Character extends Entity
 {
     constructor()
@@ -201,6 +203,7 @@ class NPC extends Character
 
     interact(player)
     {
+        /*
         function npcSpeek()
         {
             GameSystem.showAsideText("NPC: $").then(playerSpeek);
@@ -209,7 +212,8 @@ class NPC extends Character
         {
             GameSystem.showAsideText("Player: $").then(npcSpeek);
         }
-        npcSpeek();
+        npcSpeek();*/
+        GameSystem.gameState.changeState(new Talking(this));
     }
 }    
 class PlayerStateMachine extends FSM

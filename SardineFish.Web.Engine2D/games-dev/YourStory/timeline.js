@@ -55,7 +55,7 @@ class TimeLine
 
     writeEvent(event)
     {
-        this.events.splice(this.currentIdx++, 0, event);
+        this.events.splice(++this.currentIdx, 0, event);
     }
 
     update(dt)
@@ -180,4 +180,4 @@ class Conversation extends SotryEvent
     }
 }
 
-export { TimeLine , InitialEvent, SpawnNPC };
+export { TimeLine , InitialEvent, SpawnNPC, Conversation };

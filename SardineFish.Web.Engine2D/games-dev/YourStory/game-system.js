@@ -71,6 +71,12 @@ class GameSystemClass {
                 this.start();
                 this.switchToUI();
             });
+            this.showUI("#mask")
+                .then(() => this.hideUI("#mask")).
+                then(() =>
+                {
+                    
+                });
         },
             (progress) =>
             {
@@ -78,11 +84,24 @@ class GameSystemClass {
                 $("#progress").style.width = progress * 100 + "%";
             });
     }
-    switchToUI()
+    switchToUI(animate = false)
     {
-        //this.camera.moveTo()
         this.camera.zoomTo(1.2);
         this.camera.moveTo(400, 200);
+        this.blockInput = true;
+    }
+    showPauseUI()
+    {
+        this.hideUI("#ui");
+        this.showUI("#pause-menu");
+    }
+    hidePauseUI()
+    {
+        this.showUI("#ui").then(() =>
+        {
+            $("#ui").style.display = "block";
+        });
+        this.hideUI("#pause-menu");
     }
     switchToGame(title = true)
     {
@@ -95,6 +114,11 @@ class GameSystemClass {
         setTimeout(() => {
             this.renderMainUI();
             $("#main-menu").style["display"] = "none";
+            this.showUI("#ui").then(() =>
+            {
+                $("#ui").style.display = "block";
+                this.blockInput = false;
+            })
         }, 1000);
     }
     start()

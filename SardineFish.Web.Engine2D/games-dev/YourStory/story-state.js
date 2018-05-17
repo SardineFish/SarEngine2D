@@ -1,6 +1,6 @@
 import { State, FSM } from "./fsm.js";
 import { GameSystem } from "./game-system.js";
-import { TimeLine } from "./timeline.js";
+import { TimeLine, Conversation } from "./timeline.js";
 import { MeetStranger, MeetKnownNPC } from "./choices.js";
 
 class StoryStateMachine extends FSM
@@ -125,9 +125,48 @@ class ChooseEvent extends State
 }
 class Talking extends State
 {
+    constructor(target)
+    {
+        super();
+        this.target = target;
+        this.npcTalking = false;
+        this.talking = false;
+    }
+
     enter()
     {
         
+    }
+
+    update()
+    {
+        if (GameSystem.timeline.next && GameSystem.playerPos - GameSystem.timeline.next.position < GameSystem.cancleDistance)
+        {
+            GameSystem.timeline.goNext();
+        }   
+        else
+        {
+            if (this.talking)
+                return;    
+            this.talking = true;
+            if (this.npcTalking)
+            {
+                GameSystem.showAsideText("NPC: $").then(fills =>
+                {
+                    GameSystem.timeline.writeEvent(new Conversation(this.target.position.x, this.target, fills[0]));
+                    this.talking = false;
+                    this.npcTalking = false;
+                });
+            }  
+            else
+            {
+                GameSystem.showAsideText(`${GameSystem.player.name}: $`).then(fills => {
+                    GameSystem.timeline.writeEvent(new Conversation(this.target.position.x, GameSystem.player, fills[0]));
+                    this.talking = false;
+                    this.npcTalking = true;
+                });
+            }
+        }
     }
 
 }

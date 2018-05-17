@@ -154,8 +154,8 @@
                 }
 
                 var x = delay;
-                //delay = delay - lastDelay;
-                delay = 13;
+                delay = delay - lastDelay;
+                //delay = 13;
                 lastDelay = x;
                 /*if(engine.debug.clear)
                     engine.debug.clear();

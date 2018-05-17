@@ -46,9 +46,9 @@ class MeetStranger extends Choice
     {
         super();
         this.description = randomFromList([
-            "有一个人",
-            "好像站着一个人类",
-            "遇到了一个陌生人",
+            "一个人",
+            "一个人类",
+            "一个陌生人",
             "一个陌生的身影"
         ]);
     }

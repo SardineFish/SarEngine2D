@@ -20,8 +20,26 @@ GameSystem.input = input;
 scene.addInput(input);
 $("#button-start").onclick = (e) =>
 {
+    var name = $("#name").innerText;
+    if (name === "")
+    {
+        $("#main-menu .notice").innerText = "Please write your name here.";
+        //console.log($("#main-menu .notice"));
+        $("#main-menu .notice").style.opacity = 1;
+        return;
+    }    
+    GameSystem.player.name = name;
+    $("#name-text").innerText = name;
     GameSystem.switchToGame();
 };
+$("#button-pause").onclick = (e) =>
+{
+    GameSystem.showPauseUI();
+};
+$("#button-resume").onclick = (e) =>
+{
+    GameSystem.hidePauseUI();
+}
 /*var player = new Player(input);
 scene.addGameObject(player.gameObject);
 GameSystem.player = player;*/
