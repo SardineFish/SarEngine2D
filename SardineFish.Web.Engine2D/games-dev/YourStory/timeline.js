@@ -1,7 +1,7 @@
 import { GameSystem } from "./game-system.js";
 import { NPC, Player, Character } from "./lib.js";
 import { Entity } from "./entity.js";
-import { InEvent } from "./story-state.js";
+import { InEvent, Talking } from "./story-state.js";
 class TimeLine
 {
     /**
@@ -13,6 +13,9 @@ class TimeLine
         /** @type {Array<SotryEvent>} */
         this.events = events || [];
         this.currentIdx = -1;
+        this.events.forEach(event => {
+            event.timeline = this;
+        });
     }
 
     /**
@@ -176,7 +179,12 @@ class Conversation extends SotryEvent
     start()
     {
         GameSystem.showAsideText(`${this.speaker.name}: ${this.text}`)
-            .then(() => this.timeline.goNext());
+            .then(() =>
+            {
+                //this.timeline.goNext();
+                if (GameSystem.gameState.currentState instanceof Talking)
+                    GameSystem.gameState.currentState.talking = false;
+            });
     }
 }
 

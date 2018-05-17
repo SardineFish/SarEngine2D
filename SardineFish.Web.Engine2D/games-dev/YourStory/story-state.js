@@ -1,7 +1,8 @@
 import { State, FSM } from "./fsm.js";
 import { GameSystem } from "./game-system.js";
 import { TimeLine, Conversation } from "./timeline.js";
-import { MeetStranger, MeetKnownNPC } from "./choices.js";
+import { MeetStranger, MeetKnownNPC, randomFromList } from "./choices.js";
+import { NPC } from "./lib.js";
 
 class StoryStateMachine extends FSM
 {
@@ -31,6 +32,14 @@ class Wander extends State
         if (GameSystem.timeline.next)
         {
             var nextEvent = GameSystem.timeline.next;
+            if (GameSystem.playerPos - nextEvent.position > GameSystem.cancleDistance)
+            {
+                GameSystem.timeline.currentIdx++;
+            }    
+            if (nextEvent instanceof Conversation)
+            {
+                return;
+            }    
             if (nextEvent.earlyEvent)
             {
                 if (nextEvent.position - GameSystem.playerPos < GameSystem.spawnDistance)
@@ -107,7 +116,7 @@ class ChooseEvent extends State
             }    
             choices = choices.concat(unknown);
         }    
-        GameSystem.showChoice(`不远处，${GameSystem.player.name}遇到了……`, choices.map(c => c.description))
+        GameSystem.showChoice(`不远处，${GameSystem.player.name}……`, choices.map(c => c.description))
             .then((idx) =>
             {
                 choices[idx].activate();
@@ -125,24 +134,53 @@ class ChooseEvent extends State
 }
 class Talking extends State
 {
+    /**
+     * 
+     * @param {NPC} target 
+     */
     constructor(target)
     {
         super();
         this.target = target;
         this.npcTalking = false;
         this.talking = false;
+        
     }
 
     enter()
     {
-        
+        if (GameSystem.getEntityID(this.target) === 2)
+            GameSystem.player.familiarNPCs.push(this.target);    
+        if (GameSystem.player.familiarNPCs.indexOf(this.target) < 0)
+        {
+            if (this.target.name == "NPC")
+            {
+                let greeting = randomFromList(["Hey~ ", "Hi! ", "你好哇, ", "〇_〇", "欸~"]);
+                GameSystem.showAsideText(`不知名的NPC: ${greeting}我是$. `)
+                    .then(fills =>
+                    {
+                        this.target.name = fills[0];
+                        GameSystem.player.familiarNPCs.push(this.target);
+                    });
+            }    
+        }    
     }
 
     update()
-    {
+    {  
+        if (GameSystem.playerPos - this.target.position.x > GameSystem.cancleDistance)
+        {
+            GameSystem.gameState.changeState(new Wander());
+            GameSystem.hideChoice();
+        }
+        if (GameSystem.player.familiarNPCs.indexOf(this.target) < 0)
+            return;
+        if (this.talking)
+            return;
         if (GameSystem.timeline.next && GameSystem.playerPos - GameSystem.timeline.next.position < GameSystem.cancleDistance)
         {
             GameSystem.timeline.goNext();
+            this.talking = true;
         }   
         else
         {
@@ -151,7 +189,7 @@ class Talking extends State
             this.talking = true;
             if (this.npcTalking)
             {
-                GameSystem.showAsideText("NPC: $").then(fills =>
+                GameSystem.showAsideText(`${this.target.name}: $`).then(fills =>
                 {
                     GameSystem.timeline.writeEvent(new Conversation(this.target.position.x, this.target, fills[0]));
                     this.talking = false;

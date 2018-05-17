@@ -56,7 +56,7 @@ class AssetsClass
             frameHeight: 500,
             renderWidth: 400,
             renderHeight: 400,
-            fps: 15,
+            fps: 10,
             count: 8
         });
         this.playerWalkRightAnim = new ImageAnimation({
@@ -65,7 +65,7 @@ class AssetsClass
             frameHeight: 500,
             renderWidth: 400,
             renderHeight: 400,
-            fps: 15,
+            fps: 10,
             count: 8
         });
         this.playerAttackLeftAnim = null;

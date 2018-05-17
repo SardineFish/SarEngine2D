@@ -21,7 +21,7 @@ class Character extends Entity
         this.jumpLeftAnim = new ImageAnimation();
         this.jumpRightAnim = new ImageAnimation();
         this.walkSpeed = 500;
-        this.jumpSpeed = 3200;
+        this.jumpSpeed = 2400;
         this.gameObject.setCenter(0, 100);
         this.gameObject.collider = new Rectangle(200, 200);
         this.gameObject.collider.moveTo(0, 100);
@@ -171,10 +171,14 @@ class NPC extends Character
         this.hoverUI.graphic.font.fontSize = 40;
         this.hoverUI.graphic.fillStyle = new Color(255, 255, 255, 1.0);
         this.hoverUI.linkTo(this.gameObject);
-        GameSystem.scene.addGameObject(this.hoverUI);
 
         this.gameObject.moveTo(pos, 0);
         this.hoverUI.moveTo(pos, 450);
+    }
+    start()
+    {
+        super.start();
+        GameSystem.scene.addGameObject(this.hoverUI);
     }
     update()
     {

@@ -1,6 +1,14 @@
 body{
     margin: 0;
     padding: 0;
+    font-family: "Open Sans",
+    Roboto,
+    Segoe UI,
+    Microsoft YaHei,
+    Tahoma,
+    Geneva,
+    Verdana,
+    sans-serif;
 }
 #ui {
     display: none;

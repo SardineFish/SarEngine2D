@@ -29,7 +29,7 @@ class MeetKnownNPC extends Choice
         this.description = randomFromList([
             `遇到了刚认识的${this.npc.name}`,
             `再次遇到了${this.npc.name}`,
-            `又是${this.npc.name}`,
+            `发现又是${this.npc.name}`,
         ]);
     }
 
@@ -46,10 +46,10 @@ class MeetStranger extends Choice
     {
         super();
         this.description = randomFromList([
-            "一个人",
-            "一个人类",
-            "一个陌生人",
-            "一个陌生的身影"
+            "看到了一个人",
+            "遇到了一个人类",
+            "发现了一个陌生人",
+            "仿佛看见一个陌生的身影"
         ]);
     }
 

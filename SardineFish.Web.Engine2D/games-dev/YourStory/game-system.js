@@ -1,5 +1,5 @@
 import { Player, NPC } from "./lib.js";
-import { TimeLine, InitialEvent } from "./timeline.js";
+import { TimeLine, InitialEvent, SpawnNPC, Conversation } from "./timeline.js";
 import { Entity } from "./entity.js";
 import { StoryStateMachine, Wander } from "./story-state.js";
 import { Assets } from "./assets.js";
@@ -36,7 +36,7 @@ class GameSystemClass {
         this.choicePopSpeed = 7;
         this.textPopSpeed = 20;
         this.spawnDistance = 2160;
-        this.cancleDistance = 3200;
+        this.cancleDistance = 2400;
         this.textPopTimmer = null;
         this.backgroundList = [];
         this.groundLayer = null;
@@ -46,7 +46,7 @@ class GameSystemClass {
         this.npcLayer = new Layer();
         /** @type {Array<Entity>} */
         this.entityList = [];
-        this.timeline = new TimeLine([new InitialEvent(0)]);
+        this.timeline = null; 
     }
     /**
      * @returns {GameSystemClass}
@@ -123,7 +123,7 @@ class GameSystemClass {
     }
     start()
     {
-        this.scene.physics.g = new Vector2(0, -12800);
+        this.scene.physics.g = new Vector2(0, -6000);
         this.npcLayer = new Layer();
         this.scene.layers.add(this.npcLayer, -1);
         this.scene.worldBackground = new Color(126, 152, 150, 1.0);
@@ -139,10 +139,27 @@ class GameSystemClass {
         this.loadBackground(Assets.bgForest);
         this.loadGround();
         this.initPlayer();
+        let firstNPC = new NPC(this.cancleDistance + this.spawnDistance);
+        firstNPC.name = "假人";
+        this.addEntity(firstNPC);
+        this.timeline = new TimeLine([
+            new InitialEvent(0),
+            new SpawnNPC(this.cancleDistance + this.spawnDistance, firstNPC, "假人"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "很高兴遇见你"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "我是这游戏的NPC，你也可以叫我假人"),
+            new Conversation(this.cancleDistance + this.spawnDistance, this.player, "这里……"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "这个世界是因为你而存在的"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "一切的意义是由你赋予的"),
+            new Conversation(this.cancleDistance + this.spawnDistance, this.player, "那……我会在这里遇见什么？"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "Whatever you want!"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "你可以选择你想遇见的人，也可以写下一段你期望的会话，亦或直接走开"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "一切都由你来谱写"),
+            new Conversation(this.cancleDistance + this.spawnDistance, firstNPC, "这是属于你的故事. "),
+        ]);
         //this.scene.addGameObject(this.player.gameObject);
         this.timeline.start();
         this.gameState.changeState(new Wander());
-        this.spawn(new NPC(400), 400);
+        //this.spawn(new NPC(400), 400);
         
         //this.camera.linkTo(this.player.gameObject);
     }
@@ -273,6 +290,7 @@ class GameSystemClass {
         let text = new Text("Your Story");
         text.moveTo(0, this.display.viewRange.top - 200);
         text.font.fontSize = 120;
+        text.font.fontFamily = "Open Sans";
         text.textAlign = TextAlign.Center;
         var obj = new GameObject();
         obj.graphic = text;
